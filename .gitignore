@@ -1,0 +1,24 @@
+venv/
+__pycache__/
+
+opensources/
+.env
+
+# Database
+*.db
+
+# Frontend
+node_modules/
+dist/
+build/
+coverage/
+dist/
+build/
+coverage/
+
+ops/volumes/
+ops/init-scripts/
+ops/kind
+
+*.egg-info/
+uv.lock
