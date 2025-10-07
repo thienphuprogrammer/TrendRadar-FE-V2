@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { forwardRef, useEffect, useMemo, useRef } from 'react';
 import { message } from 'antd';
 import styled from 'styled-components';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { MORE_ACTION, NODE_TYPE } from '@/utils/enum';
 import { editCalculatedField } from '@/utils/modelingHelper';
 import SiderLayout from '@/components/layouts/SiderLayout';
@@ -57,7 +58,7 @@ const DiagramWrapper = styled.div`
   height: 100%;
 `;
 
-export default function Modeling() {
+function ModelingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const diagramRef = useRef(null);
@@ -486,5 +487,13 @@ export default function Modeling() {
         />
       </SiderLayout>
     </DeployStatusContext.Provider>
+  );
+}
+
+export default function Modeling() {
+  return (
+    <ProtectedRoute>
+      <ModelingPage />
+    </ProtectedRoute>
   );
 }

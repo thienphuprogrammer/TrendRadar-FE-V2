@@ -87,7 +87,9 @@ function RecommendedQuestionsInstruction(props) {
   );
 }
 
-export default function Home() {
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+
+function HomePage() {
   const $prompt = useRef<ComponentRef<typeof Prompt>>(null);
   const router = useRouter();
   const homeSidebar = useHomeSidebar();
@@ -153,5 +155,13 @@ export default function Home() {
         onCreateResponse={onCreateResponse}
       />
     </SiderLayout>
+  );
+}
+
+export default function Home() {
+  return (
+    <ProtectedRoute>
+      <HomePage />
+    </ProtectedRoute>
   );
 }

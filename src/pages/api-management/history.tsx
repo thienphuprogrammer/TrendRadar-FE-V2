@@ -4,6 +4,7 @@ import { Table, TableColumnsType, Button, Tag, Typography } from 'antd';
 import { getAbsoluteTime } from '@/utils/time';
 import useDrawerAction from '@/hooks/useDrawerAction';
 import { getColumnSearchProps } from '@/utils/table';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import ApiOutlined from '@ant-design/icons/ApiOutlined';
@@ -17,7 +18,7 @@ import { ApiType, ApiHistoryResponse } from '@/apollo/client/graphql/__types__';
 
 const PAGE_SIZE = 10;
 
-export default function APIHistory() {
+function APIHistoryPage() {
   const detailsDrawer = useDrawerAction();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [filters, setFilters] = useState<Record<string, any>>({});
@@ -210,5 +211,13 @@ export default function APIHistory() {
         />
       </PageLayout>
     </SiderLayout>
+  );
+}
+
+export default function APIHistory() {
+  return (
+    <ProtectedRoute>
+      <APIHistoryPage />
+    </ProtectedRoute>
   );
 }

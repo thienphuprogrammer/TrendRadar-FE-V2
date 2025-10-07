@@ -2,6 +2,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Button, message, Table, TableColumnsType, Typography } from 'antd';
 import { format } from 'sql-formatter';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import FunctionOutlined from '@ant-design/icons/FunctionOutlined';
@@ -27,7 +28,7 @@ const SQLCodeBlock = dynamic(() => import('@/components/code/SQLCodeBlock'), {
 
 const { Paragraph, Text } = Typography;
 
-export default function ManageQuestionSQLPairs() {
+function QuestionSQLPairsPage() {
   const questionSqlPairModal = useModalAction();
   const sqlPairDrawer = useDrawerAction();
 
@@ -191,5 +192,13 @@ export default function ManageQuestionSQLPairs() {
         />
       </PageLayout>
     </SiderLayout>
+  );
+}
+
+export default function ManageQuestionSQLPairs() {
+  return (
+    <ProtectedRoute>
+      <QuestionSQLPairsPage />
+    </ProtectedRoute>
   );
 }

@@ -198,7 +198,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       const { status, error } = this.transformStatusAndError(res.data);
       return {
         status: status as SqlPairStatus,
-        error,
+        error: error ?? undefined,
       };
     } catch (err: any) {
       logger.debug(
@@ -611,7 +611,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       const { status, error } = this.transformStatusAndError(res.data);
       return {
         status: status as QuestionsStatus,
-        error,
+        error: error ?? undefined,
         questions: res.data.questions || [],
       };
     } catch (err: any) {
@@ -718,7 +718,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     const { status, error } = this.transformStatusAndError(body);
     return {
       status: status as AskFeedbackStatus,
-      error,
+      error: error ?? undefined,
       response:
         body.response?.map((result: any) => ({
           sql: result.sql,
@@ -751,7 +751,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     const { status, error } = this.transformStatusAndError(body);
     return {
       status: status as ChartStatus,
-      error,
+      error: error ?? undefined,
       response: {
         reasoning: body.response?.reasoning,
         chartType: body.response?.chart_type,
@@ -765,7 +765,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     return {
       status: status as TextBasedAnswerStatus,
       numRowsUsedInLLM: body.num_rows_used_in_llm,
-      error,
+      error: error ?? undefined,
     };
   }
 
@@ -785,7 +785,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
           // do nothing
         } else {
           logger.debug(`Wren AI: Unknown Wren AI deploy status: ${status}`);
-          return;
+          return false;
         }
       } catch (err: any) {
         throw err;
@@ -825,7 +825,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     return {
       type: body?.type,
       status: status as AskResultStatus,
-      error,
+      error: error ?? null,
       response: candidates,
       rephrasedQuestion: body?.rephrased_question,
       intentReasoning: body?.intent_reasoning,
@@ -861,7 +861,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     return {
       type,
       status: status as AskResultStatus,
-      error,
+      error: error ?? null,
       response: {
         description: body?.response?.description,
         steps,
@@ -915,22 +915,22 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
           message: error.message,
           shortMessage: error.extensions.shortMessage as string,
         }
-      : null;
+      : undefined;
 
     return {
       status,
-      error: formattedError,
+      error: formattedError ?? null,
     };
   }
 
-  private transformHistoryInput(histories: ThreadResponse[]): AskHistory[] {
+  private transformHistoryInput(histories?: ThreadResponse[]): AskHistory[] {
     if (!histories) {
       return [];
     }
 
     // make it snake_case
     return histories.map((history) => ({
-      sql: history.sql,
+      sql: history.sql ?? '',
       question: history.question,
     }));
   }

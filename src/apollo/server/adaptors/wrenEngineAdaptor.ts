@@ -115,14 +115,14 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
     modelName: string,
     columnName: string,
   ) {
-    const model = manifest.models.find((m) => m.name === modelName);
+    const model = manifest.models?.find((m) => m.name === modelName);
     if (!model) {
       return {
         valid: false,
         message: `Model ${modelName} not found in the manifest`,
       };
     }
-    const column = model.columns.find((c) => c.name === columnName);
+    const column = model.columns?.find((c) => c.name === columnName);
     if (!column) {
       return {
         valid: false,
@@ -287,8 +287,8 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
       return res.data;
     } catch (err: any) {
       logger.debug(`Got error when getting native SQL: ${err.message}`);
-      Errors.create(Errors.GeneralErrorCodes.DRY_PLAN_ERROR, {
-        customMessage: err.message,
+      throw Errors.create(Errors.GeneralErrorCodes.DRY_PLAN_ERROR, {
+        customMessage: err.response?.data?.message || err.message,
         originalError: err,
       });
     }
@@ -338,7 +338,7 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
     }
   }
 
-  private async initDatabase(sql) {
+  private async initDatabase(sql: string) {
     try {
       const url = new URL(this.initSqlUrlPath, this.wrenEngineBaseEndpoint);
       const headers = {
@@ -367,7 +367,7 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
         data_type,
       ] = row;
       let table = acc.find(
-        (t) => t.name === table_name && t.properties.schema === table_schema,
+        (t) => t.name === table_name && t.properties?.schema === table_schema,
       );
       if (!table) {
         table = {
@@ -379,7 +379,7 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
             catalog: table_catalog,
             table: table_name,
           },
-          primaryKey: null,
+          primaryKey: undefined,
         };
         acc.push(table);
       }

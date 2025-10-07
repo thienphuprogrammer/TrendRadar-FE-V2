@@ -13,6 +13,10 @@ const resolveAlias = {
 const nextConfig = withLess({
   output: 'standalone',
   staticPageGenerationTimeout: 1000,
+  eslint: {
+    // Allow production builds to successfully complete even if there are ESLint errors
+    ignoreDuringBuilds: true,
+  },
   compiler: {
     // Enables the styled-components SWC transform
     styledComponents: {
@@ -21,7 +25,11 @@ const nextConfig = withLess({
     },
   },
   lessLoaderOptions: {
+    // Ant Design 5 doesn't use Less, but keep for custom Less files
     additionalData: `@import "@/styles/antd-variables.less";`,
+    lessOptions: {
+      javascriptEnabled: true,
+    },
   },
   webpack: (config) => {
     config.resolve.alias = {

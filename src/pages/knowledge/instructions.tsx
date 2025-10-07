@@ -8,6 +8,7 @@ import {
   message,
 } from 'antd';
 import styled from 'styled-components';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import { InstructionsSVG } from '@/utils/svgs';
@@ -48,7 +49,7 @@ const StyledInstructionsIcon = styled(InstructionsSVG)`
   height: 20px;
 `;
 
-export default function ManageInstructions() {
+function InstructionsPage() {
   const instructionModal = useModalAction();
   const instructionDrawer = useDrawerAction();
 
@@ -229,5 +230,13 @@ export default function ManageInstructions() {
         />
       </PageLayout>
     </SiderLayout>
+  );
+}
+
+export default function ManageInstructions() {
+  return (
+    <ProtectedRoute>
+      <InstructionsPage />
+    </ProtectedRoute>
   );
 }

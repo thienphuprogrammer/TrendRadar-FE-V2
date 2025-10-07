@@ -75,7 +75,7 @@ export class AdjustmentBackgroundTaskTracker
   private trackedTasksById: Map<number, TrackedTask> = new Map();
   private pollingInterval: number;
   private memoryRetentionTime: number;
-  private pollingIntervalId: NodeJS.Timeout;
+  private pollingIntervalId: NodeJS.Timeout | undefined;
   private runningJobs = new Set<string>();
   private threadResponseRepository: IThreadResponseRepository;
   private telemetry: PostHogTelemetry;
@@ -121,7 +121,7 @@ export class AdjustmentBackgroundTaskTracker
           adjustment: true,
           status: AskFeedbackStatus.UNDERSTANDING,
           response: [],
-          error: null,
+          error: undefined,
         },
       });
 
@@ -205,8 +205,8 @@ export class AdjustmentBackgroundTaskTracker
     // call createAskFeedback on AI service
     const response = await this.wrenAIAdaptor.createAskFeedback({
       ...input,
-      tables: adjustment.payload?.retrievedTables,
-      sqlGenerationReasoning: adjustment.payload?.sqlGenerationReasoning,
+      tables: adjustment.payload?.retrievedTables || [],
+      sqlGenerationReasoning: adjustment.payload?.sqlGenerationReasoning || '',
       sql: originalThreadResponse.sql,
       question: originalThreadResponse.question,
     });
@@ -214,7 +214,7 @@ export class AdjustmentBackgroundTaskTracker
 
     // update asking task with new queryId
     await this.askingTaskRepository.updateOne(
-      currentThreadResponse.askingTaskId,
+      currentThreadResponse.askingTaskId || 0,
       {
         queryId,
 
@@ -223,7 +223,7 @@ export class AdjustmentBackgroundTaskTracker
           adjustment: true,
           status: AskFeedbackStatus.UNDERSTANDING,
           response: [],
-          error: null,
+          error: undefined,
         },
       },
     );
@@ -239,8 +239,8 @@ export class AdjustmentBackgroundTaskTracker
       rerun: true,
       adjustmentPayload: {
         originalThreadResponseId: originalThreadResponse.id,
-        retrievedTables: adjustment.payload?.retrievedTables,
-        sqlGenerationReasoning: adjustment.payload?.sqlGenerationReasoning,
+        retrievedTables: adjustment.payload?.retrievedTables || [],
+        sqlGenerationReasoning: adjustment.payload?.sqlGenerationReasoning || '',
       },
     } as TrackedTask;
     this.trackedTasks.set(queryId, task);
