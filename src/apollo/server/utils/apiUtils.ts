@@ -1,15 +1,15 @@
 import { NextApiResponse } from 'next';
 import { v4 as uuidv4 } from 'uuid';
-import { ApiType, ApiHistory } from '@server/repositories/apiHistoryRepository';
+import { ApiHistory, ApiType } from '@server/repositories/apiHistoryRepository';
 import * as Errors from '@server/utils/error';
 import { components } from '@/common';
 import {
   AskResult,
   AskResultStatus,
   AskResultType,
-  WrenAIError,
   TextBasedAnswerResult,
   TextBasedAnswerStatus,
+  WrenAIError,
 } from '@/apollo/server/models/adaptor';
 
 const { apiHistoryRepository } = components;

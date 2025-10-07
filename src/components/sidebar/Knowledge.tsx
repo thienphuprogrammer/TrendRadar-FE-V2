@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import FunctionOutlined from '@ant-design/icons/FunctionOutlined';
-import { Path, MENU_KEY } from '@/utils/enum';
+import { MENU_KEY, Path } from '@/utils/enum';
 import { InstructionsSVG } from '@/utils/svgs';
 import SidebarMenu from '@/components/sidebar/SidebarMenu';
 
@@ -56,7 +56,7 @@ export default function Knowledge() {
     <Layout>
       <SidebarMenu
         items={menuItems}
-        selectedKeys={MENU_KEY_MAP[router.pathname]}
+        selectedKeys={(MENU_KEY_MAP as any)[router.pathname]}
       />
     </Layout>
   );

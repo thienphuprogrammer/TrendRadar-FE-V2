@@ -2,20 +2,23 @@
  * Security Settings Page
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  Button,
   Card,
   Form,
   Input,
-  Button,
-  Typography,
+  Popconfirm,
   Space,
   Table,
-  Popconfirm,
-  Tag,
-  Divider,
+  Typography,
 } from 'antd';
-import { LockOutlined, DeleteOutlined, DesktopOutlined, MobileOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  DesktopOutlined,
+  LockOutlined,
+  MobileOutlined,
+} from '@ant-design/icons';
 import styled from 'styled-components';
 import { useAuth } from '@/contexts/AuthContext';
 import { authClient } from '@/lib/api/authClient';
@@ -162,7 +165,12 @@ const SecurityPage: React.FC = () => {
               <Form.Item
                 name="oldPassword"
                 label="Current Password"
-                rules={[{ required: true, message: 'Please enter your current password' }]}
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please enter your current password',
+                  },
+                ]}
               >
                 <Input.Password
                   prefix={<LockOutlined />}
@@ -199,7 +207,9 @@ const SecurityPage: React.FC = () => {
                       if (!value || getFieldValue('newPassword') === value) {
                         return Promise.resolve();
                       }
-                      return Promise.reject(new Error('Passwords do not match'));
+                      return Promise.reject(
+                        new Error('Passwords do not match'),
+                      );
                     },
                   }),
                 ]}
@@ -212,7 +222,12 @@ const SecurityPage: React.FC = () => {
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" htmlType="submit" loading={loading} size="large">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  size="large"
+                >
                   Update Password
                 </Button>
               </Form.Item>
@@ -250,4 +265,3 @@ const SecurityPage: React.FC = () => {
 };
 
 export default SecurityPage;
-

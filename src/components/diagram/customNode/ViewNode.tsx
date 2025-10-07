@@ -21,11 +21,17 @@ const { Text } = Typography;
 
 export const ViewNode = ({ data }: CustomNodeProps<DiagramView>) => {
   const context = useContext(DiagramContext);
-  const onMoreClick = (type: MORE_ACTION) => {
-    context?.onMoreClick({
-      type,
-      data: data.originalData,
-    });
+  const onMoreClick = (
+    type: MORE_ACTION | { type: MORE_ACTION; data: any },
+  ) => {
+    if (typeof type === 'object') {
+      context?.onMoreClick(type);
+    } else {
+      context?.onMoreClick({
+        type,
+        data: data.originalData,
+      });
+    }
   };
   const onNodeClick = () => {
     context?.onNodeClick({
@@ -66,7 +72,11 @@ export const ViewNode = ({ data }: CustomNodeProps<DiagramView>) => {
         <MarkerHandle id={data.originalData.id} />
       </NodeHeader>
       <NodeBody draggable={false}>
-        {renderColumns(data.originalData.fields)}
+        {renderColumns(
+          data.originalData.fields.filter(
+            (field) => field != null,
+          ) as ComposeDiagramField[],
+        )}
       </NodeBody>
     </StyledNode>
   );
@@ -74,7 +84,7 @@ export const ViewNode = ({ data }: CustomNodeProps<DiagramView>) => {
 
 export default memo(ViewNode);
 
-const ColumnTemplate = (props) => {
+const ColumnTemplate = (props: any) => {
   const { id, type } = props;
   return <Column {...props} key={id} icon={getColumnTypeIcon({ type })} />;
 };

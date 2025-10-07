@@ -12,8 +12,11 @@ import {
   ThreadResponseAdjustmentType,
 } from '@server/repositories';
 import { IWrenAIAdaptor } from '../adaptors';
-import { TelemetryEvent, WrenService } from '../telemetry/telemetry';
-import { PostHogTelemetry } from '../telemetry/telemetry';
+import {
+  PostHogTelemetry,
+  TelemetryEvent,
+  WrenService,
+} from '../telemetry/telemetry';
 
 const logger = getLogger('AdjustmentTaskTracker');
 logger.level = 'debug';
@@ -207,7 +210,7 @@ export class AdjustmentBackgroundTaskTracker
       ...input,
       tables: adjustment.payload?.retrievedTables || [],
       sqlGenerationReasoning: adjustment.payload?.sqlGenerationReasoning || '',
-      sql: originalThreadResponse.sql,
+      sql: originalThreadResponse.sql || '',
       question: originalThreadResponse.question,
     });
     const queryId = response.queryId;
@@ -240,7 +243,8 @@ export class AdjustmentBackgroundTaskTracker
       adjustmentPayload: {
         originalThreadResponseId: originalThreadResponse.id,
         retrievedTables: adjustment.payload?.retrievedTables || [],
-        sqlGenerationReasoning: adjustment.payload?.sqlGenerationReasoning || '',
+        sqlGenerationReasoning:
+          adjustment.payload?.sqlGenerationReasoning || '',
       },
     } as TrackedTask;
     this.trackedTasks.set(queryId, task);
@@ -339,16 +343,20 @@ export class AdjustmentBackgroundTaskTracker
             task.lastPolled = now;
 
             // if result is not changed, we don't need to update the database
-            if (!this.isResultChanged(task.result, result)) {
+            if (
+              result &&
+              task.result &&
+              !this.isResultChanged(task.result, result)
+            ) {
               this.runningJobs.delete(queryId);
               return;
             }
 
             // Check if task is now finalized
-            if (this.isTaskFinalized(result.status)) {
+            if (result && this.isTaskFinalized(result.status)) {
               task.isFinalized = true;
               // update thread response if threadResponseId is provided
-              if (task.threadResponseId) {
+              if (task.threadResponseId && result) {
                 await this.updateThreadResponseWhenTaskFinalized(
                   task.threadResponseId,
                   result,
@@ -362,11 +370,11 @@ export class AdjustmentBackgroundTaskTracker
               const eventProperties = {
                 taskId: task.taskId,
                 queryId: task.queryId,
-                status: result.status,
-                error: result.error,
+                status: result?.status,
+                error: result?.error,
                 adjustmentPayload: task.adjustmentPayload,
               };
-              if (result.status === AskFeedbackStatus.FINISHED) {
+              if (result?.status === AskFeedbackStatus.FINISHED) {
                 this.telemetry.sendEvent(eventName, eventProperties);
               } else {
                 this.telemetry.sendEvent(
@@ -378,22 +386,26 @@ export class AdjustmentBackgroundTaskTracker
               }
 
               logger.info(
-                `Task ${queryId} is finalized with status: ${result.status}`,
+                `Task ${queryId} is finalized with status: ${result?.status}`,
               );
             }
 
             // update task in memory if any change
-            task.result = result;
+            if (result) {
+              task.result = result;
+            }
 
             // update the database
             logger.info(`Updating task ${queryId} in database`);
-            await this.updateTaskInDatabase({ queryId }, result);
+            if (result) {
+              await this.updateTaskInDatabase({ queryId }, result);
+            }
 
             // Mark the job as finished
             this.runningJobs.delete(queryId);
           } catch (err) {
             this.runningJobs.delete(queryId);
-            logger.error(err.stack);
+            logger.error(err instanceof Error ? err.stack : String(err));
             throw err;
           }
         },

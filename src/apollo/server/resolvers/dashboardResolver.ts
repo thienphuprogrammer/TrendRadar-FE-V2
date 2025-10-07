@@ -1,9 +1,9 @@
 import { IContext } from '@server/types';
 import { ChartType } from '@server/models/adaptor';
 import {
-  UpdateDashboardItemLayouts,
-  PreviewDataResponse,
   DEFAULT_PREVIEW_LIMIT,
+  PreviewDataResponse,
+  UpdateDashboardItemLayouts,
 } from '@server/services';
 import {
   Dashboard,
@@ -12,9 +12,9 @@ import {
 } from '@server/repositories';
 import { getLogger } from '@server/utils';
 import {
-  SetDashboardCacheData,
   DashboardSchedule,
   PreviewItemResponse,
+  SetDashboardCacheData,
 } from '@server/models/dashboard';
 
 const logger = getLogger('DashboardResolver');
@@ -97,6 +97,9 @@ export class DashboardResolver {
     const project = await ctx.projectService.getCurrentProject();
     const deployment = await ctx.deployService.getLastDeployment(project.id);
     const mdl = deployment.manifest;
+    if (!response.sql) {
+      throw new Error('SQL is required for preview');
+    }
     await ctx.queryService.preview(response.sql, {
       project,
       manifest: mdl,
@@ -174,7 +177,7 @@ export class DashboardResolver {
 
       // handle data to [{ column1: value1, column2: value2, ... }]
       const values = data.data.map((val) => {
-        return data.columns.reduce((acc, col, index) => {
+        return data.columns.reduce((acc: any, col, index) => {
           acc[col.name] = val[index];
           return acc;
         }, {});
@@ -208,7 +211,9 @@ export class DashboardResolver {
         args.data,
       );
     } catch (error) {
-      logger.error(`Failed to set dashboard schedule: ${error.message}`);
+      logger.error(
+        `Failed to set dashboard schedule: ${error instanceof Error ? error.message : String(error)}`,
+      );
       throw error;
     }
   }

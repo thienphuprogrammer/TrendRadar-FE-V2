@@ -31,14 +31,14 @@ const SQLCodeBlock = dynamic(() => import('@/components/code/SQLCodeBlock'), {
 
 const { Text } = Typography;
 
-const StyledPre = styled.pre`
+const StyledPre = styled.pre<{ className?: string }>`
   .adm_code-block {
     border-top: none;
     border-radius: 0px 0px 4px 4px;
   }
 `;
 
-const StyledToolBar = styled.div`
+const StyledToolBar = styled.div<{ className?: string }>`
   background-color: var(--gray-2);
   height: 32px;
   padding: 4px 8px;
@@ -134,7 +134,7 @@ export default function ViewSQLTabContent(props: AnswerResultProps) {
               <>
                 <Image
                   className="mr-2"
-                  src={DATA_SOURCE_OPTIONS[dataSourceType].logo}
+                  src={DATA_SOURCE_OPTIONS[dataSourceType].logo || ''}
                   alt={DATA_SOURCE_OPTIONS[dataSourceType].label}
                   width="22"
                   height="22"
@@ -177,14 +177,16 @@ export default function ViewSQLTabContent(props: AnswerResultProps) {
               data-ph-capture-attribute-name="view_sql_copy_sql"
               icon={<CodeFilled />}
               size="small"
-              onClick={() => onOpenAdjustSQLModal({ sql, responseId: id })}
+              onClick={() =>
+                onOpenAdjustSQLModal({ sql: sql || '', responseId: id })
+              }
             >
               Adjust SQL
             </Button>
           </Space>
         </StyledToolBar>
         <SQLCodeBlock
-          code={sqls}
+          code={sqls || ''}
           showLineNumbers
           maxHeight="300"
           loading={nativeSQLResult.loading}

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
-import { Timeline, Badge } from 'antd';
+import { Badge, Timeline } from 'antd';
 import FileDoneOutlined from '@ant-design/icons/FileDoneOutlined';
 import Retrieving from './step/Retrieving';
 import Organizing from './step/Organizing';
@@ -10,10 +10,10 @@ import ViewFinished from './step/ViewFinished';
 import SQLPairFinished from './step/SQLPairFinished';
 import { PROCESS_STATE } from '@/utils/enum';
 import {
-  ProcessStateMachine,
   convertAskingTaskToProcessState,
+  ProcessStateMachine,
 } from '@/hooks/useAskProcessState';
-import type { Props, PreparedTask } from './index';
+import type { PreparedTask, Props } from './index';
 
 const StyledBadge = styled(Badge)`
   position: absolute;
@@ -64,9 +64,12 @@ export default function PreparationSteps(
   // displays
   const showView = !!view;
   const showSqlPair = !!preparedTask?.candidates[0]?.sqlPair;
-  const showRetrieving = retrievingNextStates.includes(processState);
-  const showOrganizing = organizingNextStates.includes(processState);
-  const showGenerating = generatingNextStates.includes(processState);
+  const showRetrieving =
+    processState && retrievingNextStates.includes(processState);
+  const showOrganizing =
+    processState && organizingNextStates.includes(processState);
+  const showGenerating =
+    processState && generatingNextStates.includes(processState);
 
   // data
   const retrievedTables = preparedTask?.retrievedTables || [];

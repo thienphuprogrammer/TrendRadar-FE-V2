@@ -5,14 +5,13 @@
 
 import React from 'react';
 import { useRouter } from 'next/router';
-import { Dropdown, Avatar, Space, Typography } from 'antd';
 import type { MenuProps } from 'antd';
+import { Avatar, Dropdown, Menu, Space, Typography } from 'antd';
 import {
-  UserOutlined,
-  SettingOutlined,
   LockOutlined,
   LogoutOutlined,
   TeamOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import styled from 'styled-components';
 import { useAuth } from '@/contexts/AuthContext';
@@ -57,7 +56,9 @@ const UserMenu: React.FC = () => {
     await logout();
   };
 
-  const initials = `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase() || user.email.charAt(0).toUpperCase();
+  const initials =
+    `${user.first_name?.charAt(0) || ''}${user.last_name?.charAt(0) || ''}`.toUpperCase() ||
+    user.email.charAt(0).toUpperCase();
 
   const items: MenuProps['items'] = [
     {
@@ -65,11 +66,7 @@ const UserMenu: React.FC = () => {
       type: 'group',
       label: (
         <UserInfo>
-          <UserName>
-            {user.firstName && user.lastName
-              ? `${user.firstName} ${user.lastName}`
-              : user.email}
-          </UserName>
+          <UserName>{user.full_name || user.email}</UserName>
           <UserEmail>{user.email}</UserEmail>
         </UserInfo>
       ),
@@ -109,8 +106,12 @@ const UserMenu: React.FC = () => {
   ];
 
   return (
-    <Dropdown menu={{ items }} trigger={['click']} placement="bottomRight">
-      <Space 
+    <Dropdown
+      overlay={<Menu items={items} />}
+      trigger={['click']}
+      placement="bottomRight"
+    >
+      <Space
         style={{ cursor: 'pointer' }}
         role="button"
         tabIndex={0}
@@ -123,7 +124,11 @@ const UserMenu: React.FC = () => {
           }
         }}
       >
-        <StyledAvatar size={36} style={{ backgroundColor: '#667eea' }} aria-label={`User avatar: ${user.email}`}>
+        <StyledAvatar
+          size={36}
+          style={{ backgroundColor: '#667eea' }}
+          aria-label={`User avatar: ${user.email}`}
+        >
           {initials}
         </StyledAvatar>
       </Space>
@@ -132,4 +137,3 @@ const UserMenu: React.FC = () => {
 };
 
 export default UserMenu;
-

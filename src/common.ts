@@ -1,46 +1,46 @@
 import { getConfig } from '@server/config';
 import { bootstrapKnex } from './apollo/server/utils/knex';
 import {
-  ProjectRepository,
-  ViewRepository,
-  DeployLogRepository,
-  ThreadRepository,
-  ThreadResponseRepository,
-  ModelRepository,
-  ModelColumnRepository,
-  RelationRepository,
-  SchemaChangeRepository,
-  ModelNestedColumnRepository,
-  LearningRepository,
+  ApiHistoryRepository,
+  AskingTaskRepository,
+  DashboardItemRefreshJobRepository,
   DashboardItemRepository,
   DashboardRepository,
-  SqlPairRepository,
-  AskingTaskRepository,
+  DeployLogRepository,
   InstructionRepository,
-  ApiHistoryRepository,
-  DashboardItemRefreshJobRepository,
+  LearningRepository,
+  ModelColumnRepository,
+  ModelNestedColumnRepository,
+  ModelRepository,
+  ProjectRepository,
+  RelationRepository,
+  SchemaChangeRepository,
+  SqlPairRepository,
+  ThreadRepository,
+  ThreadResponseRepository,
+  ViewRepository,
 } from '@server/repositories';
 import {
-  WrenEngineAdaptor,
-  WrenAIAdaptor,
   IbisAdaptor,
+  WrenAIAdaptor,
+  WrenEngineAdaptor,
 } from '@server/adaptors';
 import {
-  DataSourceMetadataService,
-  QueryService,
-  ProjectService,
-  DeployService,
   AskingService,
-  MDLService,
-  DashboardService,
   AskingTaskTracker,
+  DashboardService,
+  DataSourceMetadataService,
+  DeployService,
   InstructionService,
+  MDLService,
+  ProjectService,
+  QueryService,
 } from '@server/services';
 import { PostHogTelemetry } from './apollo/server/telemetry/telemetry';
 import {
+  DashboardCacheBackgroundTracker,
   ProjectRecommendQuestionBackgroundTracker,
   ThreadRecommendQuestionBackgroundTracker,
-  DashboardCacheBackgroundTracker,
 } from './apollo/server/backgrounds';
 import { SqlPairService } from './apollo/server/services/sqlPairService';
 

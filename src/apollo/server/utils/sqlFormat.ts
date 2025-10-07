@@ -15,7 +15,9 @@ export function safeFormatSQL(
       // Try using Trino as the fallback dialect
       return format(sql, { ...options, language: 'trino' });
     } catch (_fallbackError) {
-      logger.error(`Failed to format SQL: ${err.message}`);
+      logger.error(
+        `Failed to format SQL: ${(_fallbackError as Error).message}`,
+      );
       return sql;
     }
   }

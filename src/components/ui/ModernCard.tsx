@@ -77,4 +77,3 @@ export const ModernCard: React.FC<ModernCardProps> = ({
 };
 
 export default ModernCard;
-

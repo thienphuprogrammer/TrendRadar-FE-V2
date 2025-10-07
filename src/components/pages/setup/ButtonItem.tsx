@@ -6,7 +6,7 @@ import { IterableComponent } from '@/utils/iteration';
 import { ButtonOption } from './utils';
 import { SampleDatasetName } from '@/apollo/client/graphql/__types__';
 
-const StyledButton = styled(Button)`
+const StyledButton = styled(Button)<{ className?: string }>`
   border: 2px var(--gray-4) solid;
   background-color: var(--gray-2);
   border-radius: 4px;

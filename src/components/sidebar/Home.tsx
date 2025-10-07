@@ -15,7 +15,7 @@ export interface Props {
   data: {
     threads: ThreadData[];
   };
-  onSelect: (selectKeys) => void;
+  onSelect: (selectKeys: any) => void;
   onDelete: (id: string) => Promise<void>;
   onRename: (id: string, newName: string) => Promise<void>;
 }

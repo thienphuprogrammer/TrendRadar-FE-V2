@@ -1,11 +1,11 @@
 import {
-  WrenAIError,
-  WrenAILanguage,
+  AskFeedbackStatus,
   AskResultStatus,
   AskResultType,
-  RecommendationQuestionStatus,
   ChartAdjustmentOption,
-  AskFeedbackStatus,
+  RecommendationQuestionStatus,
+  WrenAIError,
+  WrenAILanguage,
 } from '@server/models/adaptor';
 import { Thread } from '../repositories/threadRepository';
 import {
@@ -22,9 +22,9 @@ import {
   ThreadRecommendQuestionResult,
 } from '../services/askingService';
 import {
-  SuggestedQuestion,
-  SampleDatasetName,
   getSampleAskQuestions,
+  SampleDatasetName,
+  SuggestedQuestion,
 } from '../data';
 import { TelemetryEvent, WrenService } from '../telemetry/telemetry';
 import { TrackedAskingResult } from '../services';
@@ -167,7 +167,8 @@ export class AskingResolver {
     if (!sampleDataset) {
       return { questions: [] };
     }
-    const questions = getSampleAskQuestions(sampleDataset as SampleDatasetName);
+    const questions =
+      getSampleAskQuestions(sampleDataset as SampleDatasetName) || [];
     return { questions };
   }
 
@@ -183,7 +184,10 @@ export class AskingResolver {
     const data = { question };
     const task = await askingService.createAskingTask(data, {
       threadId,
-      language: WrenAILanguage[project.language] || WrenAILanguage.EN,
+      language: project.language
+        ? WrenAILanguage[project.language as keyof typeof WrenAILanguage] ||
+          WrenAILanguage.EN
+        : WrenAILanguage.EN,
     });
     ctx.telemetry.sendEvent(TelemetryEvent.HOME_ASK_CANDIDATE, {
       question,
@@ -207,7 +211,7 @@ export class AskingResolver {
     _root: any,
     args: { taskId: string },
     ctx: IContext,
-  ): Promise<AskingTask> {
+  ): Promise<AskingTask | null> {
     const { taskId } = args;
     const askingService = ctx.askingService;
     const askResult = await askingService.getAskingTask(taskId);
@@ -458,7 +462,10 @@ export class AskingResolver {
     const project = await ctx.projectService.getCurrentProject();
 
     const task = await askingService.rerunAskingTask(responseId, {
-      language: WrenAILanguage[project.language] || WrenAILanguage.EN,
+      language: project.language
+        ? WrenAILanguage[project.language as keyof typeof WrenAILanguage] ||
+          WrenAILanguage.EN
+        : WrenAILanguage.EN,
     });
     ctx.telemetry.sendEvent(TelemetryEvent.HOME_RERUN_ASKING_TASK, {
       responseId,
@@ -503,11 +510,14 @@ export class AskingResolver {
       responseId,
       {
         projectId: project.id,
-        tables: data.tables,
-        sqlGenerationReasoning: data.sqlGenerationReasoning,
+        tables: data.tables || [],
+        sqlGenerationReasoning: data.sqlGenerationReasoning || '',
       },
       {
-        language: WrenAILanguage[project.language] || WrenAILanguage.EN,
+        language: project.language
+          ? WrenAILanguage[project.language as keyof typeof WrenAILanguage] ||
+            WrenAILanguage.EN
+          : WrenAILanguage.EN,
       },
     );
   }
@@ -535,7 +545,10 @@ export class AskingResolver {
       responseId,
       project.id,
       {
-        language: WrenAILanguage[project.language] || WrenAILanguage.EN,
+        language: project.language
+          ? WrenAILanguage[project.language as keyof typeof WrenAILanguage] ||
+            WrenAILanguage.EN
+          : WrenAILanguage.EN,
       },
     );
     return true;
@@ -545,19 +558,22 @@ export class AskingResolver {
     _root: any,
     args: { taskId: string },
     ctx: IContext,
-  ): Promise<AdjustmentTask> {
+  ): Promise<AdjustmentTask | null> {
     const { taskId } = args;
     const askingService = ctx.askingService;
     const adjustmentTask = await askingService.getAdjustmentTask(taskId);
+    if (!adjustmentTask) {
+      return null;
+    }
     return {
-      queryId: adjustmentTask?.queryId,
-      status: adjustmentTask?.status,
-      error: adjustmentTask?.error,
-      sql: adjustmentTask?.response?.[0]?.sql,
-      traceId: adjustmentTask?.traceId,
-      invalidSql: adjustmentTask?.invalidSql
+      queryId: adjustmentTask.queryId,
+      status: adjustmentTask.status,
+      error: adjustmentTask.error || null,
+      sql: adjustmentTask.response?.[0]?.sql,
+      traceId: adjustmentTask.traceId || '',
+      invalidSql: adjustmentTask.invalidSql
         ? safeFormatSQL(adjustmentTask.invalidSql)
-        : null,
+        : undefined,
     };
   }
 
@@ -571,7 +587,12 @@ export class AskingResolver {
     const askingService = ctx.askingService;
     const breakdownDetail = await askingService.generateThreadResponseBreakdown(
       responseId,
-      { language: WrenAILanguage[project.language] || WrenAILanguage.EN },
+      {
+        language: project.language
+          ? WrenAILanguage[project.language as keyof typeof WrenAILanguage] ||
+            WrenAILanguage.EN
+          : WrenAILanguage.EN,
+      },
     );
     return breakdownDetail;
   }
@@ -585,7 +606,10 @@ export class AskingResolver {
     const { responseId } = args;
     const askingService = ctx.askingService;
     return askingService.generateThreadResponseAnswer(responseId, {
-      language: WrenAILanguage[project.language] || WrenAILanguage.EN,
+      language: project.language
+        ? WrenAILanguage[project.language as keyof typeof WrenAILanguage] ||
+          WrenAILanguage.EN
+        : WrenAILanguage.EN,
     });
   }
 
@@ -598,7 +622,10 @@ export class AskingResolver {
     const { responseId } = args;
     const askingService = ctx.askingService;
     return askingService.generateThreadResponseChart(responseId, {
-      language: WrenAILanguage[project.language] || WrenAILanguage.EN,
+      language: project.language
+        ? WrenAILanguage[project.language as keyof typeof WrenAILanguage] ||
+          WrenAILanguage.EN
+        : WrenAILanguage.EN,
     });
   }
 
@@ -611,7 +638,10 @@ export class AskingResolver {
     const { responseId, data } = args;
     const askingService = ctx.askingService;
     return askingService.adjustThreadResponseChart(responseId, data, {
-      language: WrenAILanguage[project.language] || WrenAILanguage.EN,
+      language: project.language
+        ? WrenAILanguage[project.language as keyof typeof WrenAILanguage] ||
+          WrenAILanguage.EN
+        : WrenAILanguage.EN,
     });
   }
 
@@ -686,6 +716,7 @@ export class AskingResolver {
       const viewId = parent.viewId;
       if (!viewId) return null;
       const view = await ctx.viewRepository.findOneBy({ id: viewId });
+      if (!view) return null;
       const displayName = view.properties
         ? JSON.parse(view.properties)?.displayName
         : view.name;
@@ -721,6 +752,7 @@ export class AskingResolver {
         return null;
       }
       const askingService = ctx.askingService;
+      if (!parent.askingTaskId) return null;
       const askingTask = await askingService.getAskingTaskById(
         parent.askingTaskId,
       );
@@ -731,11 +763,12 @@ export class AskingResolver {
       parent: ThreadResponse,
       _args: any,
       ctx: IContext,
-    ): Promise<AdjustmentTask> => {
+    ): Promise<AdjustmentTask | null> => {
       if (!parent.adjustment) {
         return null;
       }
       const askingService = ctx.askingService;
+      if (!parent.askingTaskId) return null;
       const adjustmentTask = await askingService.getAdjustmentTaskById(
         parent.askingTaskId,
       );
@@ -743,12 +776,12 @@ export class AskingResolver {
       return {
         queryId: adjustmentTask?.queryId,
         status: adjustmentTask?.status,
-        error: adjustmentTask?.error,
+        error: adjustmentTask?.error || null,
         sql: adjustmentTask?.response?.[0]?.sql,
-        traceId: adjustmentTask?.traceId,
+        traceId: adjustmentTask?.traceId || '',
         invalidSql: adjustmentTask?.invalidSql
           ? safeFormatSQL(adjustmentTask.invalidSql)
-          : null,
+          : undefined,
       };
     },
   });
@@ -767,6 +800,7 @@ export class AskingResolver {
       const viewId = parent.view?.id;
       if (!viewId) return parent.view;
       const view = await ctx.viewRepository.findOneBy({ id: viewId });
+      if (!view) return null;
 
       const displayName = view.properties
         ? JSON.parse(view.properties).displayName
@@ -818,7 +852,7 @@ export class AskingResolver {
       retrievedTables: askingTask.retrievedTables,
       invalidSql: askingTask.invalidSql
         ? safeFormatSQL(askingTask.invalidSql)
-        : null,
+        : undefined,
       traceId: askingTask.traceId,
     };
   }

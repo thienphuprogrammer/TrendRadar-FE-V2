@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Modal, Layout, Button } from 'antd';
+import { Button, Layout, Modal } from 'antd';
 import styled from 'styled-components';
 import { SETTINGS } from '@/utils/enum';
 import { makeIterable } from '@/utils/iteration';
@@ -10,8 +10,8 @@ import DataSourceSettings from './DataSourceSettings';
 import ProjectSettings from './ProjectSettings';
 import { getSettingMenu } from './utils';
 import {
-  useGetSettingsLazyQuery,
   GetSettingsQuery,
+  useGetSettingsLazyQuery,
 } from '@/apollo/client/graphql/settings.generated';
 
 const { Sider, Content } = Layout;
@@ -62,7 +62,7 @@ const DynamicComponent = ({
     {
       [SETTINGS.DATA_SOURCE]: (
         <DataSourceSettings
-          type={dataSource?.type}
+          type={dataSource?.type || 'POSTGRES'}
           sampleDataset={dataSource?.sampleDataset}
           properties={dataSource?.properties}
           refetchSettings={refetch}
@@ -74,7 +74,7 @@ const DynamicComponent = ({
   );
 };
 
-const MenuTemplate = ({ currentMenu, value, onClick }) => {
+const MenuTemplate = ({ currentMenu, value, onClick }: any) => {
   const current = getSettingMenu(value);
   return (
     <StyledButton
@@ -97,7 +97,7 @@ export default function Settings(props: Props) {
   const current = getSettingMenu(menu);
   const menuList = Object.keys(SETTINGS).map((key) => ({
     key,
-    value: SETTINGS[key],
+    value: (SETTINGS as any)[key],
   }));
   const [fetchSettings, { data, refetch }] = useGetSettingsLazyQuery({
     fetchPolicy: 'cache-and-network',
@@ -111,7 +111,7 @@ export default function Settings(props: Props) {
     if (visible) fetchSettings();
   }, [visible]);
 
-  const onMenuClick = ({ value }) => setMenu(value);
+  const onMenuClick = ({ value }: any) => setMenu(value);
 
   return (
     <StyledModal

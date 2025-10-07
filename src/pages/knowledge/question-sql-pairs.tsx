@@ -16,10 +16,10 @@ import QuestionSQLPairModal from '@/components/modals/QuestionSQLPairModal';
 import SQLPairDrawer from '@/components/pages/knowledge/SQLPairDrawer';
 import { SqlPair } from '@/apollo/client/graphql/__types__';
 import {
-  useSqlPairsQuery,
   useCreateSqlPairMutation,
-  useUpdateSqlPairMutation,
   useDeleteSqlPairMutation,
+  useSqlPairsQuery,
+  useUpdateSqlPairMutation,
 } from '@/apollo/client/graphql/sqlPairs.generated';
 
 const SQLCodeBlock = dynamic(() => import('@/components/code/SQLCodeBlock'), {
@@ -37,9 +37,9 @@ function QuestionSQLPairsPage() {
   });
   const sqlPairs = data?.sqlPairs || [];
 
-  const getBaseOptions = (options) => {
+  const getBaseOptions = (options: any) => {
     return {
-      onError: (error) => console.error(error),
+      onError: (error: any) => console.error(error),
       refetchQueries: ['SqlPairs'],
       awaitRefetchQueries: true,
       ...options,
@@ -72,7 +72,7 @@ function QuestionSQLPairsPage() {
       }),
     );
 
-  const onMoreClick = async (payload) => {
+  const onMoreClick = async (payload: any) => {
     const { type, data } = payload;
     if (type === MORE_ACTION.DELETE) {
       await deleteSqlPairMutation({
@@ -161,9 +161,11 @@ function QuestionSQLPairsPage() {
       >
         <Table
           className="ant-table-has-header"
-          dataSource={sqlPairs}
+          dataSource={sqlPairs.filter(
+            (sqlPair): sqlPair is SqlPair => sqlPair != null,
+          )}
           loading={loading}
-          columns={columns}
+          columns={columns as TableColumnsType<SqlPair>}
           rowKey="id"
           pagination={{
             hideOnSinglePage: true,
@@ -174,6 +176,9 @@ function QuestionSQLPairsPage() {
         />
         <SQLPairDrawer
           {...sqlPairDrawer.state}
+          defaultValue={
+            sqlPairDrawer.state.open ? sqlPairDrawer.state.defaultValue : null
+          }
           onClose={sqlPairDrawer.closeDrawer}
         />
         <QuestionSQLPairModal

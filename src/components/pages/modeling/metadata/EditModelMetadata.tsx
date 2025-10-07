@@ -51,14 +51,16 @@ export default function EditModelMetadata(props: Props) {
 
   const form = useContext(EditableContext);
 
-  const onChange = (value) => {
-    form.setFieldsValue({
-      [formNamespace]: {
-        ...(form.getFieldValue(formNamespace) || {}),
-        ...value,
-        modelId,
-      },
-    });
+  const onChange = (value: any) => {
+    if (form) {
+      form.setFieldsValue({
+        [formNamespace]: {
+          ...(form.getFieldValue(formNamespace) || {}),
+          ...value,
+          modelId,
+        },
+      });
+    }
   };
 
   const handleMetadataChange = (fieldsName: string) => (value: any[]) => {

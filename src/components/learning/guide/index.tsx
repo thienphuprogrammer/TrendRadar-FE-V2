@@ -35,12 +35,13 @@ export default forwardRef<Attributes, Props>(function Guide(_props, ref) {
     if ($driver.current !== null) return;
     $driver.current = driver();
     return () => {
-      $driver.current.destroy();
+      $driver.current?.destroy();
       $driver.current = null;
     };
   }, []);
 
   const play = (id: string, dispatcher: Dispatcher) => {
+    if (!$driver.current) return;
     const playStoryWithId = makeStoriesPlayer(
       $driver.current,
       router,
@@ -49,11 +50,7 @@ export default forwardRef<Attributes, Props>(function Guide(_props, ref) {
     playStoryWithId(id, dispatcher);
   };
 
-  useImperativeHandle(ref, () => ({ play }), [
-    $driver.current,
-    storyPayload,
-    router,
-  ]);
+  useImperativeHandle(ref, () => ({ play }), [storyPayload, router]);
 
   return null;
 });

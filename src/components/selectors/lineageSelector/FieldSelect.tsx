@@ -5,7 +5,7 @@ import { ModelIcon } from '@/utils/icons';
 import { IterableComponent } from '@/utils/iteration';
 import Selector, { Option } from '@/components/selectors/Selector';
 
-const FieldBox = styled.div`
+const FieldBox = styled.div<{ className?: string }>`
   user-select: none;
   border-radius: 4px;
   background-color: white;
@@ -38,13 +38,13 @@ const FieldBox = styled.div`
   }
 `;
 
-const FieldHeader = styled.div`
+const FieldHeader = styled.div<{ className?: string }>`
   display: flex;
   align-items: center;
   border-bottom: 1px var(--gray-4) solid;
 `;
 
-const StyledSelector = styled(Selector)`
+const StyledSelector = styled(Selector)<{ className?: string }>`
   &.ant-select-status-error.ant-select:not(.ant-select-disabled):not(
       .ant-select-customize-input
     )
@@ -70,7 +70,7 @@ type Props = FieldValue & {
   onFetchOptions?: (item: any, index: number) => Promise<FieldOption[]>;
 };
 
-export const getFieldValue = (field): FieldValue => {
+export const getFieldValue = (field: any): FieldValue => {
   return {
     nodeType: field.nodeType,
     referenceName: field.referenceName,
@@ -97,7 +97,7 @@ export default function FieldSelect(props: IterableComponent<Props>) {
     NODE_TYPE.MODEL,
     NODE_TYPE.RELATION,
   ].includes(nodeType);
-  const [options, setOptions] = useState([]);
+  const [options, setOptions] = useState<Option[]>([]);
 
   const getOptions = async () => {
     const result = onFetchOptions && (await onFetchOptions(props, index));

@@ -144,7 +144,7 @@ export default class DataSourceSchemaDetector
         modelIds,
       });
 
-    const affectedResources = this.getAffectedResources(changes, {
+    const affectedResources = this.getAffectedResources(changes || [], {
       models,
       modelColumns,
       modelRelationships,
@@ -164,17 +164,19 @@ export default class DataSourceSchemaDetector
         // both DELETED_TABLES and DELETED_COLUMNS need to remove all affected calculated fields
         logger.debug(
           `Start to remove all affected calculated fields "${resource.calculatedFields.map(
-            (column) => `${column.displayName} (${column.referenceName})`,
+            (column: any) => `${column.displayName} (${column.referenceName})`,
           )}".`,
         );
 
-        const columnIds = resource.calculatedFields.map((column) => column.id);
+        const columnIds = resource.calculatedFields.map(
+          (column: any) => column.id,
+        );
         await this.ctx.modelColumnRepository.deleteAllByColumnIds(columnIds);
 
         // remove columns if SchemaChangeType is DELETED_COLUMNS
         if (schemaChangeType === SchemaChangeType.DELETED_COLUMNS) {
           const affectedColumnNames = resource.columns.map(
-            (column) => column.sourceColumnName,
+            (column: any) => column.sourceColumnName,
           );
 
           logger.debug(
@@ -193,7 +195,9 @@ export default class DataSourceSchemaDetector
     // remove tables if SchemaChangeType is DELETED_TABLES
     if (schemaChangeType === SchemaChangeType.DELETED_TABLES) {
       // delete models
-      const affectedTableNames = changes.map((table) => table.name);
+      const affectedTableNames = (changes || []).map(
+        (table: any) => table.name,
+      );
 
       logger.debug(
         `Start to remove tables "${affectedTableNames}" from models.`,
@@ -205,9 +209,11 @@ export default class DataSourceSchemaDetector
     }
 
     // update resolve flag
-    await this.updateResolveToSchemaChange(lastSchemaChange, [
-      schemaChangeType,
-    ]);
+    if (lastSchemaChange) {
+      await this.updateResolveToSchemaChange(lastSchemaChange, [
+        schemaChangeType,
+      ]);
+    }
   }
 
   /**
@@ -234,14 +240,16 @@ export default class DataSourceSchemaDetector
   ) {
     const affectedModels = models.filter(
       (model) =>
-        changes.findIndex((table) => table.name === model.sourceTableName) !==
-        -1,
+        (changes || []).findIndex(
+          (table: any) => table.name === model.sourceTableName,
+        ) !== -1,
     );
 
     const affectedResources = affectedModels.map((model) => {
-      const affectedColumns = changes.find(
-        (table) => table.name === model.sourceTableName,
-      ).columns;
+      const affectedColumns =
+        (changes || []).find(
+          (table: any) => table.name === model.sourceTableName,
+        )?.columns || [];
 
       const allCalculatedFields = modelColumns.filter(
         (column) => column.isCalculated,
@@ -255,46 +263,58 @@ export default class DataSourceSchemaDetector
               modelColumn.modelId === model.id,
           );
 
-          result.columns.push({
-            sourceColumnName: column.name,
-            displayName: affectedColumn.displayName,
-            type: column.type,
-          });
+          if (affectedColumn) {
+            (result as any).columns.push({
+              sourceColumnName: column.name,
+              displayName: affectedColumn.displayName,
+              type: column.type,
+            });
+          }
 
           // collect affected calculated fields if it's target column
           const affectedCalculatedFieldsByColumnId = allCalculatedFields.filter(
             (calculatedField) => {
-              const lineage = JSON.parse(calculatedField.lineage);
+              const lineage = calculatedField.lineage
+                ? JSON.parse(calculatedField.lineage)
+                : null;
               return (
-                lineage && lineage[lineage.length - 1] === affectedColumn.id
+                lineage &&
+                affectedColumn &&
+                lineage[lineage.length - 1] === affectedColumn.id
               );
             },
           );
 
-          result.calculatedFields.push(...affectedCalculatedFieldsByColumnId);
+          (result as any).calculatedFields.push(
+            ...affectedCalculatedFieldsByColumnId,
+          );
 
           // collect affected relationships
           const affectedRelationships = modelRelationships
             .map((relationship) =>
-              [relationship.fromColumnId, relationship.toColumnId].includes(
-                affectedColumn.id,
-              )
-                ? relationship
-                : null,
+              affectedColumn
+                ? [relationship.fromColumnId, relationship.toColumnId].includes(
+                    affectedColumn.id,
+                  )
+                : false
+                  ? relationship
+                  : null,
             )
             .filter((relationship) => !!relationship);
 
           affectedRelationships.forEach((relationship) => {
+            if (!relationship || typeof relationship === 'boolean') return;
+
             const referenceName =
-              model.referenceName === relationship.fromModelName
-                ? relationship.toModelName
-                : relationship.fromModelName;
+              model.referenceName === (relationship as any).fromModelName
+                ? (relationship as any).toModelName
+                : (relationship as any).fromModelName;
 
             const displayName = models.find(
               (model) => model.referenceName === referenceName,
             )?.displayName;
 
-            result.relationships.push({
+            (result as any).relationships.push({
               displayName,
               id: relationship.id,
               referenceName,
@@ -303,14 +323,18 @@ export default class DataSourceSchemaDetector
             // collect affected calculated fields if the relationship is in use
             const affectedCalculatedFieldsByRelationshipId =
               allCalculatedFields.filter((calculatedField) => {
-                const lineage = JSON.parse(calculatedField.lineage);
+                const lineage = calculatedField.lineage
+                  ? JSON.parse(calculatedField.lineage)
+                  : null;
+
+                if (!lineage) return false;
 
                 // pop the column ID from the lineage
                 lineage.pop();
                 return lineage && lineage.includes(relationship.id);
               });
 
-            result.calculatedFields.push(
+            (result as any).calculatedFields.push(
               ...affectedCalculatedFieldsByRelationshipId,
             );
           });
@@ -347,8 +371,8 @@ export default class DataSourceSchemaDetector
       );
       // If the table is not found in the latest schema, it means the table has been deleted.
       if (!lastestTable) {
-        result[SchemaChangeType.DELETED_TABLES] = [
-          ...(result[SchemaChangeType.DELETED_TABLES] || []),
+        (result as any)[SchemaChangeType.DELETED_TABLES] = [
+          ...((result as any)[SchemaChangeType.DELETED_TABLES] || []),
           currentTable,
         ];
         return result;
@@ -370,24 +394,24 @@ export default class DataSourceSchemaDetector
           );
           // If the column is not found in the latest schema, it means the column has been deleted.
           if (!latestColumn) {
-            deletedColumnChange.columns.push(currentColumn);
+            (deletedColumnChange as any).columns.push(currentColumn);
             continue;
           }
           // If the column is found in the latest schema, it means the column has been modified.
           // save latest column as modified column
-          modifiedColumnChange.columns.push(latestColumn);
+          (modifiedColumnChange as any).columns.push(latestColumn);
         }
 
         // If there are any deleted or modified columns, we need to add them to the result.
-        if (deletedColumnChange.columns.length > 0) {
-          result[SchemaChangeType.DELETED_COLUMNS] = [
-            ...(result[SchemaChangeType.DELETED_COLUMNS] || []),
+        if ((deletedColumnChange as any).columns.length > 0) {
+          (result as any)[SchemaChangeType.DELETED_COLUMNS] = [
+            ...((result as any)[SchemaChangeType.DELETED_COLUMNS] || []),
             deletedColumnChange,
           ];
         }
-        if (modifiedColumnChange.columns.length > 0) {
-          result[SchemaChangeType.MODIFIED_COLUMNS] = [
-            ...(result[SchemaChangeType.MODIFIED_COLUMNS] || []),
+        if ((modifiedColumnChange as any).columns.length > 0) {
+          (result as any)[SchemaChangeType.MODIFIED_COLUMNS] = [
+            ...((result as any)[SchemaChangeType.MODIFIED_COLUMNS] || []),
             modifiedColumnChange,
           ];
         }
@@ -407,7 +431,7 @@ export default class DataSourceSchemaDetector
   }
 
   private async addSchemaChange(diffSchema: DataSourceSchemaChange) {
-    const getResolveState = (change) => (!!change ? false : undefined);
+    const getResolveState = (change: any) => (!!change ? false : undefined);
 
     const lastSchemaChange =
       await this.ctx.schemaChangeRepository.findLastSchemaChange(
@@ -464,6 +488,10 @@ export default class DataSourceSchemaDetector
     const project = await this.ctx.projectRepository.findOneBy({
       id: this.projectId,
     });
+    if (!project) {
+      throw new Error(`Project with id ${this.projectId} not found`);
+    }
+
     const latestDataSourceTables =
       await this.ctx.projectService.getProjectDataSourceTables(project);
     const result = latestDataSourceTables.map((table) => {

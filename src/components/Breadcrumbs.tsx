@@ -9,7 +9,10 @@ import { useRouter } from 'next/router';
 import { HomeOutlined, RightOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 
-const BreadcrumbsContainer = styled.nav`
+const BreadcrumbsContainer = styled.nav<{
+  className?: string;
+  children?: React.ReactNode;
+}>`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -18,7 +21,10 @@ const BreadcrumbsContainer = styled.nav`
   color: ${({ theme }) => theme.colors.textSecondary};
 `;
 
-const BreadcrumbItem = styled.span<{ $isLast?: boolean }>`
+const BreadcrumbItem = styled.span<{
+  $isLast?: boolean;
+  children?: React.ReactNode;
+}>`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -29,7 +35,7 @@ const BreadcrumbItem = styled.span<{ $isLast?: boolean }>`
   a {
     color: ${({ theme }) => theme.colors.textSecondary};
     transition: color 0.2s;
-    
+
     &:hover {
       color: ${({ theme }) => theme.colors.primary};
     }
@@ -65,28 +71,30 @@ const pathNameMap: Record<string, string> = {
   users: 'Users',
 };
 
-export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className }) => {
+export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
+  items,
+  className,
+}) => {
   const router = useRouter();
-  
+
   const breadcrumbs = items || generateBreadcrumbsFromPath(router.pathname);
 
   return (
     <BreadcrumbsContainer className={className} aria-label="Breadcrumb">
       <BreadcrumbItem>
-        <Link href="/">
-          <a aria-label="Home">
-            <HomeOutlined />
-          </a>
+        <Link href="/" aria-label="Home">
+
+          <HomeOutlined />
+
         </Link>
       </BreadcrumbItem>
-      
       {breadcrumbs.map((item, index) => (
         <React.Fragment key={index}>
           <Separator />
           <BreadcrumbItem $isLast={index === breadcrumbs.length - 1}>
             {item.href && index < breadcrumbs.length - 1 ? (
               <Link href={item.href}>
-                <a>{item.label}</a>
+                {item.label}
               </Link>
             ) : (
               <span>{item.label}</span>
@@ -100,11 +108,11 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className }) =>
 
 function generateBreadcrumbsFromPath(pathname: string): BreadcrumbItem[] {
   const paths = pathname.split('/').filter(Boolean);
-  
+
   return paths.map((path, index) => {
     const href = '/' + paths.slice(0, index + 1).join('/');
     const label = pathNameMap[path] || capitalize(path);
-    
+
     return { label, href };
   });
 }
@@ -114,4 +122,3 @@ function capitalize(str: string): string {
 }
 
 export default Breadcrumbs;
-

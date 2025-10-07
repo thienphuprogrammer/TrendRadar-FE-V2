@@ -2,7 +2,14 @@
  * Dark Theme Configuration
  */
 
-import { colors, typography, spacing, borderRadius, shadows, zIndex, transitions } from './tokens';
+import {
+  borderRadius,
+  colors,
+  spacing,
+  transitions,
+  typography,
+  zIndex,
+} from './tokens';
 
 export const darkTheme = {
   name: 'dark',
@@ -74,16 +81,16 @@ export const darkTheme = {
     gray800: colors.gray[100],
     gray900: colors.gray[50],
   },
-  
+
   // Typography
   ...typography,
-  
+
   // Spacing
   spacing,
-  
+
   // Border radius
   borderRadius,
-  
+
   // Shadows (darker for dark mode)
   shadows: {
     xs: '0 1px 2px 0 rgba(0, 0, 0, 0.3)',
@@ -96,13 +103,12 @@ export const darkTheme = {
     inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.3)',
     none: 'none',
   },
-  
+
   // Z-index
   zIndex,
-  
+
   // Transitions
   transitions,
 } as const;
 
 export type DarkTheme = typeof darkTheme;
-

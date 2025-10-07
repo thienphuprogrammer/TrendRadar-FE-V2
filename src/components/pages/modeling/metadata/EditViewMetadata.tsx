@@ -41,14 +41,16 @@ export default function EditViewMetadata(props: Props) {
     fetchPolicy: 'no-cache',
   });
 
-  const onChange = (value) => {
-    form.setFieldsValue({
-      [formNamespace]: {
-        ...(form.getFieldValue(formNamespace) || {}),
-        ...value,
-        viewId,
-      },
-    });
+  const onChange = (value: any) => {
+    if (form) {
+      form.setFieldsValue({
+        [formNamespace]: {
+          ...(form.getFieldValue(formNamespace) || {}),
+          ...value,
+          viewId,
+        },
+      });
+    }
   };
 
   const handleMetadataChange = (fieldsName: string) => (value: any[]) => {

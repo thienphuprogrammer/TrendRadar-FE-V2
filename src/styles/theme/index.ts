@@ -17,4 +17,3 @@ export const themes = {
 
 export type Theme = typeof lightTheme | typeof darkTheme;
 export type ThemeName = keyof typeof themes;
-

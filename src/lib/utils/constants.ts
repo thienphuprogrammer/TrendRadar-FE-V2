@@ -5,7 +5,8 @@
 
 // API Configuration
 export const API_CONFIG = {
-  GATEWAY_URL: process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:8000',
+  GATEWAY_URL:
+    process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:8000',
   AUTH_BASE_PATH: '/api/v1/auth',
   TIMEOUT: 30000, // 30 seconds
 } as const;
@@ -161,4 +162,3 @@ export const FORM_MESSAGES = {
   USERNAME_MIN_LENGTH: `Username must be at least ${VALIDATION.USERNAME_MIN_LENGTH} characters`,
   USERNAME_MAX_LENGTH: `Username must not exceed ${VALIDATION.USERNAME_MAX_LENGTH} characters`,
 } as const;
-

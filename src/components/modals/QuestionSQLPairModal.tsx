@@ -16,9 +16,11 @@ import PreviewData from '@/components/dataPreview/PreviewData';
 import ImportDataSourceSQLModal, {
   isSupportSubstitute,
 } from '@/components/modals/ImportDataSourceSQLModal';
-import { usePreviewSqlMutation } from '@/apollo/client/graphql/sql.generated';
+import {
+  useGenerateQuestionMutation,
+  usePreviewSqlMutation,
+} from '@/apollo/client/graphql/sql.generated';
 import { useGetSettingsQuery } from '@/apollo/client/graphql/settings.generated';
-import { useGenerateQuestionMutation } from '@/apollo/client/graphql/sql.generated';
 import { SqlPair } from '@/apollo/client/graphql/__types__';
 
 type Props = ModalAction<SqlPair> & {

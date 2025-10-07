@@ -1,16 +1,16 @@
 import { IWrenAIAdaptor } from '../adaptors';
 import {
-  WrenAILanguage,
   TextBasedAnswerResult,
   TextBasedAnswerStatus,
+  WrenAILanguage,
 } from '../models/adaptor';
-import { ThreadResponse, IThreadResponseRepository } from '../repositories';
+import { IThreadResponseRepository, ThreadResponse } from '../repositories';
 import {
-  IProjectService,
   IDeployService,
+  IProjectService,
   IQueryService,
-  ThreadResponseAnswerStatus,
   PreviewDataResponse,
+  ThreadResponseAnswerStatus,
 } from '../services';
 import { getLogger } from '@server/utils';
 
@@ -50,6 +50,14 @@ export class TextBasedAnswerBackgroundTracker {
     this.start();
   }
 
+  public addTask(threadResponse: ThreadResponse) {
+    this.tasks[threadResponse.id] = threadResponse;
+  }
+
+  public getTasks() {
+    return this.tasks;
+  }
+
   private start() {
     setInterval(async () => {
       const jobs = Object.values(this.tasks).map(
@@ -78,6 +86,11 @@ export class TextBasedAnswerBackgroundTracker {
           const mdl = deployment.manifest;
           let data: PreviewDataResponse;
           try {
+            if (!threadResponse.sql) {
+              this.runningJobs.delete(threadResponse.id);
+              return;
+            }
+
             data = (await this.queryService.preview(threadResponse.sql, {
               project,
               manifest: mdl,
@@ -85,12 +98,14 @@ export class TextBasedAnswerBackgroundTracker {
               limit: 500,
             })) as PreviewDataResponse;
           } catch (error) {
-            logger.error(`Error when query sql data: ${error}`);
+            logger.error(
+              `Error when query sql data: ${error instanceof Error ? error.message : String(error)}`,
+            );
             await this.threadResponseRepository.updateOne(threadResponse.id, {
               answerDetail: {
                 ...threadResponse.answerDetail,
                 status: ThreadResponseAnswerStatus.FAILED,
-                error: error?.extensions || error,
+                error: (error as any)?.extensions || error,
               },
             });
             throw error;
@@ -103,7 +118,10 @@ export class TextBasedAnswerBackgroundTracker {
             sqlData: data,
             threadId: threadResponse.threadId.toString(),
             configurations: {
-              language: WrenAILanguage[project.language] || WrenAILanguage.EN,
+              language:
+                WrenAILanguage[
+                  (project.language as keyof typeof WrenAILanguage) || 'EN'
+                ] || WrenAILanguage.EN,
             },
           });
 
@@ -157,13 +175,5 @@ export class TextBasedAnswerBackgroundTracker {
         });
       });
     }, this.intervalTime);
-  }
-
-  public addTask(threadResponse: ThreadResponse) {
-    this.tasks[threadResponse.id] = threadResponse;
-  }
-
-  public getTasks() {
-    return this.tasks;
   }
 }

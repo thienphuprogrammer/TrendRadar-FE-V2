@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { keyBy } from 'lodash';
-import { Col, Row, Typography, Button } from 'antd';
+import { Button, Col, Row, Typography } from 'antd';
 import FieldTable from '@/components/table/FieldTable';
 import CalculatedFieldTable from '@/components/table/CalculatedFieldTable';
 import RelationTable from '@/components/table/RelationTable';

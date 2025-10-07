@@ -4,8 +4,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Form, Input, Button, Card, Typography, Alert, Result } from 'antd';
-import { MailOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { Alert, Button, Card, Form, Input, Result, Typography } from 'antd';
+import { ArrowLeftOutlined, MailOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { authClient } from '@/lib/api/authClient';
 import GuestRoute from '@/components/auth/GuestRoute';
@@ -78,7 +78,10 @@ const ForgotPasswordPage: React.FC = () => {
       await authClient.requestPasswordReset({ email: values.email });
       setSuccess(true);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to send reset email. Please try again.');
+      setError(
+        err.response?.data?.detail ||
+          'Failed to send reset email. Please try again.',
+      );
     } finally {
       setLoading(false);
     }
@@ -100,7 +103,7 @@ const ForgotPasswordPage: React.FC = () => {
                 </>
               }
               extra={[
-                <Link href="/auth/login" key="login">
+                <Link href="/auth/login" key="login" legacyBehavior>
                   <StyledButton type="primary">Back to Login</StyledButton>
                 </Link>,
               ]}
@@ -121,7 +124,8 @@ const ForgotPasswordPage: React.FC = () => {
 
           <StyledTitle level={2}>Forgot Password?</StyledTitle>
           <Subtitle>
-            Enter your email address and we'll send you a link to reset your password
+            Enter your email address and we'll send you a link to reset your
+            password
           </Subtitle>
 
           {error && (
@@ -165,10 +169,10 @@ const ForgotPasswordPage: React.FC = () => {
           </Form>
 
           <BackLink>
-            <Link href="/auth/login">
-              <a style={{ color: '#667eea', fontSize: 14 }}>
-                <ArrowLeftOutlined /> Back to Login
-              </a>
+            <Link href="/auth/login" style={{ color: '#667eea', fontSize: 14 }}>
+
+              <ArrowLeftOutlined />Back to Login
+                            
             </Link>
           </BackLink>
         </StyledCard>
@@ -178,4 +182,3 @@ const ForgotPasswordPage: React.FC = () => {
 };
 
 export default ForgotPasswordPage;
-

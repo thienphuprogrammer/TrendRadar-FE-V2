@@ -27,7 +27,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     if (!isLoading) {
       // Not authenticated - redirect to login
       if (!isAuthenticated) {
-        router.replace(`${redirectTo}?redirect=${encodeURIComponent(router.asPath)}`);
+        router.replace(
+          `${redirectTo}?redirect=${encodeURIComponent(router.asPath)}`,
+        );
         return;
       }
 
@@ -48,7 +50,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Not authenticated or wrong role
-  if (!isAuthenticated || (requiredRoles && user && !requiredRoles.includes(user.role))) {
+  if (
+    !isAuthenticated ||
+    (requiredRoles && user && !requiredRoles.includes(user.role))
+  ) {
     return (
       <div role="status" aria-live="polite" aria-label="Redirecting">
         <PageLoading visible />
@@ -60,4 +65,3 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 };
 
 export default ProtectedRoute;
-

@@ -4,7 +4,7 @@
  */
 
 import { AxiosError } from 'axios';
-import { HTTP_STATUS, ERROR_MESSAGES } from './constants';
+import { ERROR_MESSAGES, HTTP_STATUS } from './constants';
 
 export interface ApiErrorResponse {
   message: string;
@@ -21,7 +21,12 @@ export class ApiError extends Error {
   public detail?: string;
   public errors?: Record<string, string[]>;
 
-  constructor(message: string, status: number, detail?: string, errors?: Record<string, string[]>) {
+  constructor(
+    message: string,
+    status: number,
+    detail?: string,
+    errors?: Record<string, string[]>,
+  ) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
@@ -38,8 +43,9 @@ export function parseAxiosError(error: AxiosError): ApiError {
     // Server responded with error status
     const data = error.response.data as any;
     const status = error.response.status;
-    
-    const message = data?.detail || data?.message || getDefaultErrorMessage(status);
+
+    const message =
+      data?.detail || data?.message || getDefaultErrorMessage(status);
     const detail = data?.detail;
     const errors = data?.errors;
 
@@ -49,14 +55,11 @@ export function parseAxiosError(error: AxiosError): ApiError {
     return new ApiError(
       ERROR_MESSAGES.NETWORK_ERROR,
       0,
-      'No response from server'
+      'No response from server',
     );
   } else {
     // Something else happened
-    return new ApiError(
-      error.message || ERROR_MESSAGES.UNKNOWN_ERROR,
-      0
-    );
+    return new ApiError(error.message || ERROR_MESSAGES.UNKNOWN_ERROR, 0);
   }
 }
 
@@ -118,15 +121,17 @@ export function isValidationError(error: ApiError): boolean {
 /**
  * Format validation errors for form display
  */
-export function formatValidationErrors(error: ApiError): Record<string, string> {
+export function formatValidationErrors(
+  error: ApiError,
+): Record<string, string> {
   if (!error.errors) return {};
-  
+
   const formatted: Record<string, string> = {};
-  
+
   Object.entries(error.errors).forEach(([field, messages]) => {
     formatted[field] = messages.join(', ');
   });
-  
+
   return formatted;
 }
 
@@ -140,7 +145,7 @@ export function handleApiError(
     onNetworkError?: () => void;
     onValidationError?: (errors: Record<string, string>) => void;
     onOtherError?: (error: ApiError) => void;
-  }
+  },
 ): ApiError {
   let apiError: ApiError;
 
@@ -149,10 +154,7 @@ export function handleApiError(
   } else if (error.isAxiosError) {
     apiError = parseAxiosError(error as AxiosError);
   } else {
-    apiError = new ApiError(
-      error.message || ERROR_MESSAGES.UNKNOWN_ERROR,
-      0
-    );
+    apiError = new ApiError(error.message || ERROR_MESSAGES.UNKNOWN_ERROR, 0);
   }
 
   // Call appropriate handler
@@ -179,7 +181,7 @@ export async function retryWithBackoff<T>(
     baseDelay?: number;
     maxDelay?: number;
     shouldRetry?: (error: any) => boolean;
-  } = {}
+  } = {},
 ): Promise<T> {
   const {
     maxRetries = 3,
@@ -202,10 +204,9 @@ export async function retryWithBackoff<T>(
 
       // Calculate delay with exponential backoff
       const delay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 
   throw lastError;
 }
-

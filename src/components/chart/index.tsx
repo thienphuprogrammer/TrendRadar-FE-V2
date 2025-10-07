@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { isEmpty } from 'lodash';
 import { Alert, Button, Tooltip } from 'antd';
-import { TopLevelSpec, compile } from 'vega-lite';
+import { compile, TopLevelSpec } from 'vega-lite';
 import embed, { EmbedOptions, Result } from 'vega-embed';
 import ChartSpecHandler from './handler';
 import ReloadOutlined from '@ant-design/icons/ReloadOutlined';
@@ -56,12 +56,15 @@ export default function Chart(props: VegaLiteProps) {
     onPin,
   } = props;
 
-  const [donutInner, setDonutInner] = useState(null);
-  const [parsedSpec, setParsedSpec] =
-    useState<ReturnType<typeof compile>['spec']>(null);
-  const [parsedError, setParsedError] = useState<Record<string, any>>(null);
+  const [donutInner, setDonutInner] = useState<number | null>(null);
+  const [parsedSpec, setParsedSpec] = useState<
+    ReturnType<typeof compile>['spec'] | null
+  >(null);
+  const [parsedError, setParsedError] = useState<Record<string, any> | null>(
+    null,
+  );
   const [isShowTopCategories, setIsShowTopCategories] = useState(false);
-  const $view = useRef<Result>(null);
+  const $view = useRef<Result | null>(null);
   const $container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -73,21 +76,21 @@ export default function Chart(props: VegaLiteProps) {
           data: { values },
         },
         {
-          donutInner,
+          donutInner: donutInner || false,
           isShowTopCategories: autoFilter || isShowTopCategories,
-          isHideLegend: hideLegend,
-          isHideTitle: hideTitle,
+          isHideLegend: hideLegend || false,
+          isHideTitle: hideTitle || false,
         },
       );
       const chartSpec = specHandler.getChartSpec();
       const isDataEmpty = isEmpty((chartSpec?.data as any)?.values);
       if (isDataEmpty) {
         setParsedSpec(null);
-      } else {
+      } else if (chartSpec) {
         const compiled = compile(chartSpec, { config: specHandler.config });
         setParsedSpec(compiled.spec);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       setParsedError({
         code: 'CLIENT_PARSE_ERROR',
@@ -125,7 +128,7 @@ export default function Chart(props: VegaLiteProps) {
   };
 
   const getChartContent = () => {
-    if (values.length === 0) return <div>No available data</div>;
+    if (!values || values.length === 0) return <div>No available data</div>;
 
     if (parsedError) {
       return (

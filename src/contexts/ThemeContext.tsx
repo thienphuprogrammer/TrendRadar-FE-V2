@@ -3,9 +3,16 @@
  * Provides theme state and toggle functionality
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import { themes, Theme, ThemeName } from '@/styles/theme';
+import { Theme, ThemeName, themes } from '@/styles/theme';
 import { themeStorage } from '@/lib/utils/storage';
 
 interface ThemeContextType {
@@ -45,11 +52,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     if (!mounted) return;
 
     themeStorage.set(themeName);
-    
+
     // Update document class for CSS
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(themeName);
-    
+
     // Update meta theme-color for mobile browsers
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
@@ -82,9 +89,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   return (
     <ThemeContext.Provider value={value}>
-      <StyledThemeProvider theme={currentTheme}>
-        {children}
-      </StyledThemeProvider>
+      <StyledThemeProvider theme={currentTheme}>{children}</StyledThemeProvider>
     </ThemeContext.Provider>
   );
 };
@@ -101,4 +106,3 @@ export const useTheme = (): ThemeContextType => {
 };
 
 export default ThemeContext;
-

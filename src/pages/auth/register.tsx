@@ -3,10 +3,9 @@
  */
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { Form, Input, Button, Card, Typography, Space, Alert, Select } from 'antd';
-import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
+import { Alert, Button, Card, Form, Input, Select, Typography } from 'antd';
+import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types/auth';
@@ -14,7 +13,6 @@ import GuestRoute from '@/components/auth/GuestRoute';
 import { Logo } from '@/components/Logo';
 
 const { Title, Text } = Typography;
-const { Option } = Select;
 
 const Container = styled.div`
   min-height: 100vh;
@@ -69,7 +67,6 @@ const Footer = styled.div`
 `;
 
 const RegisterPage: React.FC = () => {
-  const router = useRouter();
   const { register, error: authError, clearError } = useAuth();
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
@@ -82,11 +79,11 @@ const RegisterPage: React.FC = () => {
       await register({
         email: values.email,
         password: values.password,
-        firstName: values.firstName,
-        lastName: values.lastName,
-        role: values.role || UserRole.VIEWER,
+        first_name: values.firstName,
+        last_name: values.lastName,
+        role: values.role || UserRole.SELLER,
       });
-    } catch (error) {
+    } catch (_error) {
       // Error handled by context
     } finally {
       setLoading(false);
@@ -121,32 +118,35 @@ const RegisterPage: React.FC = () => {
             layout="vertical"
             requiredMark={false}
           >
-            <Space.Compact style={{ width: '100%' }}>
-              <Form.Item
-                name="firstName"
-                label="First Name"
-                style={{ width: '50%', marginBottom: 16 }}
-              >
-                <Input
-                  prefix={<UserOutlined />}
-                  placeholder="First name"
-                  size="large"
-                  autoComplete="given-name"
-                />
-              </Form.Item>
-
-              <Form.Item
-                name="lastName"
-                label="Last Name"
-                style={{ width: '50%', marginBottom: 16 }}
-              >
-                <Input
-                  placeholder="Last name"
-                  size="large"
-                  autoComplete="family-name"
-                />
-              </Form.Item>
-            </Space.Compact>
+            <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+              <div style={{ flex: 1 }}>
+                <Form.Item
+                  name="firstName"
+                  label="First Name"
+                  style={{ marginBottom: 16 }}
+                >
+                  <Input
+                    prefix={<UserOutlined />}
+                    placeholder="First name"
+                    size="large"
+                    autoComplete="given-name"
+                  />
+                </Form.Item>
+              </div>
+              <div style={{ flex: 1 }}>
+                <Form.Item
+                  name="lastName"
+                  label="Last Name"
+                  style={{ marginBottom: 16 }}
+                >
+                  <Input
+                    placeholder="Last name"
+                    size="large"
+                    autoComplete="family-name"
+                  />
+                </Form.Item>
+              </div>
+            </div>
 
             <Form.Item
               name="email"
@@ -170,12 +170,15 @@ const RegisterPage: React.FC = () => {
               initialValue={UserRole.VIEWER}
               tooltip="Your role in the organization"
             >
-              <Select size="large">
-                <Option value={UserRole.VIEWER}>Viewer</Option>
-                <Option value={UserRole.ANALYST}>Analyst</Option>
-                <Option value={UserRole.DEVELOPER}>Developer</Option>
-                <Option value={UserRole.ADMIN}>Admin</Option>
-              </Select>
+              <Select
+                size="large"
+                options={[
+                  { label: 'Viewer', value: UserRole.VIEWER },
+                  { label: 'Analyst', value: UserRole.ANALYST },
+                  { label: 'Seller', value: UserRole.SELLER },
+                  { label: 'Admin', value: UserRole.ADMIN },
+                ]}
+              />
             </Form.Item>
 
             <Form.Item
@@ -229,8 +232,11 @@ const RegisterPage: React.FC = () => {
 
           <Footer>
             <Text type="secondary">Already have an account? </Text>
-            <Link href="/auth/login">
-              <a style={{ color: '#667eea', fontWeight: 500 }}>Sign in</a>
+            <Link
+              href="/auth/login"
+              style={{ color: '#667eea', fontWeight: 500 }}
+            >
+              Sign in
             </Link>
           </Footer>
         </StyledCard>
@@ -240,4 +246,3 @@ const RegisterPage: React.FC = () => {
 };
 
 export default RegisterPage;
-

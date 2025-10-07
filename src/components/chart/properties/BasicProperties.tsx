@@ -1,5 +1,5 @@
 import { capitalize } from 'lodash';
-import { Form, Row, Col, Select } from 'antd';
+import { Col, Form, Row, Select } from 'antd';
 import { ChartType } from '@/apollo/client/graphql/__types__';
 
 export const getChartTypeOptions = () => {

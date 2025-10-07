@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
-import { isEmpty, debounce } from 'lodash';
+import { debounce, isEmpty } from 'lodash';
 import clsx from 'clsx';
-import { Button, Typography, Tabs, Tag, Tooltip } from 'antd';
+import { Button, Tabs, Tag, Tooltip, Typography } from 'antd';
 import styled from 'styled-components';
 import CheckCircleFilled from '@ant-design/icons/CheckCircleFilled';
 import CodeFilled from '@ant-design/icons/CodeFilled';
@@ -26,10 +26,10 @@ import Preparation from '@/components/pages/home/preparation';
 import {
   AskingTaskStatus,
   ThreadResponse,
-  ThreadResponseAnswerDetail,
-  ThreadResponseAnswerStatus,
   ThreadResponseAdjustment,
   ThreadResponseAdjustmentType,
+  ThreadResponseAnswerDetail,
+  ThreadResponseAnswerStatus,
 } from '@/apollo/client/graphql/__types__';
 
 const { Title, Text } = Typography;
@@ -125,7 +125,12 @@ export interface Props {
   onInitPreviewDone: () => void;
 }
 
-const QuestionTitle = (props) => {
+interface QuestionTitleProps {
+  question: string;
+  className?: string;
+}
+
+const QuestionTitle = (props: QuestionTitleProps) => {
   const { question, className } = props;
   return (
     <Title
@@ -140,7 +145,7 @@ const QuestionTitle = (props) => {
 
 const renderRecommendedQuestions = (
   isLastThreadResponse: boolean,
-  recommendedQuestionProps,
+  recommendedQuestionProps: any,
   onSelect: RecommendedQuestionsProps['onSelect'],
 ) => {
   if (!isLastThreadResponse || !recommendedQuestionProps.show) return null;
@@ -215,7 +220,7 @@ export default function AnswerResult(props: Props) {
 
   const resultStyle = isLastThreadResponse
     ? { minHeight: 'calc(100vh - (194px))' }
-    : null;
+    : undefined;
 
   const isAdjustment = !!adjustment;
 
@@ -228,7 +233,7 @@ export default function AnswerResult(props: Props) {
   const isBreakdownOnly = useMemo(() => {
     // we support rendering different types of answers now, so we need to check if it's old data.
     // existing thread response's answerDetail is null.
-    return answerDetail === null && !isEmpty(breakdownDetail);
+    return answerDetail == null && !isEmpty(breakdownDetail);
   }, [answerDetail, breakdownDetail]);
 
   // initialize generate answer
@@ -337,7 +342,7 @@ export default function AnswerResult(props: Props) {
                       question:
                         threadResponse?.askingTask?.rephrasedQuestion ||
                         question,
-                      sql,
+                      sql: sql || '',
                     },
                     { isCreateMode: true },
                   )
@@ -351,8 +356,10 @@ export default function AnswerResult(props: Props) {
               </Button>
             </Tooltip>
             <ViewBlock
-              view={view}
-              onClick={() => onOpenSaveAsViewModal({ sql, responseId: id })}
+              view={view || undefined}
+              onClick={() =>
+                onOpenSaveAsViewModal({ sql: sql || '', responseId: id })
+              }
             />
           </div>
           {renderRecommendedQuestions(

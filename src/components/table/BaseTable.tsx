@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Table, TableProps, Row, Col } from 'antd';
+import { Col, Row, Table, TableProps } from 'antd';
 import EllipsisWrapper from '@/components/EllipsisWrapper';
 import SQLCodeBlock from '@/components/code/SQLCodeBlock';
 import { getColumnTypeIcon } from '@/utils/columnType';

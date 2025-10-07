@@ -2,27 +2,26 @@
  * Admin User Management Page
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Card,
-  Table,
   Button,
-  Space,
-  Tag,
-  Input,
-  Select,
-  Modal,
+  Card,
   Form,
+  Input,
   message,
-  Typography,
+  Modal,
   Popconfirm,
+  Select,
+  Space,
+  Table,
+  Tag,
+  Typography,
 } from 'antd';
 import {
-  SearchOutlined,
-  EditOutlined,
   DeleteOutlined,
-  PlusOutlined,
+  EditOutlined,
   ReloadOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
 import styled from 'styled-components';
 import { useAuth } from '@/contexts/AuthContext';
@@ -172,9 +171,14 @@ const UserManagementPage: React.FC = () => {
       title: 'Role',
       dataIndex: 'role',
       key: 'role',
-      filters: Object.values(UserRole).map((role) => ({ text: role, value: role })),
+      filters: Object.values(UserRole).map((role) => ({
+        text: role,
+        value: role,
+      })),
       onFilter: (value: any, record: User) => record.role === value,
-      render: (role: string) => <Tag color={getRoleColor(role)}>{role.toUpperCase()}</Tag>,
+      render: (role: string) => (
+        <Tag color={getRoleColor(role)}>{role.toUpperCase()}</Tag>
+      ),
     },
     {
       title: 'Status',
@@ -243,7 +247,11 @@ const UserManagementPage: React.FC = () => {
         <Container>
           <Header>
             <Title level={2}>User Management</Title>
-            <Button type="primary" icon={<ReloadOutlined />} onClick={loadUsers}>
+            <Button
+              type="primary"
+              icon={<ReloadOutlined />}
+              onClick={loadUsers}
+            >
               Refresh
             </Button>
           </Header>
@@ -254,7 +262,9 @@ const UserManagementPage: React.FC = () => {
                 placeholder="Search by email or name"
                 prefix={<SearchOutlined />}
                 value={filters.search}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, search: e.target.value })
+                }
                 style={{ width: 300 }}
                 allowClear
               />
@@ -354,4 +364,3 @@ const UserManagementPage: React.FC = () => {
 };
 
 export default UserManagementPage;
-

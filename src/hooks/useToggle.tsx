@@ -3,9 +3,11 @@
  * Simple hook for boolean toggle state
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
-export function useToggle(initialValue: boolean = false): [boolean, () => void, (value: boolean) => void] {
+export function useToggle(
+  initialValue: boolean = false,
+): [boolean, () => void, (value: boolean) => void] {
   const [value, setValue] = useState(initialValue);
 
   const toggle = useCallback(() => {
@@ -18,4 +20,3 @@ export function useToggle(initialValue: boolean = false): [boolean, () => void, 
 
   return [value, toggle, set];
 }
-

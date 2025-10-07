@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import CustomPopover from '../CustomPopover';
 import { getJoinTypeText } from '@/utils/data';
 
-const Joint = styled.div`
+const Joint = styled.div<{ style?: React.CSSProperties }>`
   position: absolute;
   width: 30px;
   height: 30px;

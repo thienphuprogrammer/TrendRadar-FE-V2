@@ -15,7 +15,7 @@ export interface SelectQuestionProps {
 }
 
 interface Props {
-  items: { question: string; sql: string }[];
+  items?: { question: string; sql: string }[];
   loading?: boolean;
   error?: {
     shortMessage?: string;

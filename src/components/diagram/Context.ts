@@ -2,8 +2,9 @@ import { createContext } from 'react';
 import { ComposeDiagram } from '@/utils/data';
 
 export interface ClickPayload {
-  [key: string]: any;
   data: ComposeDiagram;
+
+  [key: string]: any;
 }
 
 type ContextProps = {

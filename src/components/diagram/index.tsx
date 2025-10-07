@@ -8,21 +8,21 @@ import {
   useState,
 } from 'react';
 import ReactFlow, {
-  MiniMap,
   Background,
-  Controls,
   ControlButton,
-  useNodesState,
-  useEdgesState,
+  Controls,
   Edge,
-  useReactFlow,
+  MiniMap,
   ReactFlowProvider,
+  useEdgesState,
+  useNodesState,
+  useReactFlow,
 } from 'reactflow';
 import { ModelNode, ViewNode } from './customNode';
 import { ModelEdge } from './customEdge';
 import Marker from './Marker';
-import { DiagramContext, ClickPayload } from './Context';
-import { trimId, highlightNodes, highlightEdges } from './utils';
+import { ClickPayload, DiagramContext } from './Context';
+import { highlightEdges, highlightNodes, trimId } from './utils';
 import { Diagram as DiagramData } from '@/utils/data';
 import { RefreshIcon } from '@/utils/icons';
 import { EDGE_TYPE, NODE_TYPE } from '@/utils/enum';

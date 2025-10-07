@@ -35,7 +35,7 @@ export default function SiderLayout(props: Props) {
     <SimpleLayout loading={loading}>
       <Layout className="adm-layout">
         <StyledSider width={280}>
-          <Sidebar {...sidebar} onOpenSettings={settings.openModal} />
+          <Sidebar {...(sidebar || {})} onOpenSettings={settings.openModal} />
         </StyledSider>
         <StyledContentLayout color={color}>
           {props.children}

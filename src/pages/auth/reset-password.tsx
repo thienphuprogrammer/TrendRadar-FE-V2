@@ -5,7 +5,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { Form, Input, Button, Card, Typography, Alert, Result } from 'antd';
+import { Alert, Button, Card, Form, Input, Result, Typography } from 'antd';
 import { LockOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { authClient } from '@/lib/api/authClient';
@@ -84,7 +84,10 @@ const ResetPasswordPage: React.FC = () => {
       });
       setSuccess(true);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to reset password. Please try again.');
+      setError(
+        err.response?.data?.detail ||
+          'Failed to reset password. Please try again.',
+      );
     } finally {
       setLoading(false);
     }
@@ -100,7 +103,7 @@ const ResetPasswordPage: React.FC = () => {
               title="Password Reset Successful"
               subTitle="Your password has been successfully reset. You can now log in with your new password."
               extra={[
-                <Link href="/auth/login" key="login">
+                <Link href="/auth/login" key="login" legacyBehavior>
                   <StyledButton type="primary">Go to Login</StyledButton>
                 </Link>,
               ]}
@@ -194,4 +197,3 @@ const ResetPasswordPage: React.FC = () => {
 };
 
 export default ResetPasswordPage;
-

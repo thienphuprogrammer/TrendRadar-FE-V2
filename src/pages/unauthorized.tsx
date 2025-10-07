@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/router';
-import { Result, Button } from 'antd';
+import { Button, Result } from 'antd';
 import styled from 'styled-components';
 import SimpleLayout from '@/components/layouts/SimpleLayout';
 
@@ -42,4 +42,3 @@ const UnauthorizedPage: React.FC = () => {
 };
 
 export default UnauthorizedPage;
-

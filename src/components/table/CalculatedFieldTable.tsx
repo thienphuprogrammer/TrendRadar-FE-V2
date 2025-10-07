@@ -1,7 +1,7 @@
 import BaseTable, {
-  Props,
   COLUMN,
   ExpandableRows,
+  Props,
 } from '@/components/table/BaseTable';
 
 export default function CalculatedFieldTable(props: Props) {

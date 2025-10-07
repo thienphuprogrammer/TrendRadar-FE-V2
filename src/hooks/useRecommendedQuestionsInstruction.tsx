@@ -1,17 +1,17 @@
-import { useMemo, useState, useEffect } from 'react';
-import { groupBy, orderBy, flatMap } from 'lodash';
+import { useEffect, useMemo, useState } from 'react';
+import { flatMap, groupBy, orderBy } from 'lodash';
 import { message } from 'antd';
 import Icon from '@/import/icon';
 import ReloadOutlined from '@ant-design/icons/ReloadOutlined';
 import { CopilotSVG } from '@/utils/svgs';
 import { isRecommendedFinished } from '@/hooks/useAskPrompt';
 import {
-  ResultQuestion,
   RecommendedQuestionsTaskStatus,
+  ResultQuestion,
 } from '@/apollo/client/graphql/__types__';
 import {
-  useGetProjectRecommendationQuestionsLazyQuery,
   useGenerateProjectRecommendationQuestionsMutation,
+  useGetProjectRecommendationQuestionsLazyQuery,
 } from '@/apollo/client/graphql/home.generated';
 
 export interface GroupedQuestion {

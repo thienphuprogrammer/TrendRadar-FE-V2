@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { Alert, Typography, Button } from 'antd';
+import { Alert, Button, Typography } from 'antd';
 import { ApolloError } from '@apollo/client';
 import styled from 'styled-components';
 import { getColumnTypeIcon } from '@/utils/columnType';
@@ -8,7 +8,10 @@ import { parseGraphQLError } from '@/utils/errorHandler';
 
 const { Text } = Typography;
 
-const StyledCell = styled.div`
+const StyledCell = styled.div<{
+  children?: React.ReactNode;
+  className?: string;
+}>`
   position: relative;
 
   .copy-icon {
@@ -59,7 +62,7 @@ const ColumnContext = memo((props: { text: string; copyable: boolean }) => {
   );
 });
 
-const getPreviewColumns = (cols, { copyable }) =>
+const getPreviewColumns = (cols: any, { copyable }: any) =>
   cols.map(({ name, type }: Record<string, any>) => {
     return {
       dataIndex: name,
@@ -67,7 +70,7 @@ const getPreviewColumns = (cols, { copyable }) =>
       key: name,
       ellipsis: true,
       title: <ColumnTitle name={name} type={type} />,
-      render: (text) => <ColumnContext text={text} copyable={copyable} />,
+      render: (text: any) => <ColumnContext text={text} copyable={copyable} />,
       onCell: () => ({ style: { lineHeight: '24px' } }),
     };
   });
@@ -96,18 +99,19 @@ export default function PreviewData(props: Props) {
     [previewData?.columns, copyable],
   );
 
-  const hasErrorMessage = error && error.message;
-  if (!loading && hasErrorMessage) {
-    const { message, shortMessage } = parseGraphQLError(error);
+  if (!loading && error) {
+    const parsedError = parseGraphQLError(error);
 
-    return (
-      <Alert
-        message={shortMessage}
-        description={message}
-        type="error"
-        showIcon
-      />
-    );
+    if (parsedError) {
+      return (
+        <Alert
+          message={parsedError.shortMessage}
+          description={parsedError.message}
+          type="error"
+          showIcon
+        />
+      );
+    }
   }
 
   return (

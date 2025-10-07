@@ -2,11 +2,11 @@ import { DataSourceName } from '@server/types';
 import { Manifest } from '@server/mdl/type';
 import { IWrenEngineAdaptor } from '../adaptors/wrenEngineAdaptor';
 import {
-  SupportedDataSource,
-  IIbisAdaptor,
   IbisQueryResponse,
-  ValidationRules,
   IbisResponse,
+  IIbisAdaptor,
+  SupportedDataSource,
+  ValidationRules,
 } from '../adaptors/ibisAdaptor';
 import { getLogger } from '@server/utils';
 import { Project } from '../repositories';
@@ -132,7 +132,7 @@ export class QueryService implements IQueryService {
           dataSource,
           connectionInfo,
           mdl,
-          limit,
+          limit || 1000,
           refresh,
           cacheEnabled,
         );
@@ -156,7 +156,7 @@ export class QueryService implements IQueryService {
   }
 
   public async validate(
-    project,
+    project: any,
     rule: ValidationRules,
     manifest: Manifest,
     parameters: Record<string, any>,
@@ -169,7 +169,10 @@ export class QueryService implements IQueryService {
       manifest,
       parameters,
     );
-    return res;
+    return {
+      ...res,
+      message: res.message || undefined,
+    };
   }
 
   private useEngine(dataSource: DataSourceName): boolean {

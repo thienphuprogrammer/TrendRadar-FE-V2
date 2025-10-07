@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Typography, Row, Col } from 'antd';
+import { Col, Row, Typography } from 'antd';
 import { cloneDeep, set } from 'lodash';
 import { NODE_TYPE } from '@/utils/enum';
 import EditableWrapper from '@/components/EditableWrapper';
@@ -27,7 +27,7 @@ export default function EditBasicMetadata(props: Props) {
       });
   }, [data]);
 
-  const handleSave = (_, value) => {
+  const handleSave = (_: any, value: any) => {
     const [dataIndexKey] = Object.keys(value);
 
     const newData = cloneDeep(data);

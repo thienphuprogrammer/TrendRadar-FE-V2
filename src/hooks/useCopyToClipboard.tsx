@@ -3,10 +3,13 @@
  * Hook for copying text to clipboard
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { copyToClipboard } from '@/lib/utils/helpers';
 
-export function useCopyToClipboard(): [(text: string) => Promise<void>, boolean] {
+export function useCopyToClipboard(): [
+  (text: string) => Promise<void>,
+  boolean,
+] {
   const [copied, setCopied] = useState(false);
 
   const copy = useCallback(async (text: string) => {
@@ -20,4 +23,3 @@ export function useCopyToClipboard(): [(text: string) => Promise<void>, boolean]
 
   return [copy, copied];
 }
-

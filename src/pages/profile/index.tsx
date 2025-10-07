@@ -3,8 +3,17 @@
  */
 
 import React, { useState } from 'react';
-import { Card, Form, Input, Button, Typography, Space, Avatar, Tag, Divider, message } from 'antd';
-import { UserOutlined, MailOutlined, SaveOutlined } from '@ant-design/icons';
+import {
+  Avatar,
+  Button,
+  Card,
+  Form,
+  Input,
+  Space,
+  Tag,
+  Typography,
+} from 'antd';
+import { MailOutlined, SaveOutlined, UserOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -44,11 +53,13 @@ const ProfilePage: React.FC = () => {
     setLoading(true);
     try {
       await updateProfile({
-        firstName: values.firstName,
-        lastName: values.lastName,
-        email: values.email,
+        first_name: values.firstName,
+        last_name: values.lastName,
+        phone: values.phone,
+        company: values.company,
+        bio: values.bio,
       });
-    } catch (error) {
+    } catch (_error) {
       // Error handled by context
     } finally {
       setLoading(false);
@@ -57,21 +68,24 @@ const ProfilePage: React.FC = () => {
 
   if (!user) return null;
 
-  const initials = `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase() || user.email.charAt(0).toUpperCase();
+  const initials =
+    `${user.first_name?.charAt(0) || ''}${user.last_name?.charAt(0) || ''}`.toUpperCase() ||
+    user.email.charAt(0).toUpperCase();
 
   return (
     <ProtectedRoute>
-      <PageLayout>
+      <PageLayout title="Profile">
         <Container>
           <ProfileHeader>
-            <Avatar size={80} style={{ backgroundColor: '#667eea', fontSize: 32 }}>
+            <Avatar
+              size={80}
+              style={{ backgroundColor: '#667eea', fontSize: 32 }}
+            >
               {initials}
             </Avatar>
             <ProfileInfo>
               <Title level={3} style={{ margin: 0 }}>
-                {user.firstName && user.lastName
-                  ? `${user.firstName} ${user.lastName}`
-                  : user.email}
+                {user.full_name || user.email}
               </Title>
               <Space style={{ marginTop: 8 }}>
                 <Tag color="blue">{user.role}</Tag>
@@ -88,12 +102,18 @@ const ProfilePage: React.FC = () => {
               layout="vertical"
               onFinish={onFinish}
               initialValues={{
-                firstName: user.firstName || '',
-                lastName: user.lastName || '',
-                email: user.email,
+                firstName: user.first_name || '',
+                lastName: user.last_name || '',
+                phone: user.phone || '',
+                company: user.company || '',
+                bio: user.bio || '',
               }}
             >
-              <Space size="large" style={{ width: '100%' }} direction="vertical">
+              <Space
+                size="large"
+                style={{ width: '100%' }}
+                direction="vertical"
+              >
                 <div style={{ display: 'flex', gap: 16 }}>
                   <Form.Item
                     name="firstName"
@@ -112,10 +132,7 @@ const ProfilePage: React.FC = () => {
                     label="Last Name"
                     style={{ flex: 1 }}
                   >
-                    <Input
-                      placeholder="Last name"
-                      size="large"
-                    />
+                    <Input placeholder="Last name" size="large" />
                   </Form.Item>
                 </div>
 
@@ -155,7 +172,7 @@ const ProfilePage: React.FC = () => {
                 <Text type="secondary">Member Since</Text>
                 <br />
                 <Text strong>
-                  {new Date(user.createdAt).toLocaleDateString('en-US', {
+                  {new Date(user.created_at).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -163,12 +180,12 @@ const ProfilePage: React.FC = () => {
                 </Text>
               </div>
 
-              {user.lastLoginAt && (
+              {user.last_login && (
                 <div>
                   <Text type="secondary">Last Login</Text>
                   <br />
                   <Text strong>
-                    {new Date(user.lastLoginAt).toLocaleString('en-US', {
+                    {new Date(user.last_login).toLocaleString('en-US', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
@@ -187,4 +204,3 @@ const ProfilePage: React.FC = () => {
 };
 
 export default ProfilePage;
-

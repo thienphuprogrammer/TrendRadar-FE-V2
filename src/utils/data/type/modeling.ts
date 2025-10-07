@@ -5,6 +5,7 @@ import {
   DiagramView,
   DiagramViewField,
 } from '@/apollo/client/graphql/__types__';
+
 export type {
   Diagram,
   DiagramModel,
@@ -54,5 +55,5 @@ export type ComposeDiagramField = (
 
 export type CachedProps = {
   cached: boolean;
-  refreshTime?: string;
+  refreshTime?: string | null;
 };

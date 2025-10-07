@@ -5,9 +5,9 @@ import * as Errors from '@/apollo/server/utils/error';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ApiError,
-  respondWith,
   handleApiError,
   MAX_WAIT_TIME,
+  respondWith,
   validateSummaryResult,
 } from '@/apollo/server/utils/apiUtils';
 import {
@@ -83,7 +83,7 @@ export default async function handler(
       sqlData = queryResult;
     } catch (queryError) {
       throw new ApiError(
-        queryError.message || 'Error executing SQL query',
+        (queryError as Error).message || 'Error executing SQL query',
         400,
         Errors.GeneralErrorCodes.INVALID_SQL_ERROR,
       );

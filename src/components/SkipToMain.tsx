@@ -35,4 +35,3 @@ export const SkipToMain: React.FC = () => {
 };
 
 export default SkipToMain;
-

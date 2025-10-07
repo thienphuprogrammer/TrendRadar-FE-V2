@@ -1,8 +1,9 @@
 interface Props {
-  [key: string]: any;
   data: any[];
   // by default it will use item['key'] as keyIndex unless specifying keyIndex
   keyIndex?: string | ((item: any) => string);
+
+  [key: string]: any;
 }
 
 export type IterableComponent<T = any> = {

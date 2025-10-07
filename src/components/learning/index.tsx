@@ -65,7 +65,7 @@ const PlayIcon = styled.div`
   }
 `;
 
-const List = styled.div<{ finished: boolean }>`
+const List = styled.div<{ finished?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -92,7 +92,7 @@ const ListTemplate = (props: IterableComponent<LearningConfig>) => {
   return (
     <List
       className="select-none"
-      finished={finished}
+      finished={finished || false}
       onClick={onClick}
       as={as}
       {...hrefAttrs}
@@ -121,7 +121,7 @@ const getData = (
 ) => {
   const getDispatcher = (id: LEARNING) => ({
     onDone: () => saveRecord(id),
-    onSaveLanguage: saveLanguage,
+    onSaveLanguage: (value: string) => saveLanguage(value as ProjectLanguage),
   });
 
   const modeling = [
@@ -313,7 +313,8 @@ export default function SidebarSection(_props: Props) {
         },
       };
 
-      routerAction[router.pathname] && routerAction[router.pathname]();
+      const action = routerAction[router.pathname as keyof typeof routerAction];
+      action && action();
     }
   }, [learningRecordResult?.learningRecord, router.pathname]);
 

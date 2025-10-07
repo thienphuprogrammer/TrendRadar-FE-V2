@@ -57,18 +57,18 @@ export default function AdjustReasoningStepsModal(props: Props) {
     if (!visible) return;
     const listModels = listModelsResult.data?.listModels || [];
     const retrievedTables = listModels.reduce((result, model) => {
-      if (defaultValue?.retrievedTables.includes(model.referenceName)) {
+      if (defaultValue?.retrievedTables?.includes(model.referenceName)) {
         result.push(model.referenceName);
       }
       return result;
     }, []);
     form.setFieldsValue({
       tables: retrievedTables,
-      sqlGenerationReasoning: defaultValue?.sqlGenerationReasoning,
+      sqlGenerationReasoning: defaultValue?.sqlGenerationReasoning || '',
     });
   }, [form, defaultValue, visible, listModelsResult.data?.listModels]);
 
-  const tagRender = (props) => {
+  const tagRender = (props: any) => {
     const { value, closable, onClose } = props;
     const model = modelNameMap[value];
     return (

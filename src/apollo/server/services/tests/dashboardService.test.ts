@@ -1,9 +1,9 @@
 import { DashboardService } from '../dashboardService';
-import { ScheduleFrequencyEnum } from '@server/models/dashboard';
-import { CacheScheduleDayEnum } from '@server/models/dashboard';
 import {
-  SetDashboardCacheData,
+  CacheScheduleDayEnum,
   DashboardSchedule,
+  ScheduleFrequencyEnum,
+  SetDashboardCacheData,
 } from '@server/models/dashboard';
 
 // Create a test class that extends DashboardService to access protected methods

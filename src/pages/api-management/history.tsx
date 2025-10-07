@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useState } from 'react';
-import { Table, TableColumnsType, Button, Tag, Typography } from 'antd';
+import { Button, Table, TableColumnsType, Tag, Typography } from 'antd';
 import { getAbsoluteTime } from '@/utils/time';
 import useDrawerAction from '@/hooks/useDrawerAction';
 import { getColumnSearchProps } from '@/utils/table';
@@ -14,7 +14,7 @@ import CloseCircleOutlined from '@ant-design/icons/CloseCircleOutlined';
 import SQLCodeBlock from '@/components/code/SQLCodeBlock';
 import DetailsDrawer from '@/components/pages/apiManagement/DetailsDrawer';
 import { useApiHistoryQuery } from '@/apollo/client/graphql/apiManagement.generated';
-import { ApiType, ApiHistoryResponse } from '@/apollo/client/graphql/__types__';
+import { ApiHistoryResponse, ApiType } from '@/apollo/client/graphql/__types__';
 
 const PAGE_SIZE = 10;
 

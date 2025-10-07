@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { nextTick } from '@/utils/time';
 import usePromptThreadStore from './store';
 import AnswerResult from './AnswerResult';
-import { makeIterable, IterableComponent } from '@/utils/iteration';
+import { IterableComponent, makeIterable } from '@/utils/iteration';
 import { getIsFinished } from '@/hooks/useAskPrompt';
 import { getAnswerIsFinished } from '@/components/pages/home/promptThread/TextBasedAnswer';
 import {
@@ -101,8 +101,8 @@ export default function PromptThread() {
   useEffect(() => {
     const lastResponse = responses[responses.length - 1];
     const isLastResponseFinished =
-      getIsFinished(lastResponse?.askingTask?.status) ||
-      getAnswerIsFinished(lastResponse?.answerDetail?.status);
+      getIsFinished(lastResponse?.askingTask?.status || 'NOT_STARTED') ||
+      getAnswerIsFinished(lastResponse?.answerDetail?.status || 'NOT_STARTED');
     nextTick().then(() => {
       triggerScrollToBottom(isLastResponseFinished ? 'auto' : 'smooth');
     });

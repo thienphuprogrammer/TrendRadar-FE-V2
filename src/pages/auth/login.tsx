@@ -5,8 +5,17 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { Form, Input, Button, Card, Typography, Divider, Space, Alert } from 'antd';
-import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
+import {
+  Alert,
+  Button,
+  Card,
+  Divider,
+  Form,
+  Input,
+  Space,
+  Typography,
+} from 'antd';
+import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { useAuth } from '@/contexts/AuthContext';
 import GuestRoute from '@/components/auth/GuestRoute';
@@ -140,7 +149,9 @@ const LoginPage: React.FC = () => {
             <Form.Item
               name="password"
               label="Password"
-              rules={[{ required: true, message: 'Please enter your password' }]}
+              rules={[
+                { required: true, message: 'Please enter your password' },
+              ]}
             >
               <Input.Password
                 prefix={<LockOutlined />}
@@ -151,8 +162,8 @@ const LoginPage: React.FC = () => {
             </Form.Item>
 
             <ForgotPasswordLink>
-              <Link href="/auth/forgot-password">
-                <a style={{ color: '#667eea' }}>Forgot password?</a>
+              <Link href="/auth/forgot-password" style={{ color: '#667eea' }}>
+                Forgot password?
               </Link>
             </ForgotPasswordLink>
 
@@ -182,8 +193,8 @@ const LoginPage: React.FC = () => {
 
           <Footer>
             <Text type="secondary">Don't have an account? </Text>
-            <Link href="/auth/register">
-              <a style={{ color: '#667eea', fontWeight: 500 }}>Sign up</a>
+            <Link href="/auth/register" style={{ color: '#667eea', fontWeight: 500 }}>
+              Sign up
             </Link>
           </Footer>
         </StyledCard>
@@ -193,4 +204,3 @@ const LoginPage: React.FC = () => {
 };
 
 export default LoginPage;
-

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Tag, Space } from 'antd';
+import { Button, Space, Tag } from 'antd';
 import StopOutlined from '@ant-design/icons/StopOutlined';
 import ReloadOutlined from '@ant-design/icons/ReloadOutlined';
 import { attachLoading } from '@/utils/helper';
@@ -22,22 +22,26 @@ export default function PreparationStatus(
   const [reRunLoading, setReRunLoading] = useState(false);
   const isProcessing = !getIsFinished(preparedTask.status);
 
-  const onCancel = (e) => {
+  const onCancel = (e: React.MouseEvent) => {
     e.stopPropagation();
     const stopPreparedTask = preparedTask.isAdjustment
       ? onStopAdjustTask
       : onStopAskingTask;
-    const stopAskingTask = attachLoading(stopPreparedTask, setStopLoading);
-    stopAskingTask(preparedTask.queryId);
+    if (stopPreparedTask) {
+      const stopAskingTask = attachLoading(stopPreparedTask, setStopLoading);
+      stopAskingTask(preparedTask.queryId);
+    }
   };
 
-  const onReRun = (e) => {
+  const onReRun = (e: React.MouseEvent) => {
     e.stopPropagation();
     const reRunPreparedTask = preparedTask.isAdjustment
       ? onReRunAdjustTask
       : onReRunAskingTask;
-    const reRunAskingTask = attachLoading(reRunPreparedTask, setReRunLoading);
-    reRunAskingTask(data);
+    if (reRunPreparedTask) {
+      const reRunAskingTask = attachLoading(reRunPreparedTask, setReRunLoading);
+      reRunAskingTask(data);
+    }
   };
 
   if (isProcessing) {

@@ -103,7 +103,7 @@ export interface ITelemetry {
 
 export class PostHogTelemetry {
   private readonly posthog: any;
-  private readonly userId: string;
+  private readonly userId!: string;
 
   constructor() {
     if (telemetryEnabled) {
@@ -149,6 +149,12 @@ export class PostHogTelemetry {
     }
   }
 
+  public stop() {
+    if (this.posthog) {
+      this.posthog.shutdown();
+    }
+  }
+
   private collectSystemInfo(): Record<string, any> {
     return {
       // collect services version
@@ -166,12 +172,6 @@ export class PostHogTelemetry {
       memory_usage: process.memoryUsage(),
       cpu_usage: process.cpuUsage(),
     };
-  }
-
-  public stop() {
-    if (this.posthog) {
-      this.posthog.shutdown();
-    }
   }
 }
 

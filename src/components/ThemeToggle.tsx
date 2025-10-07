@@ -5,17 +5,25 @@
 
 import React from 'react';
 import { Switch, Tooltip } from 'antd';
-import { BulbOutlined, BulbFilled } from '@ant-design/icons';
+import { BulbFilled, BulbOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { useTheme } from '@/contexts/ThemeContext';
 
-const ToggleContainer = styled.div`
+const ToggleContainer = styled.div<{
+  children?: React.ReactNode;
+  role?: string;
+  'aria-label'?: string;
+}>`
   display: flex;
   align-items: center;
   gap: 8px;
 `;
 
-const IconWrapper = styled.span`
+const IconWrapper = styled.span<{
+  children?: React.ReactNode;
+  className?: string;
+  'aria-hidden'?: string;
+}>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,4 +70,3 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
 };
 
 export default ThemeToggle;
-

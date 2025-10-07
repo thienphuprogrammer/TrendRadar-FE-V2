@@ -180,8 +180,8 @@ export const create = (
   const message =
     customMessage ||
     originalError?.message ||
-    errorMessages[code] ||
-    errorMessages[GeneralErrorCodes.INTERNAL_SERVER_ERROR];
+    (errorMessages as any)[code] ||
+    (errorMessages as any)[GeneralErrorCodes.INTERNAL_SERVER_ERROR];
 
   // Return the GraphQLError
   const err = new GraphQLError(message, {
@@ -191,8 +191,8 @@ export const create = (
       message,
       service,
       shortMessage:
-        shortMessages[code] ||
-        shortMessages[GeneralErrorCodes.INTERNAL_SERVER_ERROR],
+        (shortMessages as any)[code] ||
+        (shortMessages as any)[GeneralErrorCodes.INTERNAL_SERVER_ERROR],
       other: options?.other,
     },
   });
@@ -238,7 +238,7 @@ export const defaultApolloErrorHandler = (error: GraphQLError) => {
       extensions: {
         code,
         message: error.message,
-        shortMessage: shortMessages[code],
+        shortMessage: (shortMessages as any)[code],
         stacktrace: error.extensions?.exception?.stacktrace,
         other: error.extensions?.other,
       },

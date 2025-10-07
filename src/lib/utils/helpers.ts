@@ -3,19 +3,35 @@
  * Common utility functions used across the application
  */
 
-import { VALIDATION, DATE_FORMATS } from './constants';
+import { DATE_FORMATS, VALIDATION } from './constants';
 
 /**
  * Format date to a readable string
  */
-export function formatDate(date: string | Date, format: string = DATE_FORMATS.DISPLAY): string {
+export function formatDate(
+  date: string | Date,
+  format: string = DATE_FORMATS.DISPLAY,
+): string {
   const d = typeof date === 'string' ? new Date(date) : date;
 
   if (isNaN(d.getTime())) {
     return 'Invalid Date';
   }
 
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
   const month = months[d.getMonth()];
   const day = d.getDate();
   const year = d.getFullYear();
@@ -78,7 +94,9 @@ export function isValidPassword(password: string): boolean {
 /**
  * Get password strength level
  */
-export function getPasswordStrength(password: string): 'weak' | 'medium' | 'strong' {
+export function getPasswordStrength(
+  password: string,
+): 'weak' | 'medium' | 'strong' {
   if (password.length < 8) return 'weak';
 
   let strength = 0;
@@ -96,7 +114,11 @@ export function getPasswordStrength(password: string): 'weak' | 'medium' | 'stro
 /**
  * Truncate string to a maximum length
  */
-export function truncate(str: string, maxLength: number, ellipsis = '...'): string {
+export function truncate(
+  str: string,
+  maxLength: number,
+  ellipsis = '...',
+): string {
   if (str.length <= maxLength) return str;
   return str.slice(0, maxLength - ellipsis.length) + ellipsis;
 }
@@ -111,7 +133,11 @@ export function capitalize(str: string): string {
 /**
  * Generate initials from name
  */
-export function getInitials(firstName?: string, lastName?: string, email?: string): string {
+export function getInitials(
+  firstName?: string,
+  lastName?: string,
+  email?: string,
+): string {
   if (firstName && lastName) {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   }
@@ -142,7 +168,7 @@ export function formatFileSize(bytes: number): string {
  */
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout | null = null;
 
@@ -162,10 +188,10 @@ export function debounce<T extends (...args: any[]) => any>(
  */
 export function throttle<T extends (...args: any[]) => any>(
   func: T,
-  limit: number
+  limit: number,
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean;
-  
+
   return function executedFunction(...args: Parameters<T>) {
     if (!inThrottle) {
       func(...args);
@@ -204,7 +230,7 @@ export function generateId(prefix: string = 'id'): string {
  * Sleep/delay function
  */
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -259,14 +285,17 @@ export function safeJsonParse<T>(json: string, fallback: T): T {
  * Group array by key
  */
 export function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
-  return array.reduce((result, item) => {
-    const groupKey = String(item[key]);
-    if (!result[groupKey]) {
-      result[groupKey] = [];
-    }
-    result[groupKey].push(item);
-    return result;
-  }, {} as Record<string, T[]>);
+  return array.reduce(
+    (result, item) => {
+      const groupKey = String(item[key]);
+      if (!result[groupKey]) {
+        result[groupKey] = [];
+      }
+      result[groupKey].push(item);
+      return result;
+    },
+    {} as Record<string, T[]>,
+  );
 }
 
 /**
@@ -290,7 +319,7 @@ export function uniqueBy<T>(array: T[], key: keyof T): T[] {
 export function sortBy<T>(
   array: T[],
   keys: (keyof T)[],
-  orders: ('asc' | 'desc')[] = []
+  orders: ('asc' | 'desc')[] = [],
 ): T[] {
   return [...array].sort((a, b) => {
     for (let i = 0; i < keys.length; i++) {
@@ -319,7 +348,7 @@ export function isBrowser(): boolean {
 export function isMobile(): boolean {
   if (!isBrowser()) return false;
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
+    navigator.userAgent,
   );
 }
 
@@ -344,4 +373,3 @@ export function buildQueryString(params: Record<string, any>): string {
   });
   return searchParams.toString();
 }
-

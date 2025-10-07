@@ -1,11 +1,11 @@
 /**
  * Authentication types and interfaces
+ * Based on TrendRadar Authentication Service API v1.0.0
  */
 
 export enum UserRole {
   ADMIN = 'admin',
   ANALYST = 'analyst',
-  DEVELOPER = 'developer',
   VIEWER = 'viewer',
   SELLER = 'seller',
 }
@@ -20,13 +20,20 @@ export enum UserStatus {
 export interface User {
   id: number;
   email: string;
-  firstName?: string;
-  lastName?: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  full_name: string;
   role: UserRole;
   status: UserStatus;
-  createdAt: string;
-  updatedAt: string;
-  lastLoginAt?: string;
+  is_active: boolean;
+  is_verified: boolean;
+  phone?: string | null;
+  company?: string | null;
+  bio?: string | null;
+  avatar_url?: string | null;
+  created_at: string;
+  updated_at: string;
+  last_login?: string | null;
 }
 
 export interface LoginCredentials {
@@ -37,16 +44,16 @@ export interface LoginCredentials {
 export interface RegisterData {
   email: string;
   password: string;
-  firstName?: string;
-  lastName?: string;
+  first_name?: string | null;
+  last_name?: string | null;
   role?: UserRole;
 }
 
 export interface TokenResponse {
-  accessToken: string;
-  refreshToken: string;
-  tokenType: string;
-  expiresIn: number;
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
 }
 
 export interface AuthState {
@@ -64,26 +71,30 @@ export interface PasswordResetRequest {
 
 export interface PasswordResetConfirm {
   token: string;
-  newPassword: string;
+  new_password: string;
 }
 
 export interface PasswordChange {
-  oldPassword: string;
-  newPassword: string;
+  old_password: string;
+  new_password: string;
 }
 
 export interface UserUpdate {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  company?: string | null;
+  bio?: string | null;
+  avatar_url?: string | null;
 }
 
 export interface SessionInfo {
   id: number;
-  userId: number;
-  ipAddress?: string;
-  userAgent?: string;
-  lastActivityAt: string;
-  createdAt: string;
+  user_id: number;
+  ip_address?: string | null;
+  user_agent?: string | null;
+  is_active: boolean;
+  created_at: string;
+  expires_at: string;
+  last_accessed: string;
 }
-

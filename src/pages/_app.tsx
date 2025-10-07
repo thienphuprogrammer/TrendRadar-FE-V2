@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
-import { ConfigProvider, Spin } from 'antd';
+import { ConfigProvider, Spin } from '@/import/antd';
 import posthog from 'posthog-js';
 import apolloClient from '@/apollo/client';
 import { GlobalConfigProvider } from '@/hooks/useGlobalConfig';

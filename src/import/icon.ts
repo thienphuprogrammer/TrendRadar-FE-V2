@@ -3,6 +3,7 @@
  */
 
 import dynamic from 'next/dynamic';
+
 export type { IconComponentProps } from '@ant-design/icons/lib/components/Icon';
 
 const Icon = dynamic(() => import('@ant-design/icons/lib/components/Icon'), {

@@ -8,6 +8,7 @@ body {
 
     .driver-popover-close-btn {
       color: @gray-7;
+
       &:hover {
         color: @gray-1;
       }
@@ -26,7 +27,7 @@ body {
       width: 100%;
     }
 
-    &[style*=block] +.driver-popover-description {
+    &[style*=block] + .driver-popover-description {
       margin-top: 8px;
     }
   }
@@ -38,12 +39,15 @@ body {
   .driver-popover-arrow-side-left {
     border-left-color: @gray-10;
   }
+
   .driver-popover-arrow-side-right {
     border-right-color: @gray-10;
   }
+
   .driver-popover-arrow-side-top {
     border-top-color: @gray-10;
   }
+
   .driver-popover-arrow-side-bottom {
     border-bottom-color: @gray-10;
   }
@@ -58,6 +62,7 @@ body {
     border: none;
     min-width: 76px;
     text-align: center;
+
     + button {
       margin-left: 8px;
     }

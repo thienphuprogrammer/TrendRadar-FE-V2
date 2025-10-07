@@ -28,6 +28,8 @@ export const LiveRegion: React.FC<LiveRegionProps> = ({
 
       return () => clearTimeout(timer);
     }
+
+    return undefined;
   }, [message, clearAfter]);
 
   return (
@@ -49,4 +51,3 @@ export const LiveRegion: React.FC<LiveRegionProps> = ({
 };
 
 export default LiveRegion;
-

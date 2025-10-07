@@ -41,4 +41,3 @@ const GuestRoute: React.FC<GuestRouteProps> = ({
 };
 
 export default GuestRoute;
-

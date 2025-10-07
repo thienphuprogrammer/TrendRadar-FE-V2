@@ -1,12 +1,6 @@
 import { Edge, Node, Position } from 'reactflow';
-import { EDGE_TYPE, MARKER_TYPE, NODE_TYPE, JOIN_TYPE } from '@/utils/enum';
-import {
-  ComposeDiagram,
-  Diagram,
-  DiagramModel,
-  DiagramModelRelationField,
-  DiagramView,
-} from '@/utils/data';
+import { EDGE_TYPE, JOIN_TYPE, MARKER_TYPE, NODE_TYPE } from '@/utils/enum';
+import { ComposeDiagram, Diagram, DiagramModel, DiagramModelRelationField, DiagramView } from '@/utils/data';
 
 export const Config = {
   // the number of nodes in one row
@@ -35,7 +29,7 @@ export const Config = {
   viewNodePreservedHeight: 32 * 1,
 };
 
-const convertBooleanToNumber = (value) => (value ? 1 : 0);
+const convertBooleanToNumber = (value: any) => (value ? 1 : 0);
 
 const getLimitedColumnsLengthProps = (columns: any[] = []) => {
   const isOverLimit = columns.length > Config.columnsLimit;
@@ -62,11 +56,11 @@ type EdgeWithData = Edge<{
 type StartPoint = { x: number; y: number; floor: number };
 
 export class Transformer {
+  public nodes: NodeWithData[] = [];
+  public edges: Edge[] = [];
   private readonly config: typeof Config = Config;
   private models: DiagramModel[];
-  public nodes: NodeWithData[] = [];
   private views: DiagramView[];
-  public edges: Edge[] = [];
   private start: StartPoint = {
     x: 0,
     y: 0,
@@ -74,8 +68,12 @@ export class Transformer {
   };
 
   constructor(data: Diagram) {
-    this.models = data?.models || [];
-    this.views = data?.views || [];
+    this.models = (data?.models || []).filter(
+      (model): model is DiagramModel => model != null,
+    );
+    this.views = (data?.views || []).filter(
+      (view): view is DiagramView => view != null,
+    );
     this.init();
   }
 
@@ -168,6 +166,8 @@ export class Transformer {
   private addModelEdge(data: DiagramModel) {
     const { relationFields } = data;
     for (const relationField of relationFields) {
+      if (!relationField) continue;
+
       // check if edge already exist
       const hasEdgeExist = this.edges.some((edge) => {
         // the edge should be unique as relationId
@@ -190,14 +190,15 @@ export class Transformer {
 
       const targetField = targetModel.relationFields.find(
         (field) =>
+          field &&
           [
             `${field.fromModelName}.${field.fromColumnName}`,
             `${field.toModelName}.${field.toColumnName}`,
           ].toString() ===
-          [
-            `${relationField.fromModelName}.${relationField.fromColumnName}`,
-            `${relationField.toModelName}.${relationField.toColumnName}`,
-          ].toString(),
+            [
+              `${relationField.fromModelName}.${relationField.fromColumnName}`,
+              `${relationField.toModelName}.${relationField.toColumnName}`,
+            ].toString(),
       );
 
       // check what source and target relation order
@@ -212,7 +213,7 @@ export class Transformer {
         (name) => name === targetModel?.referenceName,
       );
 
-      targetModel &&
+      if (targetModel) {
         this.edges.push(
           this.createEdge({
             type: EDGE_TYPE.MODEL,
@@ -221,10 +222,11 @@ export class Transformer {
             sourceField: relationField,
             sourceJoinIndex,
             targetModel,
-            targetField,
+            targetField: targetField || undefined,
             targetJoinIndex,
           }),
         );
+      }
     }
   }
 
@@ -336,11 +338,11 @@ export class Transformer {
     } = this.config;
 
     // get preserved height setting
-    const preservedHeightMap = {
+    const preservedHeightMap: Record<NODE_TYPE, number> = {
       [NODE_TYPE.MODEL]: modelNodePreservedHeight,
       [NODE_TYPE.VIEW]: viewNodePreservedHeight,
-    };
-    const preservedHeight = preservedHeightMap[composeDiagram.nodeType];
+    } as any;
+    const preservedHeight = preservedHeightMap[composeDiagram.nodeType] || 0;
 
     // check if columns limit is reached
     const { limitedLength: fieldsLength, isOverLimit: isFieldsOverLimit } =

@@ -3,21 +3,22 @@
  * Handles all authentication-related API calls to the API Gateway
  */
 
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 import {
   LoginCredentials,
+  PasswordChange,
+  PasswordResetConfirm,
+  PasswordResetRequest,
   RegisterData,
+  SessionInfo,
   TokenResponse,
   User,
-  PasswordResetRequest,
-  PasswordResetConfirm,
-  PasswordChange,
   UserUpdate,
-  SessionInfo,
 } from '@/types/auth';
 
 // Get API Gateway URL from environment or default to localhost
-const API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:8000';
+const API_GATEWAY_URL =
+  process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:8000';
 const AUTH_BASE_URL = `${API_GATEWAY_URL}/api/v1/auth`;
 
 /**
@@ -44,7 +45,7 @@ class AuthClient {
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
 
     // Response interceptor to handle token refresh
@@ -61,10 +62,11 @@ class AuthClient {
             const refreshToken = this.getRefreshToken();
             if (refreshToken) {
               const response = await this.refreshToken(refreshToken);
-              this.setTokens(response.accessToken, response.refreshToken);
-              
+              // Store new tokens
+              this.setTokens(response.access_token, response.refresh_token);
+
               // Retry original request with new token
-              originalRequest.headers.Authorization = `Bearer ${response.accessToken}`;
+              originalRequest.headers.Authorization = `Bearer ${response.access_token}`;
               return this.client(originalRequest);
             }
           } catch (refreshError) {
@@ -78,7 +80,7 @@ class AuthClient {
         }
 
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -109,33 +111,39 @@ class AuthClient {
 
   /**
    * Register a new user
+   * Returns user data. After registration, tokens should be obtained via login.
    */
   async register(data: RegisterData): Promise<User> {
     const response = await this.client.post<User>('/register', {
       email: data.email,
       password: data.password,
-      first_name: data.firstName,
-      last_name: data.lastName,
-      role: data.role || 'viewer',
+      first_name: data.first_name,
+      last_name: data.last_name,
+      role: data.role || 'seller',
     });
     return response.data;
   }
 
   /**
    * Login user
+   * Automatically stores access_token and refresh_token in localStorage
    */
   async login(credentials: LoginCredentials): Promise<TokenResponse> {
-    const response = await this.client.post<TokenResponse>('/login', credentials);
+    const response = await this.client.post<TokenResponse>(
+      '/login',
+      credentials,
+    );
     const data = response.data;
-    
-    // Store tokens
-    this.setTokens(data.accessToken, data.refreshToken);
-    
+
+    // Store tokens in localStorage for use in other APIs
+    this.setTokens(data.access_token, data.refresh_token);
+
     return data;
   }
 
   /**
    * Logout user
+   * Revokes the current session and clears stored tokens
    */
   async logout(): Promise<void> {
     try {
@@ -147,66 +155,79 @@ class AuthClient {
 
   /**
    * Refresh access token
+   * Gets a new access_token using the refresh_token
+   * Note: This bypasses the auth interceptor to avoid sending expired token
    */
   async refreshToken(refreshToken: string): Promise<TokenResponse> {
-    const response = await this.client.post<TokenResponse>('/refresh', {
-      refresh_token: refreshToken,
-    });
+    const response = await axios.post<TokenResponse>(
+      `${AUTH_BASE_URL}/refresh`,
+      {
+        refresh_token: refreshToken,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      },
+    );
     return response.data;
   }
 
   /**
    * Get current user info
+   * Requires valid access_token in Authorization header
    */
   async getCurrentUser(): Promise<User> {
-    const response = await this.client.get<User>('/me');
+    const response = await this.client.get<User>('/me', {
+      params: { token_type: 'access' },
+    });
     return response.data;
   }
 
   /**
    * Update user profile
+   * Requires valid access_token in Authorization header
    */
   async updateProfile(data: UserUpdate): Promise<User> {
-    const response = await this.client.put<User>('/me', {
-      first_name: data.firstName,
-      last_name: data.lastName,
-      email: data.email,
-    });
+    const response = await this.client.put<User>('/me', data);
     return response.data;
   }
 
   /**
    * Change password
+   * Requires valid access_token in Authorization header
    */
   async changePassword(data: PasswordChange): Promise<{ message: string }> {
-    const response = await this.client.post('/password/change', {
-      old_password: data.oldPassword,
-      new_password: data.newPassword,
-    });
+    const response = await this.client.post('/change-password', data);
     return response.data;
   }
 
   /**
    * Request password reset
+   * Sends password reset email
    */
-  async requestPasswordReset(data: PasswordResetRequest): Promise<{ message: string }> {
-    const response = await this.client.post('/password/reset', data);
+  async requestPasswordReset(
+    data: PasswordResetRequest,
+  ): Promise<{ message: string }> {
+    const response = await this.client.post('/forgot-password', data);
     return response.data;
   }
 
   /**
    * Confirm password reset
+   * Resets password with the provided token
    */
-  async confirmPasswordReset(data: PasswordResetConfirm): Promise<{ message: string }> {
-    const response = await this.client.post('/password/reset/confirm', {
-      token: data.token,
-      new_password: data.newPassword,
-    });
+  async confirmPasswordReset(
+    data: PasswordResetConfirm,
+  ): Promise<{ message: string }> {
+    const response = await this.client.post('/reset-password', data);
     return response.data;
   }
 
   /**
    * Get user sessions
+   * Requires valid access_token in Authorization header
    */
   async getSessions(): Promise<SessionInfo[]> {
     const response = await this.client.get<SessionInfo[]>('/sessions');
@@ -215,6 +236,7 @@ class AuthClient {
 
   /**
    * Revoke a specific session
+   * Requires valid access_token in Authorization header
    */
   async revokeSession(sessionId: number): Promise<{ message: string }> {
     const response = await this.client.delete(`/sessions/${sessionId}`);
@@ -222,7 +244,8 @@ class AuthClient {
   }
 
   /**
-   * Revoke all sessions except current
+   * Revoke all sessions
+   * Requires valid access_token in Authorization header
    */
   async revokeAllSessions(): Promise<{ message: string }> {
     const response = await this.client.delete('/sessions');
@@ -233,6 +256,7 @@ class AuthClient {
 
   /**
    * Get all users (admin only)
+   * Requires valid access_token in Authorization header
    */
   async getUsers(params?: {
     skip?: number;
@@ -247,25 +271,16 @@ class AuthClient {
 
   /**
    * Update user status (admin only)
+   * Requires valid access_token in Authorization header
    */
-  async updateUserStatus(userId: number, status: string): Promise<User> {
-    const response = await this.client.put<User>(`/users/${userId}/status`, { status });
-    return response.data;
-  }
-
-  /**
-   * Update user role (admin only)
-   */
-  async updateUserRole(userId: number, role: string): Promise<User> {
-    const response = await this.client.put<User>(`/users/${userId}/role`, { role });
-    return response.data;
-  }
-
-  /**
-   * Delete user (admin only)
-   */
-  async deleteUser(userId: number): Promise<{ message: string }> {
-    const response = await this.client.delete(`/users/${userId}`);
+  async updateUserStatus(userId: number, newStatus: string): Promise<User> {
+    const response = await this.client.put<User>(
+      `/users/${userId}/status`,
+      null,
+      {
+        params: { new_status: newStatus },
+      },
+    );
     return response.data;
   }
 }
@@ -273,4 +288,3 @@ class AuthClient {
 // Export singleton instance
 export const authClient = new AuthClient();
 export default authClient;
-

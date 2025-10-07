@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import {
   Button,
-  Tag,
+  message,
   Table,
   TableColumnsType,
+  Tag,
   Typography,
-  message,
 } from 'antd';
 import styled from 'styled-components';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -24,10 +24,10 @@ import InstructionModal from '@/components/modals/InstructionModal';
 import InstructionDrawer from '@/components/pages/knowledge/InstructionDrawer';
 import { Instruction } from '@/apollo/client/graphql/__types__';
 import {
-  useInstructionsQuery,
   useCreateInstructionMutation,
-  useUpdateInstructionMutation,
   useDeleteInstructionMutation,
+  useInstructionsQuery,
+  useUpdateInstructionMutation,
 } from '@/apollo/client/graphql/instructions.generated';
 
 const { Paragraph, Text } = Typography;
@@ -58,9 +58,9 @@ function InstructionsPage() {
   });
   const instructions = data?.instructions || [];
 
-  const getBaseOptions = (options) => {
+  const getBaseOptions = (options: any) => {
     return {
-      onError: (error) => console.error(error),
+      onError: (error: any) => console.error(error),
       refetchQueries: ['Instructions'],
       awaitRefetchQueries: true,
       ...options,
@@ -93,7 +93,7 @@ function InstructionsPage() {
     }),
   );
 
-  const onMoreClick = async (payload) => {
+  const onMoreClick = async (payload: any) => {
     const { type, data } = payload;
     if (type === MORE_ACTION.DELETE) {
       await deleteInstructionMutation({
@@ -128,7 +128,7 @@ function InstructionsPage() {
 
         return (
           <StyledQuestionsBlock>
-            {displayQuestions.map((question) => (
+            {displayQuestions.map((question: any) => (
               <div key={question} className="mb-1">
                 <StyledTag className="bg-gray-1 border-gray-5 text-truncate">
                   <QuestionOutlined className="geekblue-6" />
@@ -199,9 +199,11 @@ function InstructionsPage() {
       >
         <Table
           className="ant-table-has-header"
-          dataSource={instructions}
+          dataSource={instructions.filter(
+            (instruction): instruction is Instruction => instruction != null,
+          )}
           loading={loading}
-          columns={columns}
+          columns={columns as TableColumnsType<Instruction>}
           rowKey="id"
           pagination={{
             hideOnSinglePage: true,
@@ -212,6 +214,7 @@ function InstructionsPage() {
         />
         <InstructionDrawer
           {...instructionDrawer.state}
+          defaultValue={null}
           onClose={instructionDrawer.closeDrawer}
         />
         <InstructionModal

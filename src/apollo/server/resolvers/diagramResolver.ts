@@ -11,10 +11,10 @@ import {
   DiagramModel,
   DiagramModelField,
   DiagramModelRelationField,
-  NodeType,
-  IContext,
-  RelationType,
   DiagramView,
+  IContext,
+  NodeType,
+  RelationType,
 } from '@server/types';
 import { ColumnMDL, Manifest } from '@server/mdl/type';
 import { getLogger } from '@server/utils';
@@ -89,7 +89,7 @@ export class DiagramResolver {
       const allColumns = modelColumns.filter(
         (column) => column.modelId === model.id,
       );
-      const modelMDL = manifest.models.find(
+      const modelMDL = manifest.models?.find(
         (modelMDL) => modelMDL.name === model.referenceName,
       );
       allColumns.forEach((column) => {
@@ -103,6 +103,7 @@ export class DiagramResolver {
 
         if (columnRelations.length > 0) {
           columnRelations.forEach((relation) => {
+            if (!relation) return;
             const transformedRelationField = this.transformModelRelationField({
               relation,
               currentModel: model,
@@ -113,9 +114,11 @@ export class DiagramResolver {
         }
 
         if (column.isCalculated) {
-          transformedModel.calculatedFields.push(
-            this.transformCalculatedField(column, modelMDL.columns),
-          );
+          if (modelMDL && modelMDL.columns) {
+            transformedModel.calculatedFields.push(
+              this.transformCalculatedField(column, modelMDL.columns),
+            );
+          }
         } else {
           const nestedColumns = modelNestedColumns.filter(
             (nestedColumn) => nestedColumn.columnId === column.id,
@@ -133,7 +136,7 @@ export class DiagramResolver {
   }
 
   private transformModel(model: Model): DiagramModel {
-    const properties = JSON.parse(model.properties);
+    const properties = model.properties ? JSON.parse(model.properties) : {};
     return {
       id: uuidv4(),
       modelId: model.id,
@@ -142,7 +145,7 @@ export class DiagramResolver {
       referenceName: model.referenceName,
       sourceTableName: model.sourceTableName,
       refSql: model.refSql,
-      refreshTime: model.refreshTime,
+      refreshTime: model.refreshTime || '',
       cached: model.cached,
       description: properties?.description,
       fields: [],
@@ -155,7 +158,7 @@ export class DiagramResolver {
     column: ModelColumn,
     nestedColumns: ModelNestedColumn[],
   ): DiagramModelField {
-    const properties = JSON.parse(column.properties);
+    const properties = column.properties ? JSON.parse(column.properties) : {};
     return {
       id: uuidv4(),
       columnId: column.id,
@@ -178,7 +181,7 @@ export class DiagramResolver {
             referenceName: nestedColumn.referenceName,
             description: nestedColumn.properties?.description,
           }))
-        : null,
+        : undefined,
     };
   }
 
@@ -186,8 +189,8 @@ export class DiagramResolver {
     column: ModelColumn,
     columnsMDL: ColumnMDL[],
   ): DiagramModelField {
-    const properties = JSON.parse(column.properties);
-    const lineage = JSON.parse(column.lineage);
+    const properties = column.properties ? JSON.parse(column.properties) : {};
+    const lineage = column.lineage ? JSON.parse(column.lineage) : null;
     const columnMDL = columnsMDL.find(
       ({ name }) => name === column.referenceName,
     );
@@ -202,7 +205,7 @@ export class DiagramResolver {
       referenceName: column.referenceName,
       description: properties?.description,
       isPrimaryKey: column.isPk,
-      expression: columnMDL.expression,
+      expression: columnMDL?.expression || '',
     };
   }
 
@@ -229,7 +232,7 @@ export class DiagramResolver {
       id: uuidv4(),
       relationId: relation.id,
       nodeType: NodeType.RELATION,
-      displayName,
+      displayName: displayName || referenceName,
       referenceName,
       type: relation.joinType as RelationType,
       fromModelId: relation.fromModelId,
@@ -249,7 +252,7 @@ export class DiagramResolver {
   }
 
   private transformView(view: View): DiagramView {
-    const properties = JSON.parse(view.properties);
+    const properties = view.properties ? JSON.parse(view.properties) : {};
     const fields = (properties?.columns || []).map((column: any) => ({
       id: uuidv4(),
       nodeType: NodeType.FIELD,

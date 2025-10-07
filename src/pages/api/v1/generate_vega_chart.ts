@@ -5,8 +5,8 @@ import * as Errors from '@/apollo/server/utils/error';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ApiError,
-  respondWith,
   handleApiError,
+  respondWith,
 } from '@/apollo/server/utils/apiUtils';
 import {
   ChartResult,

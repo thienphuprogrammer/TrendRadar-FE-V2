@@ -5,21 +5,20 @@
 
 import React, {
   createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
   ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
 } from 'react';
 import { useRouter } from 'next/router';
 import { message } from 'antd';
 import {
-  User,
   AuthState,
   LoginCredentials,
+  PasswordChange,
   RegisterData,
   UserUpdate,
-  PasswordChange,
 } from '@/types/auth';
 import { authClient } from '@/lib/api/authClient';
 
@@ -87,60 +86,71 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initAuth();
   }, []);
 
-  const login = useCallback(async (credentials: LoginCredentials) => {
-    try {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+  const login = useCallback(
+    async (credentials: LoginCredentials) => {
+      try {
+        setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      const tokenResponse = await authClient.login(credentials);
-      const user = await authClient.getCurrentUser();
+        // Login returns TokenResponse with access_token and refresh_token
+        const tokenResponse = await authClient.login(credentials);
+        const user = await authClient.getCurrentUser();
 
-      setState({
-        user,
-        accessToken: tokenResponse.accessToken,
-        refreshToken: tokenResponse.refreshToken,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      });
+        setState({
+          user,
+          accessToken: tokenResponse.access_token,
+          refreshToken: tokenResponse.refresh_token,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+        });
 
-      message.success('Login successful!');
-      router.push('/');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.detail || 'Login failed. Please try again.';
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: errorMessage,
-      }));
-      message.error(errorMessage);
-      throw error;
-    }
-  }, [router]);
+        message.success('Đăng nhập thành công!');
+        router.push('/');
+      } catch (error: any) {
+        const errorMessage =
+          error.response?.data?.detail || 'Đăng nhập thất bại. Vui lòng thử lại.';
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: errorMessage,
+        }));
+        message.error(errorMessage);
+        throw error;
+      }
+    },
+    [router],
+  );
 
-  const register = useCallback(async (data: RegisterData) => {
-    try {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+  const register = useCallback(
+    async (data: RegisterData) => {
+      try {
+        setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      await authClient.register(data);
+        // Register returns UserResponse, not tokens
+        await authClient.register(data);
 
-      // Auto-login after registration
-      await login({
-        email: data.email,
-        password: data.password,
-      });
+        // Auto-login after registration to get tokens
+        await login({
+          email: data.email,
+          password: data.password,
+        });
 
-      message.success('Registration successful! Welcome to Wren AI.');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.detail || 'Registration failed. Please try again.';
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: errorMessage,
-      }));
-      message.error(errorMessage);
-      throw error;
-    }
-  }, [login]);
+        message.success('Đăng ký thành công! Chào mừng đến với TrendRadar.');
+      } catch (error: any) {
+        const errorMessage =
+          error.response?.data?.detail ||
+          'Đăng ký thất bại. Vui lòng thử lại.';
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: errorMessage,
+        }));
+        message.error(errorMessage);
+        throw error;
+      }
+    },
+    [login],
+  );
 
   const logout = useCallback(async () => {
     try {
@@ -156,7 +166,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading: false,
         error: null,
       });
-      message.info('Logged out successfully');
+      message.info('Đăng xuất thành công');
       router.push('/auth/login');
     }
   }, [router]);
@@ -173,9 +183,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading: false,
       }));
 
-      message.success('Profile updated successfully!');
+      message.success('Cập nhật thông tin thành công!');
     } catch (error: any) {
-      const errorMessage = error.response?.data?.detail || 'Failed to update profile';
+      const errorMessage =
+        error.response?.data?.detail || 'Cập nhật thông tin thất bại';
       setState((prev) => ({
         ...prev,
         isLoading: false,
@@ -194,9 +205,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       setState((prev) => ({ ...prev, isLoading: false }));
 
-      message.success('Password changed successfully!');
+      message.success('Đổi mật khẩu thành công!');
     } catch (error: any) {
-      const errorMessage = error.response?.data?.detail || 'Failed to change password';
+      const errorMessage =
+        error.response?.data?.detail || 'Đổi mật khẩu thất bại';
       setState((prev) => ({
         ...prev,
         isLoading: false,
@@ -246,4 +258,3 @@ export const useAuth = (): AuthContextType => {
 };
 
 export default AuthContext;
-

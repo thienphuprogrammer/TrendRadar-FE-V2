@@ -1,9 +1,9 @@
 import { getLogger } from '@server/utils';
 import {
-  AskResult,
-  AskResultType,
-  AskResultStatus,
   AskInput,
+  AskResult,
+  AskResultStatus,
+  AskResultType,
 } from '@server/models/adaptor';
 import {
   AskingTask,
@@ -60,7 +60,7 @@ export class AskingTaskTracker implements IAskingTaskTracker {
   private trackedTasksById: Map<number, TrackedTask> = new Map();
   private pollingInterval: number;
   private memoryRetentionTime: number;
-  private pollingIntervalId: NodeJS.Timeout;
+  private pollingIntervalId!: NodeJS.Timeout;
   private runningJobs = new Set<string>();
   private threadResponseRepository: IThreadResponseRepository;
   private viewRepository: IViewRepository;
@@ -161,7 +161,7 @@ export class AskingTaskTracker implements IAskingTaskTracker {
       return {
         ...trackedTask.result,
         queryId,
-        question: trackedTask.question,
+        question: trackedTask.question || '',
         taskId: trackedTask.taskId,
       };
     }
@@ -258,7 +258,7 @@ export class AskingTaskTracker implements IAskingTaskTracker {
             task.lastPolled = now;
 
             // if result is not changed, we don't need to update the database
-            if (!this.isResultChanged(task.result, result)) {
+            if (task.result && !this.isResultChanged(task.result, result)) {
               this.runningJobs.delete(queryId);
               return;
             }
@@ -332,7 +332,7 @@ export class AskingTaskTracker implements IAskingTaskTracker {
             this.runningJobs.delete(queryId);
           } catch (err) {
             this.runningJobs.delete(queryId);
-            logger.error(err.stack);
+            logger.error((err as Error).stack);
             throw err;
           }
         },
@@ -374,14 +374,18 @@ export class AskingTaskTracker implements IAskingTaskTracker {
       const view = await this.viewRepository.findOneBy({
         id: response.viewId,
       });
-      await this.threadResponseRepository.updateOne(task.threadResponseId, {
-        sql: view.statement,
-        viewId: response.viewId,
-      });
+      if (task.threadResponseId && view) {
+        await this.threadResponseRepository.updateOne(task.threadResponseId, {
+          sql: view.statement,
+          viewId: response.viewId,
+        });
+      }
     } else {
-      await this.threadResponseRepository.updateOne(task.threadResponseId, {
-        sql: response?.sql,
-      });
+      if (task.threadResponseId) {
+        await this.threadResponseRepository.updateOne(task.threadResponseId, {
+          sql: response?.sql,
+        });
+      }
     }
   }
 
@@ -406,7 +410,7 @@ export class AskingTaskTracker implements IAskingTaskTracker {
     return {
       ...(taskRecord?.detail as AskResult),
       queryId: queryId || taskRecord?.queryId,
-      question: taskRecord?.question,
+      question: taskRecord?.question || '',
       taskId: taskRecord?.id,
     };
   }
@@ -431,7 +435,7 @@ export class AskingTaskTracker implements IAskingTaskTracker {
         detail: trackedTask.result,
       });
       // update the task id in memory
-      let existingTask: TrackedTask;
+      let existingTask: TrackedTask | undefined;
       if (queryId) {
         existingTask = this.trackedTasks.get(queryId);
       } else if (taskId) {

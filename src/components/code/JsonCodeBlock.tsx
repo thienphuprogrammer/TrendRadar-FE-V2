@@ -1,4 +1,4 @@
-import { createCodeBlock, BaseProps } from './BaseCodeBlock';
+import { BaseProps, createCodeBlock } from './BaseCodeBlock';
 
 const JsonCodeBlock = (props: BaseProps) => {
   const { code, ...rest } = props;

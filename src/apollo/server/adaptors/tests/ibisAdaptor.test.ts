@@ -15,8 +15,8 @@ import {
   MS_SQL_CONNECTION_INFO,
   MYSQL_CONNECTION_INFO,
   POSTGRES_CONNECTION_INFO,
-  TRINO_CONNECTION_INFO,
   SNOWFLAKE_CONNECTION_INFO,
+  TRINO_CONNECTION_INFO,
 } from '../../repositories';
 import { snakeCase } from 'lodash';
 import { Encryptor } from '../../utils';
@@ -152,7 +152,7 @@ describe('IbisAdaptor', () => {
       mockMSSQLConnectionInfo,
     );
     const expectConnectionInfo = Object.entries(mockMSSQLConnectionInfo).reduce(
-      (acc, [key, value]) => {
+      (acc: any, [key, value]) => {
         if (key === 'trustServerCertificate') {
           if (value) {
             acc['kwargs'] = { trustServerCertificate: 'YES' };
@@ -186,7 +186,7 @@ describe('IbisAdaptor', () => {
       mockMySQLConnectionInfo,
     );
     const expectConnectionInfo = Object.entries(mockMySQLConnectionInfo).reduce(
-      (acc, [key, value]) => ((acc[snakeCase(key)] = value), acc),
+      (acc: any, [key, value]) => ((acc[snakeCase(key)] = value), acc),
       {},
     );
 
@@ -362,7 +362,7 @@ describe('IbisAdaptor', () => {
     );
     const expectConnectionInfo = Object.entries(
       mockBigQueryConnectionInfo,
-    ).reduce((acc, [key, value]) => {
+    ).reduce((acc: any, [key, value]) => {
       if (key === 'credentials') {
         acc['credentials'] = Buffer.from(
           JSON.stringify(mockBigQueryConnectionInfo.credentials),
@@ -508,9 +508,13 @@ describe('IbisAdaptor', () => {
     expect(res.columns).toEqual(['id']);
     expect(res.dtypes).toEqual({ id: 'integer' });
     expect(res.cacheHit).toEqual(true);
-    expect(new Date(res.cacheCreatedAt).getTime()).toBeGreaterThan(0);
+    expect(
+      res.cacheCreatedAt ? new Date(res.cacheCreatedAt).getTime() : 0,
+    ).toBeGreaterThan(0);
     expect(res.override).toEqual(false);
-    expect(new Date(res.cacheOverrodeAt).getTime()).toBeGreaterThan(0);
+    expect(
+      res.cacheOverrodeAt ? new Date(res.cacheOverrodeAt).getTime() : 0,
+    ).toBeGreaterThan(0);
     expect(mockedAxios.post).toHaveBeenCalledWith(
       `${ibisServerEndpoint}/v3/connector/postgres/query?cacheEnable=true`,
       expect.any(Object),

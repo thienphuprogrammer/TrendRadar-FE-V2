@@ -60,9 +60,15 @@ export default function AdjustSQLModal(props: Props) {
     });
   };
 
-  const handleError = (error) => {
+  const handleError = (error: any) => {
     const graphQLError = parseGraphQLError(error);
-    setError({ ...graphQLError, shortMessage: 'Invalid SQL syntax' });
+    setError({
+      ...graphQLError,
+      shortMessage: 'Invalid SQL syntax',
+      message: graphQLError.message || 'Unknown error',
+      code: graphQLError.code || '',
+      stacktrace: graphQLError.stacktrace || [],
+    });
     console.error(graphQLError);
   };
 
@@ -98,7 +104,7 @@ export default function AdjustSQLModal(props: Props) {
         try {
           await onValidateSQL();
           await onSubmit({
-            responseId: defaultValue?.responseId,
+            responseId: defaultValue?.responseId || 0,
             sql: values.sql,
           });
           onClose();

@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import clsx from 'clsx';
 import styled from 'styled-components';
-import { Space, Button, Row, Col } from 'antd';
+import { Button, Col, Row, Space } from 'antd';
 import ColumnHeightOutlined from '@ant-design/icons/ColumnHeightOutlined';
 import MinusOutlined from '@ant-design/icons/MinusOutlined';
 import EllipsisWrapper from '@/components/EllipsisWrapper';
@@ -44,6 +44,15 @@ interface Props {
   loading: boolean;
 }
 
+interface QuestionTemplateProps {
+  category: string;
+  sql: string;
+  question: string;
+  onSelect: (payload: { sql: string; question: string }) => void;
+  loading: boolean;
+  selectedQuestion: string;
+}
+
 const QuestionTemplate = ({
   category,
   sql,
@@ -51,7 +60,7 @@ const QuestionTemplate = ({
   onSelect,
   loading,
   selectedQuestion,
-}) => {
+}: QuestionTemplateProps) => {
   const isSelected = selectedQuestion === question;
   const isDisabled = loading && !isSelected;
 

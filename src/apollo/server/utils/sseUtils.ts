@@ -1,13 +1,13 @@
 import { NextApiResponse } from 'next';
 import { AskResultStatus } from '@/apollo/server/models/adaptor';
 import {
-  EventType,
-  StateType,
-  StreamEvent,
-  StateEvent,
   ErrorEvent,
+  EventType,
   MessageStartEvent,
   MessageStopEvent,
+  StateEvent,
+  StateType,
+  StreamEvent
 } from './sseTypes';
 
 /**

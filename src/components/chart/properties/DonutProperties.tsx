@@ -1,9 +1,9 @@
-import { Form, Row, Col, Select } from 'antd';
+import { Col, Form, Row, Select } from 'antd';
 import {
-  PropertiesProps,
-  getColumnOptions,
-  getChartTypeOptions,
   ChartTypeProperty,
+  getChartTypeOptions,
+  getColumnOptions,
+  PropertiesProps,
 } from './BasicProperties';
 
 export default function DonutProperties(props: PropertiesProps) {

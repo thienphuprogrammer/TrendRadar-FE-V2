@@ -41,13 +41,17 @@ const StyledHeader = styled(Header)`
 
 const MobileMenuButton = styled(Button)`
   display: none;
-  
+
   @media (max-width: 768px) {
     display: inline-flex;
   }
 `;
 
-const DesktopNav = styled.nav`
+const DesktopNav = styled.nav<{
+  children?: React.ReactNode;
+  role?: string;
+  'aria-label'?: string;
+}>`
   @media (max-width: 768px) {
     display: none;
   }
@@ -86,7 +90,9 @@ export default function HeaderBar() {
                     size="small"
                     $isHighlight={pathname.startsWith(Path.Home)}
                     onClick={() => router.push(Path.Home)}
-                    aria-current={pathname.startsWith(Path.Home) ? 'page' : undefined}
+                    aria-current={
+                      pathname.startsWith(Path.Home) ? 'page' : undefined
+                    }
                     aria-label="Navigate to Home"
                   >
                     Home
@@ -96,7 +102,9 @@ export default function HeaderBar() {
                     size="small"
                     $isHighlight={pathname.startsWith(Path.Modeling)}
                     onClick={() => router.push(Path.Modeling)}
-                    aria-current={pathname.startsWith(Path.Modeling) ? 'page' : undefined}
+                    aria-current={
+                      pathname.startsWith(Path.Modeling) ? 'page' : undefined
+                    }
                     aria-label="Navigate to Modeling"
                   >
                     Modeling
@@ -106,7 +114,9 @@ export default function HeaderBar() {
                     size="small"
                     $isHighlight={pathname.startsWith(Path.Knowledge)}
                     onClick={() => router.push(Path.KnowledgeQuestionSQLPairs)}
-                    aria-current={pathname.startsWith(Path.Knowledge) ? 'page' : undefined}
+                    aria-current={
+                      pathname.startsWith(Path.Knowledge) ? 'page' : undefined
+                    }
                     aria-label="Navigate to Knowledge"
                   >
                     Knowledge
@@ -116,7 +126,11 @@ export default function HeaderBar() {
                     size="small"
                     $isHighlight={pathname.startsWith(Path.APIManagement)}
                     onClick={() => router.push(Path.APIManagementHistory)}
-                    aria-current={pathname.startsWith(Path.APIManagement) ? 'page' : undefined}
+                    aria-current={
+                      pathname.startsWith(Path.APIManagement)
+                        ? 'page'
+                        : undefined
+                    }
                     aria-label="Navigate to API Management"
                   >
                     API
@@ -132,9 +146,12 @@ export default function HeaderBar() {
           </Space>
         </div>
       </StyledHeader>
-      
+
       {isMobile && (
-        <MobileSidebar visible={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+        <MobileSidebar
+          visible={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+        />
       )}
     </>
   );

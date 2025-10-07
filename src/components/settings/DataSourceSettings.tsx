@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { useEffect, useMemo } from 'react';
-import { Button, Form, Modal, message, Alert } from 'antd';
+import { Alert, Button, Form, message, Modal } from 'antd';
 import { makeIterable } from '@/utils/iteration';
 import { DATA_SOURCES, FORM_MODE, Path } from '@/utils/enum';
 import { getDataSource, getTemplates } from '@/components/pages/setup/utils';
@@ -49,7 +49,7 @@ const SampleDatasetPanel = (props: Props) => {
     if (!isCurrentTemplate) {
       const template = templates.find((item) => item.value === name);
       Modal.confirm({
-        title: `Are you sure you want to change to "${template.label}" dataset?`,
+        title: `Are you sure you want to change to "${template?.label || name}" dataset?`,
         okButtonProps: { danger: true },
         okText: 'Change',
         onOk: async () => {
@@ -91,7 +91,10 @@ const DataSourcePanel = (props: Props) => {
     },
   });
 
-  const updateError = useMemo(() => parseGraphQLError(error), [error]);
+  const updateError = useMemo(
+    () => (error ? parseGraphQLError(error) : null),
+    [error],
+  );
 
   useEffect(() => properties && reset(), [properties]);
 
@@ -121,7 +124,7 @@ const DataSourcePanel = (props: Props) => {
       <div className="d-flex align-center">
         <Image
           className="mr-2"
-          src={current.logo}
+          src={current.logo || ''}
           alt={current.label}
           width="24"
           height="24"

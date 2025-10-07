@@ -67,7 +67,7 @@ export class RelationRepository
   }
 
   public async findRelationsBy(
-    { columnIds, modelIds },
+    { columnIds, modelIds }: { columnIds: any; modelIds: any },
     queryOptions?: IQueryOptions,
   ) {
     let executer = this.knex;
@@ -139,7 +139,7 @@ export class RelationRepository
       .delete();
   }
 
-  public async findRelationInfoBy(filter, queryOptions) {
+  public async findRelationInfoBy(filter: any, queryOptions: IQueryOptions) {
     const { projectId, columnIds, modelIds } = filter;
     let executer = this.knex;
     if (queryOptions && queryOptions.tx) {

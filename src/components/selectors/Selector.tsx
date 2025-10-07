@@ -12,7 +12,7 @@ interface Props extends React.ComponentProps<typeof Select> {
   options: Option[];
 }
 
-const getOption = (item) => {
+const getOption = (item: any) => {
   const value =
     typeof item.value === 'object' ? JSON.stringify(item.value) : item.value;
   return {
@@ -25,7 +25,7 @@ const getOption = (item) => {
 export default function Selector(props: Props) {
   const { value, onChange, options, ...restProps } = props;
 
-  const handleChange = useCallback((optionValue, option) => {
+  const handleChange = useCallback((optionValue: any, option: any) => {
     const parsedValue = Array.isArray(optionValue)
       ? optionValue.map((value) => parseJson(value))
       : parseJson(optionValue);

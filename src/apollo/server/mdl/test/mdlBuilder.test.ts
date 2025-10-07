@@ -1,12 +1,12 @@
 import { DataSourceName } from '@server/types';
 import {
+  BIG_QUERY_CONNECTION_INFO,
   Model,
-  Project,
   ModelColumn,
   ModelNestedColumn,
+  Project,
   RelationInfo,
   View,
-  BIG_QUERY_CONNECTION_INFO,
 } from '../../repositories';
 import { MDLBuilder, MDLBuilderBuildFromOptions } from '../mdlBuilder';
 import { ModelMDL, RelationMDL, ViewMDL } from '../type';

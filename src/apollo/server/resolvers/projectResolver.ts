@@ -9,11 +9,11 @@ import {
   SampleDatasetData,
 } from '../types';
 import {
-  trim,
   getLogger,
+  handleNestedColumns,
   replaceInvalidReferenceName,
   transformInvalidColumnName,
-  handleNestedColumns,
+  trim,
 } from '@server/utils';
 import {
   DUCKDB_CONNECTION_INFO,
@@ -22,10 +22,10 @@ import {
   Project,
 } from '../repositories';
 import {
-  SampleDatasetName,
-  SampleDatasetRelationship,
   buildInitSql,
   getRelations,
+  SampleDatasetName,
+  SampleDatasetRelationship,
   sampleDatasets,
 } from '@server/data';
 import { snakeCase } from 'lodash';
@@ -141,7 +141,7 @@ export class ProjectResolver {
       ctx.telemetry.sendEvent(
         eventName,
         { dataSourceType: project.type, error: err.message },
-        err.extensions?.service,
+        (err as any)?.extensions?.service,
         false,
       );
       throw err;
@@ -181,7 +181,7 @@ export class ProjectResolver {
           data: {
             type: DataSourceName.DUCKDB,
             properties: duckdbDatasourceProperties,
-          } as DataSource,
+          } as unknown as DataSource,
         },
         ctx,
       );
@@ -203,7 +203,7 @@ export class ProjectResolver {
       const models = await ctx.modelRepository.findAll();
       const columns = await ctx.modelColumnRepository.findAll();
       const mappedRelations = this.buildRelationInput(
-        relations,
+        relations || [],
         models,
         columns,
       );
@@ -221,7 +221,7 @@ export class ProjectResolver {
       ctx.telemetry.sendEvent(
         eventName,
         { ...eventProperties, error: err.message },
-        err.extensions?.service,
+        (err as any)?.extensions?.service,
         false,
       );
       throw err;
@@ -290,9 +290,9 @@ export class ProjectResolver {
       if (type === DataSourceName.DUCKDB) {
         connectionInfo as DUCKDB_CONNECTION_INFO;
         await this.buildDuckDbEnvironment(ctx, {
-          initSql: connectionInfo.initSql,
-          extensions: connectionInfo.extensions,
-          configurations: connectionInfo.configurations,
+          initSql: connectionInfo.initSql || '',
+          extensions: connectionInfo.extensions || [],
+          configurations: connectionInfo.configurations || {},
         });
       } else {
         // handle other data source
@@ -314,8 +314,11 @@ export class ProjectResolver {
       await ctx.projectRepository.deleteOne(project.id);
       ctx.telemetry.sendEvent(
         eventName,
-        { eventProperties, error: err.message },
-        err.extensions?.service,
+        {
+          eventProperties,
+          error: err instanceof Error ? err.message : String(err),
+        },
+        (err as any)?.extensions?.service,
         false,
       );
       throw err;
@@ -381,7 +384,7 @@ export class ProjectResolver {
     };
   }
 
-  public async listDataSourceTables(_root: any, _arg, ctx: IContext) {
+  public async listDataSourceTables(_root: any, _arg: any, ctx: IContext) {
     return await ctx.projectService.getProjectDataSourceTables();
   }
 
@@ -417,7 +420,7 @@ export class ProjectResolver {
       ctx.telemetry.sendEvent(
         eventName,
         { dataSourceType: project.type, error: err.message },
-        err.extensions?.service,
+        (err as any)?.extensions?.service,
         false,
       );
       throw err;
@@ -438,7 +441,7 @@ export class ProjectResolver {
       await ctx.projectService.getProjectSuggestedConstraint(project);
 
     // generate relation
-    const relations = [];
+    const relations: any[] = [];
     for (const constraint of constraints) {
       const {
         constraintTable,
@@ -518,7 +521,7 @@ export class ProjectResolver {
       ctx.telemetry.sendEvent(
         eventName,
         { error: err.message },
-        err.extensions?.service,
+        (err as any)?.extensions?.service,
         false,
       );
       throw err;
@@ -557,8 +560,8 @@ export class ProjectResolver {
 
     const resolves = lastSchemaChange.resolve;
     const unresolvedChanges = Object.keys(resolves).reduce((result, key) => {
-      const isResolved = resolves[key];
-      const changes = lastSchemaChange.change[key];
+      const isResolved = (resolves as any)[key];
+      const changes = (lastSchemaChange.change as any)[key];
       // return if resolved or no changes
       if (isResolved || !changes) return result;
 
@@ -598,7 +601,7 @@ export class ProjectResolver {
       ctx.telemetry.sendEvent(
         eventName,
         { error },
-        error.extensions?.service,
+        (error as any)?.extensions?.service,
         false,
       );
       throw error;
@@ -624,7 +627,7 @@ export class ProjectResolver {
       ctx.telemetry.sendEvent(
         eventName,
         { type, error },
-        error.extensions?.service,
+        (error as any)?.extensions?.service,
         false,
       );
       throw error;
@@ -727,9 +730,10 @@ export class ProjectResolver {
       const compactColumns = table.columns;
       const primaryKey = table.primaryKey;
       const model = models.find((m) => m.sourceTableName === table.name);
+      if (!model) return [];
       return compactColumns.map(
         (column) =>
-          ({
+          (({
             modelId: model.id,
             isCalculated: false,
             displayName: column.name,
@@ -738,10 +742,11 @@ export class ProjectResolver {
             type: column.type || 'string',
             notNull: column.notNull || false,
             isPk: primaryKey === column.name,
+
             properties: column.properties
               ? JSON.stringify(column.properties)
-              : null,
-          }) as Partial<ModelColumn>,
+              : null
+          }) as Partial<ModelColumn>),
       );
     });
     const columns = await ctx.modelColumnRepository.createMany(columnValues);
@@ -752,6 +757,7 @@ export class ProjectResolver {
       const column = columns.find(
         (c) => c.sourceColumnName === compactColumn.name,
       );
+      if (!column) return [];
       return handleNestedColumns(compactColumn, {
         modelId: column.modelId,
         columnId: column.id,

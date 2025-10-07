@@ -58,22 +58,27 @@ export class DeployService implements IDeployService {
     this.telemetry = telemetry;
   }
 
-  public async getLastDeployment(projectId) {
+  public async getLastDeployment(projectId: number): Promise<Deploy> {
     const lastDeploy =
       await this.deployLogRepository.findLastProjectDeployLog(projectId);
     if (!lastDeploy) {
-      return null;
+      throw new Error(`No deployment found for project ${projectId}`);
     }
     return lastDeploy;
   }
 
-  public async getInProgressDeployment(projectId) {
-    return await this.deployLogRepository.findInProgressProjectDeployLog(
-      projectId,
-    );
+  public async getInProgressDeployment(projectId: number): Promise<Deploy> {
+    const deployment =
+      await this.deployLogRepository.findInProgressProjectDeployLog(projectId);
+    if (!deployment) {
+      throw new Error(
+        `No in-progress deployment found for project ${projectId}`,
+      );
+    }
+    return deployment;
   }
 
-  public async deploy(manifest, projectId, force = false) {
+  public async deploy(manifest: any, projectId: number, force = false) {
     const eventName = TelemetryEvent.MODELING_DEPLOY_MDL;
     try {
       // generate hash of manifest
@@ -145,10 +150,10 @@ export class DeployService implements IDeployService {
     return hash;
   }
 
-  public async getMDLByHash(hash: string) {
+  public async getMDLByHash(hash: string): Promise<string> {
     const deploy = await this.deployLogRepository.findOneBy({ hash });
     if (!deploy) {
-      return null;
+      throw new Error(`No deployment found with hash ${hash}`);
     }
     // return base64 encoded manifest
     return Buffer.from(JSON.stringify(deploy.manifest)).toString('base64');

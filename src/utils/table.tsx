@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import moment from 'moment';
-import { Input, Button, Space, DatePicker, Divider } from 'antd';
+import { Button, DatePicker, Divider, Input, Space } from 'antd';
 import SearchOutlined from '@ant-design/icons/SearchOutlined';
 import CalendarOutlined from '@ant-design/icons/CalendarOutlined';
 
@@ -26,7 +26,7 @@ export const getColumnDateFilterProps = (props: {
   onFilter?: (value: any, record: any) => boolean;
   filteredValue?: [string, string] | null;
 }) => ({
-  filterDropdown: (filters) => {
+  filterDropdown: (filters: any) => {
     return <DateFilter {...filters} {...props} />;
   },
   filterIcon: (filtered: boolean) => (
@@ -46,7 +46,7 @@ const SearchFilter = ({
   dataIndex,
   placeholder,
   filteredValue,
-}) => {
+}: any) => {
   useEffect(() => {
     if (!visible && selectedKeys.length === 0) confirm();
   }, [visible]);
@@ -89,7 +89,7 @@ const DateFilter = ({
   confirm,
   clearFilters,
   visible,
-}) => {
+}: any) => {
   useEffect(() => {
     if (!visible && selectedKeys.length === 0) confirm();
   }, [visible]);

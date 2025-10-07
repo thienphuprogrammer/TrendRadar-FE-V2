@@ -37,8 +37,8 @@ import {
 } from '@/apollo/client/graphql/metadata.generated';
 import {
   useCreateCalculatedFieldMutation,
-  useUpdateCalculatedFieldMutation,
   useDeleteCalculatedFieldMutation,
+  useUpdateCalculatedFieldMutation,
 } from '@/apollo/client/graphql/calculatedField.generated';
 import {
   useCreateRelationshipMutation,

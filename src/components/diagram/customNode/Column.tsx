@@ -2,7 +2,12 @@ import React from 'react';
 import styled from 'styled-components';
 import MarkerHandle from '@/components/diagram/customNode/MarkerHandle';
 
-const NodeColumn = styled.div`
+const NodeColumn = styled.div<{
+  children?: React.ReactNode;
+  style?: React.CSSProperties;
+  onMouseEnter?: (event: React.MouseEvent) => void;
+  onMouseLeave?: (event: React.MouseEvent) => void;
+}>`
   position: relative;
   display: flex;
   align-items: center;

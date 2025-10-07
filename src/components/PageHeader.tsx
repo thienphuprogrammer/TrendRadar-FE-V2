@@ -7,7 +7,10 @@ import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import Breadcrumbs from './Breadcrumbs';
 
-const HeaderContainer = styled.div`
+const HeaderContainer = styled.div<{
+  className?: string;
+  children?: React.ReactNode;
+}>`
   padding: 24px 0 16px;
   border-bottom: 1px solid ${({ theme }) => theme.colors.borderLight};
   margin-bottom: 24px;
@@ -85,4 +88,3 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 };
 
 export default PageHeader;
-

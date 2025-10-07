@@ -1,4 +1,4 @@
-import { Row, Col } from 'antd';
+import { Col, Row } from 'antd';
 import styled from 'styled-components';
 import { makeIterable } from '@/utils/iteration';
 import EllipsisWrapper from '@/components/EllipsisWrapper';
@@ -17,7 +17,13 @@ interface Props {
   onSelect: (data: { label: string; question: string }) => void;
 }
 
-const DemoTemplate = ({ label, question, onSelect }) => {
+interface DemoTemplateProps {
+  label: string;
+  question: string;
+  onSelect: (data: { label: string; question: string }) => void;
+}
+
+const DemoTemplate = ({ label, question, onSelect }: DemoTemplateProps) => {
   return (
     <Col span={8}>
       <DemoBlock

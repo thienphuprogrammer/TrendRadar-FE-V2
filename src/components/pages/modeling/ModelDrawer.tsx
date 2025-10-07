@@ -28,7 +28,9 @@ export default function ModelDrawer(props: Props) {
     form
       .validateFields()
       .then(async (values) => {
-        await onSubmit({ data: values, id: defaultValue?.modelId });
+        if (onSubmit) {
+          await onSubmit({ data: values, id: defaultValue?.modelId });
+        }
         onClose();
       })
       .catch(console.error);
@@ -37,7 +39,10 @@ export default function ModelDrawer(props: Props) {
   return (
     <Drawer
       visible={visible}
-      title={getDrawerTitle(formMode, defaultValue?.displayName)}
+      title={getDrawerTitle(
+        formMode || FORM_MODE.CREATE,
+        defaultValue?.displayName,
+      )}
       width={750}
       closable
       destroyOnClose

@@ -1,8 +1,8 @@
-import { Row, Col } from 'antd';
+import { Col, Row } from 'antd';
 import BaseTable, {
-  Props,
   COLUMN,
   ExpandableRows,
+  Props,
 } from '@/components/table/BaseTable';
 import NestedFieldTable from '@/components/table/NestedFieldTable';
 

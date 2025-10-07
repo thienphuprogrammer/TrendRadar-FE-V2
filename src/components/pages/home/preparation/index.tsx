@@ -1,17 +1,17 @@
 import clsx from 'clsx';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
-import { Typography, Collapse } from 'antd';
+import { Collapse, Typography } from 'antd';
 import DownOutlined from '@ant-design/icons/DownOutlined';
 import ErrorBoundary from './ErrorBoundary';
 import PreparationStatus from './PreparationStatus';
 import PreparationSteps from './PreparationSteps';
 import { IPromptThreadStore } from '@/components/pages/home/promptThread/store';
 import {
-  ThreadResponse,
-  AskingTaskStatus,
-  AskingTask,
   AdjustmentTask,
+  AskingTask,
+  AskingTaskStatus,
+  ThreadResponse,
 } from '@/apollo/client/graphql/__types__';
 
 export type Props = IPromptThreadStore['preparation'] & {

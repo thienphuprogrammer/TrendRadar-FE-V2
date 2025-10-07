@@ -11,16 +11,21 @@ import useAskPrompt from '@/hooks/useAskPrompt';
 import useRecommendedQuestionsInstruction from '@/hooks/useRecommendedQuestionsInstruction';
 import RecommendedQuestionsPrompt from '@/components/pages/home/prompt/RecommendedQuestionsPrompt';
 import {
-  useSuggestedQuestionsQuery,
   useCreateThreadMutation,
+  useSuggestedQuestionsQuery,
   useThreadLazyQuery,
 } from '@/apollo/client/graphql/home.generated';
 import { useGetSettingsQuery } from '@/apollo/client/graphql/settings.generated';
 import { CreateThreadInput } from '@/apollo/client/graphql/__types__';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 const { Text } = Typography;
 
-const Wrapper = ({ children }) => {
+interface WrapperProps {
+  children: React.ReactNode;
+}
+
+const Wrapper = ({ children }: WrapperProps) => {
   return (
     <div
       className="d-flex align-center justify-center flex-column"
@@ -35,7 +40,7 @@ const Wrapper = ({ children }) => {
   );
 };
 
-const SampleQuestionsInstruction = (props) => {
+const SampleQuestionsInstruction = (props: any) => {
   const { sampleQuestions, onSelect } = props;
 
   return (
@@ -45,7 +50,7 @@ const SampleQuestionsInstruction = (props) => {
   );
 };
 
-function RecommendedQuestionsInstruction(props) {
+function RecommendedQuestionsInstruction(props: any) {
   const { onSelect, loading } = props;
 
   const {
@@ -87,8 +92,6 @@ function RecommendedQuestionsInstruction(props) {
   );
 }
 
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
-
 function HomePage() {
   const $prompt = useRef<ComponentRef<typeof Prompt>>(null);
   const router = useRouter();
@@ -118,17 +121,19 @@ function HomePage() {
     [suggestedQuestionsData],
   );
 
-  const onSelectQuestion = async ({ question }) => {
-    $prompt.current.submit(question);
+  const onSelectQuestion = async ({ question }: any) => {
+    $prompt.current?.submit(question);
   };
 
   const onCreateResponse = async (payload: CreateThreadInput) => {
     try {
       askPrompt.onStopPolling();
       const response = await createThread({ variables: { data: payload } });
-      const threadId = response.data.createThread.id;
-      await preloadThread({ variables: { threadId } });
-      router.push(Path.Home + `/${threadId}`);
+      const threadId = response.data?.createThread?.id;
+      if (threadId) {
+        await preloadThread({ variables: { threadId } });
+        router.push(Path.Home + `/${threadId}`);
+      }
     } catch (error) {
       console.error(error);
     }

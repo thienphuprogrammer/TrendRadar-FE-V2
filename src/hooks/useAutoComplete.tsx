@@ -4,8 +4,8 @@ import { useDiagramQuery } from '@/apollo/client/graphql/diagram.generated';
 import { getNodeTypeIcon } from '@/utils/nodeType';
 import {
   DiagramModel,
-  DiagramView,
   DiagramModelField,
+  DiagramView,
   DiagramViewField,
 } from '@/apollo/client/graphql/__types__';
 

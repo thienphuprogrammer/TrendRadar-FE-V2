@@ -17,9 +17,9 @@ interface Props {
 const getValueByValueType = (value: any) =>
   ['boolean', 'object'].includes(typeof value) ? JSON.stringify(value) : value;
 
-const convertResultData = (data: Array<any>, columns) => {
+const convertResultData = (data: Array<any>, columns: any) => {
   return data.map((datum: Array<any>, index: number) => {
-    const obj = {};
+    const obj: Record<string, any> = {};
     // should have a unique "key" prop.
     obj['key'] = index;
 

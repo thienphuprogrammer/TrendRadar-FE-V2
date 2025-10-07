@@ -6,7 +6,13 @@
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 
-type BadgeVariant = 'primary' | 'success' | 'warning' | 'error' | 'info' | 'default';
+type BadgeVariant =
+  | 'primary'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'info'
+  | 'default';
 
 const StyledBadge = styled.span<{ $variant: BadgeVariant }>`
   display: inline-flex;
@@ -99,4 +105,3 @@ export const ModernBadge: React.FC<ModernBadgeProps> = ({
 };
 
 export default ModernBadge;
-

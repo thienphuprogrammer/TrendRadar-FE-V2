@@ -22,7 +22,7 @@ export const createLineageSelectorNameValidator =
 
 const makeCheckAllowType =
   (functions: ExpressionName[], allowTypes: COLUMN_TYPE[]) =>
-  (expression: ExpressionName, value) => {
+  (expression: ExpressionName, value: any) => {
     const isField = [NODE_TYPE.FIELD, NODE_TYPE.CALCULATED_FIELD].includes(
       value.nodeType,
     );

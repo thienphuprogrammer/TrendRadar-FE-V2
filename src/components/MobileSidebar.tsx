@@ -6,17 +6,21 @@
 import React from 'react';
 import { Drawer } from 'antd';
 import {
-  HomeOutlined,
-  DatabaseOutlined,
-  BookOutlined,
   ApiOutlined,
+  BookOutlined,
+  DatabaseOutlined,
+  HomeOutlined,
   MenuFoldOutlined,
 } from '@ant-design/icons';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import { Path } from '@/utils/enum';
 
-const MenuItem = styled.div<{ $active?: boolean }>`
+const MenuItem = styled.div<{
+  $active?: boolean;
+  children?: React.ReactNode;
+  onClick?: () => void;
+}>`
   display: flex;
   align-items: center;
   gap: 12px;
@@ -60,7 +64,10 @@ interface MobileSidebarProps {
   onClose: () => void;
 }
 
-export const MobileSidebar: React.FC<MobileSidebarProps> = ({ visible, onClose }) => {
+export const MobileSidebar: React.FC<MobileSidebarProps> = ({
+  visible,
+  onClose,
+}) => {
   const router = useRouter();
   const { pathname } = router;
 
@@ -79,7 +86,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({ visible, onClose }
       }
       placement="left"
       onClose={onClose}
-      open={visible}
+      visible={visible}
       width={280}
     >
       <MenuSection>
@@ -118,4 +125,3 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({ visible, onClose }
 };
 
 export default MobileSidebar;
-

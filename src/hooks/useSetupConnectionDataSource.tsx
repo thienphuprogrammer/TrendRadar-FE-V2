@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Path, REDSHIFT_AUTH_METHOD } from '@/utils/enum';
 import { useSaveDataSourceMutation } from '@/apollo/client/graphql/dataSource.generated';
 import { DataSourceName } from '@/apollo/client/graphql/__types__';
@@ -26,14 +26,16 @@ export default function useSetupConnectionDataSource() {
 
   const saveDataSource = useCallback(
     async (properties?: Record<string, any>) => {
-      await saveDataSourceMutation({
-        variables: {
-          data: {
-            type: selected,
-            properties: transformFormToProperties(properties, selected),
+      if (selected) {
+        await saveDataSourceMutation({
+          variables: {
+            data: {
+              type: selected,
+              properties: transformFormToProperties(properties, selected),
+            },
           },
-        },
-      });
+        });
+      }
     },
     [selected, saveDataSourceMutation],
   );
@@ -58,13 +60,16 @@ export const transformFormToProperties = (
   dataSourceType: DataSourceName,
 ) => {
   if (dataSourceType === DataSourceName.DUCKDB) {
-    const configurations = properties.configurations.reduce((acc, cur) => {
-      if (cur.key && cur.value) {
-        acc[cur.key] = cur.value;
-      }
+    const configurations = properties.configurations.reduce(
+      (acc: any, cur: any) => {
+        if (cur.key && cur.value) {
+          acc[cur.key] = cur.value;
+        }
 
-      return acc;
-    }, {});
+        return acc;
+      },
+      {},
+    );
 
     return {
       ...properties,
@@ -100,7 +105,7 @@ export const transformPropertiesToForm = (
   if (dataSourceType === DataSourceName.BIG_QUERY) {
   } else if (dataSourceType === DataSourceName.DUCKDB) {
     const configurations = Object.entries(properties?.configurations || {}).map(
-      ([key, value]) => ({ key, value }),
+      ([key, value]: [string, any]) => ({ key, value }),
     );
     const extensions = properties?.extensions || [];
     return {

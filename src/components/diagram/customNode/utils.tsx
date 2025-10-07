@@ -10,7 +10,12 @@ export type CustomNodeProps<T> = NodeProps<{
   highlight: string[];
 }>;
 
-export const StyledNode = styled.div`
+export const StyledNode = styled.div<{
+  children?: React.ReactNode;
+  onClick?: () => void;
+  'data-testid'?: string;
+  'data-guideid'?: string;
+}>`
   position: relative;
   width: 200px;
   border-radius: 4px;
@@ -55,7 +60,11 @@ export const StyledNode = styled.div`
   }
 `;
 
-export const NodeHeader = styled.div`
+export const NodeHeader = styled.div<{
+  children?: React.ReactNode;
+  className?: string;
+  color?: string;
+}>`
   position: relative;
   background-color: ${(props) => props.color || 'var(--geekblue-6)'};
   font-size: 14px;
@@ -88,7 +97,10 @@ export const NodeHeader = styled.div`
   }
 `;
 
-export const NodeBody = styled.div`
+export const NodeBody = styled.div<{
+  children?: React.ReactNode;
+  draggable?: boolean;
+}>`
   background-color: white;
   padding-bottom: 4px;
 `;

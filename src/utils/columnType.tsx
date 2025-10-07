@@ -1,13 +1,13 @@
 import {
-  NumericIcon,
+  BinaryIcon,
+  CalendarIcon,
   ColumnsIcon,
+  IdIcon,
   JsonBracesIcon,
+  NumericIcon,
   StringIcon,
   TextIcon,
-  CalendarIcon,
   TickIcon,
-  IdIcon,
-  BinaryIcon,
 } from './icons';
 import { COLUMN_TYPE } from './enum';
 

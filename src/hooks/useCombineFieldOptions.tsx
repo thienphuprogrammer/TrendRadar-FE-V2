@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useListModelsQuery } from '@/apollo/client/graphql/model.generated';
 import {
-  convertObjectToIdentifier,
   convertIdentifierToObject,
+  convertObjectToIdentifier,
 } from '@/utils/enum';
 import { RelationsDataType } from '@/components/table/ModelRelationSelectionTable';
 import { RelationFormValues } from '@/components/modals/RelationModal';

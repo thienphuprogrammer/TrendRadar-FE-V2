@@ -1,12 +1,13 @@
 /*
  * On demand import components to avoid bundle size issue
+ * Updated for Ant Design 5
  */
 
-// export { default as Affix } from 'antd/lib/affix';
-// export { default as Anchor } from 'antd/lib/anchor';
-// export { default as AutoComplete } from 'antd/lib/auto-complete';
+// export { default as Affix } from 'antd/es/affix';
+// export { default as Anchor } from 'antd/es/anchor';
+// export { default as AutoComplete } from 'antd/es/auto-complete';
 export { default as Alert } from 'antd/lib/alert';
-// export { default as Avatar } from 'antd/lib/avatar';
+export { default as Avatar } from 'antd/lib/avatar';
 // export { default as BackTop } from 'antd/lib/back-top';
 export { default as Badge } from 'antd/lib/badge';
 export { default as Breadcrumb } from 'antd/lib/breadcrumb';
@@ -19,7 +20,7 @@ export { default as Collapse } from 'antd/lib/collapse';
 // export { default as Checkbox } from 'antd/lib/checkbox';
 export { default as Col } from 'antd/lib/col';
 // export { default as Comment } from 'antd/lib/comment';
-// export { default as ConfigProvider } from 'antd/lib/config-provider';
+export { default as ConfigProvider } from 'antd/lib/config-provider';
 export { default as DatePicker } from 'antd/lib/date-picker';
 // export { default as Descriptions } from 'antd/lib/descriptions';
 export { default as Divider } from 'antd/lib/divider';
