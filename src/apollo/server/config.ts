@@ -150,6 +150,22 @@ const config = {
     : 1,
 };
 
+// Derive sensible defaults when running other services via docker and the
+// endpoints are not explicitly provided via environment variables.
+// This helps local dev where Next.js runs on host and other services run in docker.
+if (!config.wrenEngineEndpoint && (config.otherServiceUsingDocker ?? false)) {
+  const enginePort = process.env.WREN_ENGINE_PORT || '8080';
+  config.wrenEngineEndpoint = `http://localhost:${enginePort}`;
+}
+if (!config.wrenAIEndpoint && (config.otherServiceUsingDocker ?? false)) {
+  const aiPort = process.env.WREN_AI_SERVICE_PORT || '5556';
+  config.wrenAIEndpoint = `http://localhost:${aiPort}`;
+}
+if (!config.ibisServerEndpoint && (config.otherServiceUsingDocker ?? false)) {
+  const ibisPort = process.env.WREN_IBIS_SERVER_PORT || '8082';
+  config.ibisServerEndpoint = `http://localhost:${ibisPort}`;
+}
+
 export function getConfig(): IConfig {
   return { ...defaultConfig, ...pickBy(config) };
 }

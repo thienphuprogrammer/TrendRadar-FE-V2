@@ -61,10 +61,7 @@ export class DeployService implements IDeployService {
   public async getLastDeployment(projectId: number): Promise<Deploy> {
     const lastDeploy =
       await this.deployLogRepository.findLastProjectDeployLog(projectId);
-    if (!lastDeploy) {
-      throw new Error(`No deployment found for project ${projectId}`);
-    }
-    return lastDeploy;
+    return lastDeploy as any; // may be null
   }
 
   public async getInProgressDeployment(projectId: number): Promise<Deploy> {
