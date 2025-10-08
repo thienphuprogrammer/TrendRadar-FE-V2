@@ -2,10 +2,16 @@ import { useRouter } from 'next/router';
 import { Button, Layout, Space } from 'antd';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import LogoBar from '@/components/LogoBar';
 import { Path } from '@/utils/enum';
 import Deploy from '@/components/deploy/Deploy';
-import ThemeToggle from '@/components/ThemeToggle';
+
+// Dynamic import to avoid SSR hydration issues
+const ThemeToggle = dynamic(() => import('@/components/ThemeToggle'), {
+  ssr: false,
+  loading: () => <div style={{ width: '60px', height: '30px' }} />,
+});
 
 const { Header } = Layout;
 
