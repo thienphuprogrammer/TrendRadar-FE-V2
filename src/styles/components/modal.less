@@ -1,0 +1,72 @@
+// Enhanced modal styling
+.ant-modal {
+  .ant-modal-content {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border-primary);
+  }
+  
+  .ant-modal-header {
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-primary);
+    border-radius: 12px 12px 0 0;
+    
+    .ant-modal-title {
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 18px;
+    }
+  }
+  
+  .ant-modal-body {
+    color: var(--text-secondary);
+  }
+  
+  .ant-modal-footer {
+    border-top: 1px solid var(--border-primary);
+    background: var(--bg-primary);
+    border-radius: 0 0 12px 12px;
+  }
+  
+  .ant-modal-close {
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      color: var(--text-primary);
+      transform: rotate(90deg);
+    }
+  }
+}
+
+// Modal mask animation
+.ant-modal-mask {
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  
+  .dark & {
+    background-color: rgba(0, 0, 0, 0.65);
+  }
+}
+
+// Drawer styling
+.ant-drawer {
+  .ant-drawer-content {
+    background: var(--bg-primary);
+  }
+  
+  .ant-drawer-header {
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-primary);
+    
+    .ant-drawer-title {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+  }
+  
+  .ant-drawer-body {
+    background: var(--bg-secondary);
+  }
+}
