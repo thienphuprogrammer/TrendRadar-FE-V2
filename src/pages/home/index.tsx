@@ -26,11 +26,20 @@ const { Text } = Typography;
 const Wrapper = ({ children }) => {
   return (
     <div
-      className="d-flex align-center justify-center flex-column"
+      className="d-flex align-center justify-center flex-column animate-fade-in"
       style={{ height: '100%' }}
     >
-      <Logo size={48} color="var(--gray-8)" />
-      <div className="text-md text-medium gray-8 mt-3">
+      <div className="animate-scale-in">
+        <Logo size={48} color="var(--primary-600)" />
+      </div>
+      <div 
+        className="text-md text-medium mt-3 animate-slide-up"
+        style={{ 
+          color: 'var(--text-primary)',
+          fontWeight: 600,
+          fontSize: '18px'
+        }}
+      >
         Know more about your data
       </div>
       {children}
