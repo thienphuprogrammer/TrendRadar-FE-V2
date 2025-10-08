@@ -1,34 +1,47 @@
 import { useRouter } from 'next/router';
 import { Button, Layout, Space } from 'antd';
 import styled from 'styled-components';
+import { motion } from 'framer-motion';
 import LogoBar from '@/components/LogoBar';
 import { Path } from '@/utils/enum';
 import Deploy from '@/components/deploy/Deploy';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const { Header } = Layout;
 
 const StyledButton = styled(Button)<{ $isHighlight: boolean }>`
   background: ${(props) =>
-    props.$isHighlight ? 'rgba(255, 255, 255, 0.20)' : 'transparent'};
-  font-weight: ${(props) => (props.$isHighlight ? '700' : 'normal')};
-  border: none;
-  color: var(--gray-1);
+    props.$isHighlight ? 'rgba(14, 165, 233, 0.15)' : 'transparent'};
+  font-weight: ${(props) => (props.$isHighlight ? '600' : 'normal')};
+  border: ${(props) =>
+    props.$isHighlight ? '1px solid rgba(14, 165, 233, 0.3)' : '1px solid transparent'};
+  color: ${(props) =>
+    props.$isHighlight ? 'var(--primary-600)' : 'var(--text-secondary)'};
+  transition: all 0.3s ease;
 
   &:hover,
   &:focus {
     background: ${(props) =>
       props.$isHighlight
-        ? 'rgba(255, 255, 255, 0.20)'
-        : 'rgba(255, 255, 255, 0.05)'};
-    color: var(--gray-1);
+        ? 'rgba(14, 165, 233, 0.2)'
+        : 'var(--bg-hover)'};
+    color: var(--primary-600);
+    border-color: rgba(14, 165, 233, 0.3);
+    transform: translateY(-1px);
   }
 `;
 
 const StyledHeader = styled(Header)`
-  height: 48px;
-  border-bottom: 1px solid var(--gray-5);
-  background: var(--gray-10);
-  padding: 10px 16px;
+  height: 56px;
+  border-bottom: 1px solid var(--border-primary);
+  background: var(--bg-primary);
+  padding: 12px 24px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  
+  .dark & {
+    background: var(--bg-secondary);
+  }
 `;
 
 export default function HeaderBar() {
