@@ -4,23 +4,60 @@
   line-height: 1.2;
   height: auto;
   border: none;
+  transition: all 0.3s ease;
 }
 
 .adm-onboarding-btn {
   width: 130px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+  }
 }
 
 .adm-modeling-header-btn {
   width: 60px;
+  transition: all 0.3s ease;
 }
 
 .adm-fix-it-btn {
   border-color: @citrus-6;
   color: @citrus-6;
   background-color: @citrus-1;
+  transition: all 0.3s ease;
+  
   &:hover,&:focus {
     background-color: @citrus-1;
     border-color: @citrus-4;
     color: @citrus-5;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(245, 132, 51, 0.3);
+  }
+}
+
+// Primary button enhancements
+.ant-btn-primary {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+  border: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  
+  &:hover, &:focus {
+    background: linear-gradient(135deg, #0284c7 0%, #075985 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+  }
+}
+
+// Default button enhancements
+.ant-btn-default {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    border-color: #0ea5e9;
+    color: #0ea5e9;
   }
 }
