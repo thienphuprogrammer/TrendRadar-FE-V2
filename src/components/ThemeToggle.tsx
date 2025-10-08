@@ -42,6 +42,11 @@ const ToggleThumb = styled(motion.div)`
 
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
+  
+  // Don't render during SSR
+  if (typeof window === 'undefined') {
+    return null;
+  }
 
   return (
     <ToggleButton
