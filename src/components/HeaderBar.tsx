@@ -52,9 +52,11 @@ export default function HeaderBar() {
 
   return (
     <StyledHeader>
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
         className="d-flex justify-space-between align-center"
-        style={{ marginTop: -2 }}
       >
         <Space size={[48, 0]}>
           <LogoBar />
@@ -65,6 +67,7 @@ export default function HeaderBar() {
                 size="small"
                 $isHighlight={pathname.startsWith(Path.Home)}
                 onClick={() => router.push(Path.Home)}
+                data-testid="nav-home-button"
               >
                 Home
               </StyledButton>
@@ -73,6 +76,7 @@ export default function HeaderBar() {
                 size="small"
                 $isHighlight={pathname.startsWith(Path.Modeling)}
                 onClick={() => router.push(Path.Modeling)}
+                data-testid="nav-modeling-button"
               >
                 Modeling
               </StyledButton>
@@ -81,6 +85,7 @@ export default function HeaderBar() {
                 size="small"
                 $isHighlight={pathname.startsWith(Path.Knowledge)}
                 onClick={() => router.push(Path.KnowledgeQuestionSQLPairs)}
+                data-testid="nav-knowledge-button"
               >
                 Knowledge
               </StyledButton>
@@ -89,18 +94,18 @@ export default function HeaderBar() {
                 size="small"
                 $isHighlight={pathname.startsWith(Path.APIManagement)}
                 onClick={() => router.push(Path.APIManagementHistory)}
+                data-testid="nav-api-button"
               >
                 API
               </StyledButton>
             </Space>
           )}
         </Space>
-        {isModeling && (
-          <Space size={[16, 0]}>
-            <Deploy />
-          </Space>
-        )}
-      </div>
+        <Space size={[16, 0]}>
+          {isModeling && <Deploy />}
+          <ThemeToggle />
+        </Space>
+      </motion.div>
     </StyledHeader>
   );
 }
