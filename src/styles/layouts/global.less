@@ -5,13 +5,73 @@
 
 body {
   min-width: 360px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.app {
+  min-height: 100vh;
+  background-color: var(--bg-secondary);
+}
+
+// Override Ant Design styles for theme support
+.ant-layout {
+  background: var(--bg-secondary);
+}
+
+.ant-layout-header {
+  background: var(--bg-primary);
+}
+
+.ant-card {
+  background: var(--bg-primary);
+  border-color: var(--border-primary);
+  
+  &:hover {
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+.ant-btn {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.ant-modal-content {
+  background: var(--bg-primary);
+}
+
+.ant-modal-header {
+  background: var(--bg-primary);
+  border-bottom-color: var(--border-primary);
+}
+
+.ant-table {
+  background: var(--bg-primary);
+  
+  thead > tr > th {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-bottom-color: var(--border-primary);
+  }
+  
+  tbody > tr > td {
+    border-bottom-color: var(--border-primary);
+  }
+  
+  tbody > tr:hover > td {
+    background: var(--bg-hover);
+  }
 }
 
 @media (prefers-color-scheme: dark) {
   html body {
-    background: #fff;
+    background: var(--bg-secondary);
   }
   h1.next-error-h1 {
-    border-right: 1px solid rgba(0, 0, 0, 0.3);
+    border-right: 1px solid var(--border-primary);
   }
 }
