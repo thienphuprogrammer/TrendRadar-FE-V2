@@ -1,6 +1,8 @@
 // override antd styles
 .ant-table {
-  border: 1px @gray-4 solid;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  transition: all 0.3s ease;
 
   .ant-table-row:last-child .ant-table-cell {
     border-bottom: none;
@@ -18,7 +20,7 @@
 
   .ant-table-expanded-row {
     > .ant-table-cell {
-      background-color: @gray-3;
+      background-color: var(--bg-tertiary);
     }
   }
 
@@ -28,12 +30,12 @@
       border-radius: 0;
 
       .ant-table-thead > tr > th {
-        background: @gray-2;
+        background: var(--bg-secondary);
       }
 
       .ant-table-tbody > tr.ant-table-row:hover > td,
       .ant-table-tbody > tr > td.ant-table-cell-row-hover {
-        background: @gray-2;
+        background: var(--bg-hover);
       }
     }
   }
@@ -42,6 +44,17 @@
     .ant-table {
       font-size: @font-size-sm !important;
     }
+  }
+  
+  // Enhanced hover effects
+  .ant-table-tbody > tr.ant-table-row:hover > td {
+    background: var(--bg-hover);
+    transition: background-color 0.2s ease;
+  }
+  
+  // Selected row styling
+  .ant-table-tbody > tr.ant-table-row-selected > td {
+    background: rgba(14, 165, 233, 0.08);
   }
 }
 
