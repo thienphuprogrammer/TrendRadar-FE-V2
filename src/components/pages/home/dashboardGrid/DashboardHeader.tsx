@@ -5,8 +5,8 @@ import { MORE_ACTION } from '@/utils/enum';
 import { getCompactTime } from '@/utils/time';
 import { DashboardDropdown } from '@/components/diagram/CustomDropdown';
 import {
-  getScheduleText,
   Schedule,
+  getScheduleText,
 } from '@/components/pages/home/dashboardGrid/CacheSettingsDrawer';
 
 interface Props {

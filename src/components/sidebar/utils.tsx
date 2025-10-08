@@ -3,9 +3,10 @@ import { Button } from 'antd';
 import { DataNode } from 'antd/lib/tree';
 import { getColumnTypeIcon } from '@/utils/columnType';
 import { PrimaryKeyIcon, RelationshipIcon } from '@/utils/icons';
-import { ComposeDiagramField, getJoinTypeText } from '@/utils/data';
-import { assign, isEmpty, lowerCase, snakeCase } from 'lodash';
+import { ComposeDiagramField } from '@/utils/data';
+import { assign, isEmpty, snakeCase, lowerCase } from 'lodash';
 import GroupTreeTitle, { ActionType } from './modeling/GroupTreeTitle';
+import { getJoinTypeText } from '@/utils/data';
 import { NODE_TYPE } from '@/utils/enum';
 import { getNodeTypeIcon } from '@/utils/nodeType';
 

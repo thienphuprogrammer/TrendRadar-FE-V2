@@ -1,4 +1,4 @@
-import { Col, Popover, PopoverProps, Row, Typography } from 'antd';
+import { Popover, PopoverProps, Row, Col, Typography } from 'antd';
 
 type Props = PopoverProps;
 

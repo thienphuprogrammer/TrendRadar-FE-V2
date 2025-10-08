@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Button, Input } from 'antd';
+import { Input, Button } from 'antd';
 import styled from 'styled-components';
 import { attachLoading } from '@/utils/helper';
 
@@ -33,7 +33,7 @@ export default function PromptInput(props: Props) {
     }
   }, [isProcessing]);
 
-  const syncInputValue = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const syncInputValue = (event) => {
     setInputValue(event.target.value);
   };
 

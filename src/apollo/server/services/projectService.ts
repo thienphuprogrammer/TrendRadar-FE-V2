@@ -2,11 +2,8 @@ import crypto from 'crypto';
 import * as fs from 'fs';
 import path from 'path';
 import { getLogger } from '@server/utils';
-import {
-  IProjectRepository,
-  Project,
-  WREN_AI_CONNECTION_INFO,
-} from '../repositories';
+import { IProjectRepository, WREN_AI_CONNECTION_INFO } from '../repositories';
+import { Project } from '../repositories';
 import {
   CompactTable,
   IDataSourceMetadataService,
@@ -128,9 +125,6 @@ export class ProjectService implements IProjectService {
       : projectId
         ? await this.getProjectById(projectId)
         : await this.getCurrentProject();
-    if (!usedProject) {
-      throw new Error('Project not found');
-    }
     return await this.metadataService.getVersion(usedProject);
   }
 
@@ -150,7 +144,7 @@ export class ProjectService implements IProjectService {
       queryId: recommendQuestionResult.queryId,
       questionsStatus: RecommendationQuestionStatus.GENERATING,
       questions: [],
-      questionsError: undefined,
+      questionsError: null,
     });
 
     if (
@@ -172,11 +166,11 @@ export class ProjectService implements IProjectService {
     const result: ProjectRecommendationQuestionsResult = {
       status: RecommendQuestionResultStatus.NOT_STARTED,
       questions: [],
-      error: {} as WrenAIError,
+      error: null,
     };
     if (project.queryId) {
       result.status = project.questionsStatus
-        ? (RecommendQuestionResultStatus as any)[project.questionsStatus]
+        ? RecommendQuestionResultStatus[project.questionsStatus]
         : result.status;
       result.questions = project.questions || [];
       result.error = project.questionsError as WrenAIError;
@@ -188,12 +182,8 @@ export class ProjectService implements IProjectService {
     return await this.projectRepository.getCurrentProject();
   }
 
-  public async getProjectById(projectId: number): Promise<Project> {
-    const project = await this.projectRepository.findOneBy({ id: projectId });
-    if (!project) {
-      throw new Error(`Project with id ${projectId} not found`);
-    }
-    return project;
+  public async getProjectById(projectId: number) {
+    return await this.projectRepository.findOneBy({ id: projectId });
   }
 
   public async getProjectDataSourceTables(
@@ -264,9 +254,9 @@ export class ProjectService implements IProjectService {
     await this.projectRepository.deleteOne(projectId);
   }
 
-  public getGeneralConnectionInfo(project: any) {
+  public getGeneralConnectionInfo(project) {
     return Object.entries(project.connectionInfo).reduce(
-      (acc: any, [key, value]) => {
+      (acc, [key, value]) => {
         if (!SENSITIVE_PROPERTY_NAME.has(key)) {
           acc[key] = value;
         }
@@ -282,9 +272,7 @@ export class ProjectService implements IProjectService {
       maxQuestions: config.projectRecommendationQuestionsMaxQuestions,
       regenerate: true,
       configuration: {
-        language: project.language
-          ? (WrenAILanguage as any)[project.language] || WrenAILanguage.EN
-          : WrenAILanguage.EN,
+        language: WrenAILanguage[project.language] || WrenAILanguage.EN,
       },
     };
   }

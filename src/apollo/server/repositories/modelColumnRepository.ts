@@ -55,10 +55,7 @@ export class ModelColumnRepository
     super({ knexPg, tableName: 'model_column' });
   }
 
-  public async findColumnsByModelIds(
-    modelIds: number[],
-    queryOptions?: IQueryOptions,
-  ) {
+  public async findColumnsByModelIds(modelIds, queryOptions?: IQueryOptions) {
     if (queryOptions && queryOptions.tx) {
       const { tx } = queryOptions;
       const result = await tx(this.tableName)

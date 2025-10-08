@@ -1,4 +1,4 @@
-import { Button, Timeline, Typography } from 'antd';
+import { Button, Typography, Timeline } from 'antd';
 import CloseCircleFilled from '@ant-design/icons/CloseCircleFilled';
 import ToolOutlined from '@ant-design/icons/ToolOutlined';
 import useModalAction from '@/hooks/useModalAction';
@@ -51,9 +51,7 @@ export default function ErrorBoundary({ children, error }: Props) {
                 loading={error.fixStatementLoading}
                 onClose={fixItModal.closeModal}
                 onSubmit={async (sql: string) => {
-                  if (error.fixStatement) {
-                    await error.fixStatement(sql);
-                  }
+                  await error.fixStatement(sql);
                 }}
               />
             </>

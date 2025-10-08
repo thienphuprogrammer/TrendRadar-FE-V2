@@ -1,9 +1,9 @@
-import { useContext, useMemo, useRef } from 'react';
+import { useRef, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 import { compact } from 'lodash';
 import FieldSelect, {
-  FieldOption,
   FieldValue,
+  FieldOption,
   getFieldValue,
 } from './FieldSelect';
 import { nextTick } from '@/utils/time';
@@ -19,8 +19,8 @@ import { getNodeTypeIcon } from '@/utils/nodeType';
 import { aggregations } from '@/utils/expressionType';
 import { ExpressionName } from '@/apollo/client/graphql/__types__';
 import {
-  checkNumberFunctionAllowType,
   checkStringFunctionAllowType,
+  checkNumberFunctionAllowType,
 } from '@/utils/validator';
 
 interface Props {
@@ -30,7 +30,7 @@ interface Props {
   value?: FieldValue[];
 }
 
-const Wrapper = styled.div<{ className?: string }>`
+const Wrapper = styled.div`
   border: 1px var(--gray-5) solid;
   border-radius: 4px;
   overflow-x: auto;
@@ -65,7 +65,7 @@ export default function LineageSelector(props: Props) {
     return selectedData;
   }, [sourceModel, value]);
 
-  const change = async (selectValue: any, index: any) => {
+  const change = async (selectValue, index) => {
     const parsePayload = parseJson(selectValue) as FieldValue;
 
     const prevValue = value.slice(0, index);
@@ -100,11 +100,10 @@ export const getLineageOptions = (data: {
   values: FieldValue[];
 }) => {
   const { model, sourceModel, expression, values = [] } = data;
-  const hasPrimaryKey =
-    model.fields?.some((field) => field.isPrimaryKey) || false;
+  const hasPrimaryKey = model.fields.some((field) => field.isPrimaryKey);
   const isSourceModel = model.modelId === sourceModel.modelId;
 
-  const convertor = (field: any) => {
+  const convertor = (field) => {
     const value = compactObject(getFieldValue(field));
     const isRelationship = field.nodeType === NODE_TYPE.RELATION;
     // check if source model's calculated field

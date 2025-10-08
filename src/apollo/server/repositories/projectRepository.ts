@@ -2,11 +2,11 @@ import { Knex } from 'knex';
 import { BaseRepository, IBasicRepository } from './baseRepository';
 import {
   camelCase,
-  isEmpty,
   isPlainObject,
   mapKeys,
   mapValues,
   snakeCase,
+  isEmpty,
 } from 'lodash';
 import { DataSourceName } from '@server/types';
 import { IbisRedshiftConnectionType } from '@server/adaptors/ibisAdaptor';
@@ -190,7 +190,7 @@ export class ProjectRepository
         return isEmpty(value) ? {} : JSON.parse(value);
       }
       if (key === 'type') {
-        return DataSourceName[value as keyof typeof DataSourceName];
+        return DataSourceName[value];
       }
       return value;
     });
@@ -200,8 +200,8 @@ export class ProjectRepository
     return camelCaseData as Project;
   };
 
-  public override transformToDBData: (data: Partial<Project>) => any = (
-    data: Partial<Project>,
+  public override transformToDBData: (data: Project) => any = (
+    data: Project,
   ) => {
     if (!isPlainObject(data)) {
       throw new Error('Unexpected db data');

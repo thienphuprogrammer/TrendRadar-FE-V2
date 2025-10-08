@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Form, Input, message, Upload, UploadProps } from 'antd';
+import { Form, Input, Button, Upload, UploadProps, message } from 'antd';
 import UploadOutlined from '@ant-design/icons/UploadOutlined';
 import { ERROR_TEXTS } from '@/utils/error';
 import { FORM_MODE } from '@/utils/enum';
@@ -21,7 +21,7 @@ const UploadCredentials = (props: {
     if (!value) setFileList([]);
   }, [value]);
 
-  const onUploadChange = async (info: any) => {
+  const onUploadChange = async (info) => {
     const { file, fileList } = info;
     if (fileList.length) {
       const uploadFile = fileList[0];
@@ -42,7 +42,7 @@ const UploadCredentials = (props: {
 
   const onRemove = () => {
     setFileList([]);
-    onChange && onChange('');
+    onChange && onChange(undefined);
   };
 
   return (

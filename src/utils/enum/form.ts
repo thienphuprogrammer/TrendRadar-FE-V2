@@ -7,9 +7,7 @@ export enum FORM_MODE {
 const specialSymbol = '☺';
 
 export const convertObjectToIdentifier = <T>(obj: T, paths: string[]): string =>
-  paths
-    .map((path) => `${path}:${(obj as any)[path] || ''}`)
-    .join(specialSymbol);
+  paths.map((path) => `${path}:${obj[path] || ''}`).join(specialSymbol);
 
 export const convertIdentifierToObject = <T>(identifier: string): T =>
   Object.fromEntries(

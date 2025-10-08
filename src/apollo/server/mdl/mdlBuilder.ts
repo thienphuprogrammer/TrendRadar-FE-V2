@@ -71,13 +71,13 @@ export class MDLBuilder implements IMDLBuilder {
     } = builderOptions;
     this.project = project;
     this.models = models.sort((a, b) => a.id - b.id);
-    this.columns = (columns || []).sort((a, b) => a.id - b.id);
-    this.nestedColumns = nestedColumns || [];
-    this.relations = (relations || []).sort((a, b) => a.id - b.id);
+    this.columns = columns.sort((a, b) => a.id - b.id);
+    this.nestedColumns = nestedColumns;
+    this.relations = relations.sort((a, b) => a.id - b.id);
     this.views = views || [];
-    this.relatedModels = relatedModels || [];
-    this.relatedColumns = relatedColumns || [];
-    this.relatedRelations = relatedRelations || [];
+    this.relatedModels = relatedModels;
+    this.relatedColumns = relatedColumns;
+    this.relatedRelations = relatedRelations;
 
     // init manifest
     this.manifest = {};
@@ -136,9 +136,7 @@ export class MDLBuilder implements IMDLBuilder {
       return;
     }
     this.manifest.views = this.views.map((view: View) => {
-      const properties = view.properties
-        ? JSON.parse(view.properties) || {}
-        : {};
+      const properties = JSON.parse(view.properties) || {};
 
       // filter out properties that are not null or undefined
       // and are in the list of properties that are allowed
@@ -182,16 +180,9 @@ export class MDLBuilder implements IMDLBuilder {
           );
           return;
         }
-        const model = this.manifest.models?.find(
+        const model = this.manifest.models.find(
           (model: any) => model.name === modelRefName,
         );
-
-        if (!model) {
-          logger.debug(
-            `Build MDL Column Error: can not find model in manifest, modelRefName ${modelRefName}, columnId: ${column.id}`,
-          );
-          return;
-        }
 
         // modify model primary key
         if (column.isPk) {
@@ -250,13 +241,7 @@ export class MDLBuilder implements IMDLBuilder {
         const relatedModel = this.relatedModels.find(
           (model: any) => model.id === column.modelId,
         );
-        if (!relatedModel) {
-          logger.debug(
-            `Build MDL Column Error: can not find related model, modelId "${column.modelId}", columnId: "${column.id}"`,
-          );
-          return;
-        }
-        const model = this.manifest.models?.find(
+        const model = this.manifest.models.find(
           (model: any) => model.name === relatedModel.referenceName,
         );
         if (!model) {
@@ -272,13 +257,8 @@ export class MDLBuilder implements IMDLBuilder {
           isCalculated: true,
           expression,
           notNull: column.notNull ? true : false,
-          properties: column.properties
-            ? JSON.parse(column.properties)
-            : undefined,
+          properties: JSON.parse(column.properties),
         };
-        if (!model.columns) {
-          model.columns = [];
-        }
         model.columns.push(columnValue);
       });
   }
@@ -287,7 +267,7 @@ export class MDLBuilder implements IMDLBuilder {
     modelName: string,
     calculatedField: ModelColumn,
   ) {
-    const model = this.manifest.models?.find(
+    const model = this.manifest.models.find(
       (model: any) => model.name === modelName,
     );
     if (!model) {
@@ -296,7 +276,7 @@ export class MDLBuilder implements IMDLBuilder {
     }
     // if calculated field is already in the model, skip
     if (
-      model.columns?.find(
+      model.columns.find(
         (column: any) => column.name === calculatedField.referenceName,
       )
     ) {
@@ -309,13 +289,8 @@ export class MDLBuilder implements IMDLBuilder {
       isCalculated: true,
       expression,
       notNull: calculatedField.notNull ? true : false,
-      properties: calculatedField.properties
-        ? JSON.parse(calculatedField.properties)
-        : undefined,
+      properties: JSON.parse(calculatedField.properties),
     };
-    if (!model.columns) {
-      model.columns = [];
-    }
     model.columns.push(columnValue);
   }
 
@@ -374,7 +349,7 @@ export class MDLBuilder implements IMDLBuilder {
       relation: string;
     },
   ) {
-    const model = this.manifest.models?.find(
+    const model = this.manifest.models.find(
       (model: any) => model.name === modelName,
     );
     if (!model) {
@@ -385,7 +360,7 @@ export class MDLBuilder implements IMDLBuilder {
       model.columns = [];
     }
     // check if the modelReferenceName is already in the model column
-    const modelNameDuplicated = model.columns?.find(
+    const modelNameDuplicated = model.columns.find(
       (column: any) => column.name === columnData.modelReferenceName,
     );
     const column = {
@@ -393,14 +368,11 @@ export class MDLBuilder implements IMDLBuilder {
         ? `${columnData.modelReferenceName}_${columnData.columnReferenceName}`
         : columnData.modelReferenceName,
       type: columnData.modelReferenceName,
-      properties: undefined,
+      properties: null,
       relationship: columnData.relation,
       isCalculated: false,
       notNull: false,
     };
-    if (!model.columns) {
-      model.columns = [];
-    }
     model.columns.push(column);
   }
 
@@ -417,50 +389,34 @@ export class MDLBuilder implements IMDLBuilder {
       return '';
     }
     // calculated field
-    const lineage = column.lineage
-      ? (JSON.parse(column.lineage) as number[])
-      : [];
+    const lineage = JSON.parse(column.lineage) as number[];
     // lineage = [relationId1, relationId2, ..., columnId]
-    const fieldExpression = lineage.reduce(
-      (acc: string[], id: number, index: number) => {
-        const isLast = index === lineage.length - 1;
+    const fieldExpression = Object.entries<number>(lineage).reduce(
+      (acc, [index, id]) => {
+        const isLast = parseInt(index) == lineage.length - 1;
         if (isLast) {
           // id is columnId
           const columnReferenceName = this.relatedColumns.find(
             (relatedColumn) => relatedColumn.id === id,
           )?.referenceName;
-          if (columnReferenceName) {
-            acc.push(`\"${columnReferenceName}\"`);
-          }
+          acc.push(`\"${columnReferenceName}\"`);
           return acc;
         }
         // id is relationId
         const usedRelation = this.relatedRelations.find(
           (relatedRelation) => relatedRelation.id === id,
         );
-        if (!usedRelation || !currentModel || !currentModel.columns) {
-          return acc;
-        }
-        const relationColumnName = currentModel.columns.find(
+        const relationColumnName = currentModel!.columns.find(
           (c) => c.relationship === usedRelation.name,
-        )?.name;
-        if (!relationColumnName) {
-          return acc;
-        }
+        ).name;
         // move to next model
         const nextModelName =
           currentModel.name === usedRelation.fromModelName
             ? usedRelation.toModelName
             : usedRelation.fromModelName;
-        if (!nextModelName) {
-          return acc;
-        }
-        const nextModel = this.manifest.models?.find(
+        const nextModel = this.manifest.models.find(
           (model) => model.name === nextModelName,
         );
-        if (!nextModel) {
-          return acc;
-        }
         currentModel = nextModel;
         acc.push(relationColumnName);
         return acc;
@@ -495,7 +451,7 @@ export class MDLBuilder implements IMDLBuilder {
     if (this.useRustWrenEngine()) {
       // 1. remove all the key that the value is null
       this.manifest.models = this.manifest.models?.map((model) => {
-        model.columns?.map((column) => {
+        model.columns.map((column) => {
           column.properties = pickBy(
             column.properties,
             (value) => value !== null,
@@ -530,10 +486,10 @@ export class MDLBuilder implements IMDLBuilder {
   private useRustWrenEngine(): boolean {
     return !!config.experimentalEngineRustVersion;
   }
-  private buildDataSource(): WrenEngineDataSourceType | undefined {
+  private buildDataSource(): WrenEngineDataSourceType {
     const type = this.project.type;
     if (!type) {
-      return undefined;
+      return;
     }
     switch (type) {
       case DataSourceName.ATHENA:

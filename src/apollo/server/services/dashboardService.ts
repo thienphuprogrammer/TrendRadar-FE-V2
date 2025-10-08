@@ -1,24 +1,23 @@
 import {
+  IDashboardRepository,
+  IDashboardItemRepository,
   Dashboard,
   DashboardItem,
+  DashboardItemType,
   DashboardItemDetail,
   DashboardItemLayout,
-  DashboardItemType,
-  IDashboardItemRepository,
-  IDashboardRepository,
 } from '@server/repositories';
 import { getLogger } from '@server/utils';
 import { getUTCOffsetMinutes } from '@server/utils/timezone';
 import { IProjectService } from './projectService';
 import {
+  SetDashboardCacheData,
+  ScheduleFrequencyEnum,
   CacheScheduleDayEnum,
   DashboardSchedule,
   DAYS,
-  ScheduleFrequencyEnum,
-  SetDashboardCacheData,
 } from '@server/models/dashboard';
 import { CronExpressionParser } from 'cron-parser';
-
 const logger = getLogger('DashboardService');
 logger.level = 'debug';
 
@@ -107,29 +106,21 @@ export class DashboardService implements IDashboardService {
       let nextScheduledAt: Date | null = null;
 
       // Process schedule if caching is enabled
-      if (
-        cacheEnabled &&
-        schedule &&
-        schedule.frequency !== ScheduleFrequencyEnum.NEVER
-      ) {
+      if (cacheEnabled && schedule.frequency !== ScheduleFrequencyEnum.NEVER) {
         cronExpression = this.generateCronExpression(schedule);
-        if (cronExpression) {
-          nextScheduledAt = this.calculateNextRunTime(cronExpression);
-        }
+        nextScheduledAt = this.calculateNextRunTime(cronExpression);
       }
 
       // Update dashboard with new schedule
       return await this.dashboardRepository.updateOne(dashboardId, {
         cacheEnabled,
-        scheduleFrequency: schedule?.frequency,
-        scheduleTimezone: schedule?.timezone,
+        scheduleFrequency: schedule.frequency,
+        scheduleTimezone: schedule.timezone,
         scheduleCron: cronExpression,
         nextScheduledAt,
       });
     } catch (error) {
-      logger.error(
-        `Failed to set dashboard schedule: ${(error as Error).message}`,
-      );
+      logger.error(`Failed to set dashboard schedule: ${error.message}`);
       throw error;
     }
   }
@@ -152,7 +143,7 @@ export class DashboardService implements IDashboardService {
     const dashboard = await this.dashboardRepository.findOneBy({
       projectId: project.id,
     });
-    return dashboard as Dashboard;
+    return { ...dashboard };
   }
 
   public async getDashboardItem(
@@ -238,60 +229,28 @@ export class DashboardService implements IDashboardService {
     return true;
   }
 
-  public parseCronExpression(dashboard: Dashboard): DashboardSchedule {
-    if (!dashboard.scheduleCron) {
-      return {
-        frequency: dashboard.scheduleFrequency,
-        hour: 0,
-        minute: 0,
-        day: CacheScheduleDayEnum.MON,
-        timezone: dashboard.scheduleTimezone || '',
-        cron: '',
-      } as DashboardSchedule;
-    }
-    switch (dashboard.scheduleFrequency) {
-      case ScheduleFrequencyEnum.CUSTOM:
-        return {
-          frequency: ScheduleFrequencyEnum.CUSTOM,
-          hour: 0,
-          minute: 0,
-          day: CacheScheduleDayEnum.MON,
-          timezone: dashboard.scheduleTimezone || '',
-          cron: dashboard.scheduleCron,
-        };
-      case ScheduleFrequencyEnum.DAILY:
-      case ScheduleFrequencyEnum.WEEKLY: {
-        const parts = dashboard.scheduleCron.split(' ');
-        if (parts.length !== 5) {
-          throw new Error('Invalid cron expression format');
-        }
-        const [minute, hour, , , dayOfWeek] = parts;
-        return this.toTimezone({
-          frequency: dashboard.scheduleFrequency,
-          hour: parseInt(hour, 10),
-          minute: parseInt(minute, 10),
-          day:
-            dashboard.scheduleFrequency === ScheduleFrequencyEnum.WEEKLY
-              ? (dayOfWeek as CacheScheduleDayEnum)
-              : CacheScheduleDayEnum.MON,
-          timezone: dashboard.scheduleTimezone || '',
-          cron: '',
-        } as DashboardSchedule);
-      }
-      case ScheduleFrequencyEnum.NEVER: {
-        return {
-          frequency: ScheduleFrequencyEnum.NEVER,
-          hour: 0,
-          minute: 0,
-          day: CacheScheduleDayEnum.MON,
-          timezone: dashboard.scheduleTimezone || '',
-          cron: '',
-        } as DashboardSchedule;
-      }
-      default: {
-        throw new Error('Invalid schedule frequency');
-      }
-    }
+  private async calculateNewLayout(
+    dashboardId: number,
+  ): Promise<DashboardItemLayout> {
+    const dashboardItems = await this.dashboardItemRepository.findAllBy({
+      dashboardId,
+    });
+    const allLayouts = dashboardItems.map((item) => item.layout);
+    if (allLayouts.length === 0) return { x: 0, y: 0, w: 3, h: 2 };
+
+    const columnCount = 6;
+    const halfLayoutX = columnCount / 2;
+    // the current max y is the current row
+    const maxY = Math.max(...allLayouts.map((layout) => layout.y));
+
+    const latestLayout = allLayouts.filter((layout) => layout.y === maxY);
+    const isNextRow =
+      latestLayout.reduce((acc, layout) => acc + layout.x + layout.w, 0) >
+      halfLayoutX;
+
+    const x = isNextRow ? 0 : halfLayoutX;
+    const y = isNextRow ? maxY + 2 : maxY;
+    return { x, y, w: 3, h: 2 };
   }
 
   protected toUTC(schedule: DashboardSchedule): DashboardSchedule {
@@ -451,9 +410,7 @@ export class DashboardService implements IDashboardService {
       });
       return interval.next().toDate();
     } catch (error) {
-      logger.error(
-        `Failed to parse cron expression: ${(error as Error).message}`,
-      );
+      logger.error(`Failed to parse cron expression: ${error.message}`);
       return null;
     }
   }
@@ -508,27 +465,59 @@ export class DashboardService implements IDashboardService {
     }
   }
 
-  private async calculateNewLayout(
-    dashboardId: number,
-  ): Promise<DashboardItemLayout> {
-    const dashboardItems = await this.dashboardItemRepository.findAllBy({
-      dashboardId,
-    });
-    const allLayouts = dashboardItems.map((item) => item.layout);
-    if (allLayouts.length === 0) return { x: 0, y: 0, w: 3, h: 2 };
-
-    const columnCount = 6;
-    const halfLayoutX = columnCount / 2;
-    // the current max y is the current row
-    const maxY = Math.max(...allLayouts.map((layout) => layout.y));
-
-    const latestLayout = allLayouts.filter((layout) => layout.y === maxY);
-    const isNextRow =
-      latestLayout.reduce((acc, layout) => acc + layout.x + layout.w, 0) >
-      halfLayoutX;
-
-    const x = isNextRow ? 0 : halfLayoutX;
-    const y = isNextRow ? maxY + 2 : maxY;
-    return { x, y, w: 3, h: 2 };
+  public parseCronExpression(dashboard: Dashboard): DashboardSchedule {
+    if (!dashboard.scheduleCron) {
+      return {
+        frequency: dashboard.scheduleFrequency,
+        hour: 0,
+        minute: 0,
+        day: null,
+        timezone: dashboard.scheduleTimezone || '',
+        cron: '',
+      } as DashboardSchedule;
+    }
+    switch (dashboard.scheduleFrequency) {
+      case ScheduleFrequencyEnum.CUSTOM:
+        return {
+          frequency: ScheduleFrequencyEnum.CUSTOM,
+          hour: 0,
+          minute: 0,
+          day: null,
+          timezone: dashboard.scheduleTimezone || '',
+          cron: dashboard.scheduleCron,
+        };
+      case ScheduleFrequencyEnum.DAILY:
+      case ScheduleFrequencyEnum.WEEKLY: {
+        const parts = dashboard.scheduleCron.split(' ');
+        if (parts.length !== 5) {
+          throw new Error('Invalid cron expression format');
+        }
+        const [minute, hour, , , dayOfWeek] = parts;
+        return this.toTimezone({
+          frequency: dashboard.scheduleFrequency,
+          hour: parseInt(hour, 10),
+          minute: parseInt(minute, 10),
+          day:
+            dashboard.scheduleFrequency === ScheduleFrequencyEnum.WEEKLY
+              ? (dayOfWeek as CacheScheduleDayEnum)
+              : null,
+          timezone: dashboard.scheduleTimezone || '',
+          cron: null,
+        } as DashboardSchedule);
+      }
+      case ScheduleFrequencyEnum.NEVER: {
+        return {
+          frequency: ScheduleFrequencyEnum.NEVER,
+          hour: null,
+          minute: null,
+          day: null,
+          timezone: dashboard.scheduleTimezone || '',
+          cron: null,
+        } as DashboardSchedule;
+      }
+      default: {
+        throw new Error('Invalid schedule frequency');
+      }
+    }
   }
 }

@@ -2,7 +2,7 @@ import posthog from 'posthog-js';
 import { NextRouter } from 'next/router';
 import env, { UserConfig } from '@/utils/env';
 
-const setupPostHog = (userConfig: any) => {
+const setupPostHog = (userConfig) => {
   // Check that PostHog is client-side (used to handle Next.js SSR)
   if (typeof window !== 'undefined') {
     posthog.init(userConfig.telemetryKey, {

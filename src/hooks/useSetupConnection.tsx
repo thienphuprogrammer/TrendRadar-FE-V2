@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SETUP } from '@/utils/enum';
 import { parseGraphQLError } from '@/utils/errorHandler';
 import useSetupConnectionDataSource from './useSetupConnectionDataSource';
@@ -31,9 +31,7 @@ export default function useSetupConnection() {
   }, [stepKey]);
 
   useEffect(() => {
-    if (setupConnectionDataSource.error) {
-      setConnectError(parseGraphQLError(setupConnectionDataSource.error));
-    }
+    setConnectError(parseGraphQLError(setupConnectionDataSource.error));
   }, [setupConnectionDataSource.error]);
 
   const onBack = () => {
@@ -50,21 +48,19 @@ export default function useSetupConnection() {
           dataSource: data.dataSource,
           dispatch: () => setStepKey(SETUP.CREATE_DATA_SOURCE),
         });
-      } else if (data.template) {
+      } else {
         setupConnectionSampleDataset.saveSampleDataset(data.template);
       }
     };
 
     const dispatchCreateDataSource = (data: StepData) => {
-      if (data.properties) {
-        setupConnectionDataSource.saveDataSource(data.properties);
-      }
+      setupConnectionDataSource.saveDataSource(data.properties);
     };
 
     // Next strategy
-    if (stepKey === SETUP.STARTER && data) {
+    if (stepKey === SETUP.STARTER) {
       dispatchStarter(data);
-    } else if (stepKey === SETUP.CREATE_DATA_SOURCE && data) {
+    } else if (stepKey === SETUP.CREATE_DATA_SOURCE) {
       dispatchCreateDataSource(data);
     }
   };

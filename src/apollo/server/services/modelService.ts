@@ -10,27 +10,25 @@ import {
 } from '@server/repositories';
 import {
   getLogger,
-  replaceAllowableSyntax,
   safeParseJson,
+  replaceAllowableSyntax,
   validateDisplayName,
 } from '@server/utils';
-import {
-  DataSourceName,
-  RelationData,
-  UpdateRelationData,
-} from '@server/types';
+import { RelationData, UpdateRelationData } from '@server/types';
 import { IProjectService } from './projectService';
 import {
-  CheckCalculatedFieldCanQueryData,
   CreateCalculatedFieldData,
   ExpressionName,
   UpdateCalculatedFieldData,
+  CheckCalculatedFieldCanQueryData,
 } from '@server/models';
 import { IMDLService } from './mdlService';
 import { IWrenEngineAdaptor } from '../adaptors/wrenEngineAdaptor';
 import { ValidationRules } from '@server/adaptors/ibisAdaptor';
-import { capitalize, isEmpty } from 'lodash';
+import { isEmpty, capitalize } from 'lodash';
+import {} from '@server/utils/regex';
 import * as Errors from '@server/utils/error';
+import { DataSourceName } from '@server/types';
 import { IQueryService } from './queryService';
 
 const logger = getLogger('ModelService');
@@ -146,12 +144,9 @@ export class ModelService implements IModelService {
       } as CheckCalculatedFieldCanQueryData);
     logger.debug(`${logTitle} : checkCalculatedFieldCanQuery: ${canQuery}`);
     if (!canQuery) {
-      const parsedErrorMessage = safeParseJson(errorMessage || '');
+      const parsedErrorMessage = safeParseJson(errorMessage);
       throw Errors.create(Errors.GeneralErrorCodes.INVALID_CALCULATED_FIELD, {
-        customMessage:
-          parsedErrorMessage?.message ||
-          errorMessage ||
-          'Invalid calculated field',
+        customMessage: parsedErrorMessage?.message || errorMessage,
         originalError: parsedErrorMessage || null,
       });
     }
@@ -192,9 +187,6 @@ export class ModelService implements IModelService {
     const model = await this.modelRepository.findOneBy({
       id: column.modelId,
     });
-    if (!model) {
-      throw new Error('Model not found');
-    }
     const { valid, message } = await this.validateCalculatedFieldNaming(
       displayName,
       column.modelId,
@@ -219,9 +211,9 @@ export class ModelService implements IModelService {
       } as CheckCalculatedFieldCanQueryData);
     logger.debug(`${logTitle}: checkCalculatedFieldCanQuery: ${canQuery}`);
     if (!canQuery) {
-      const error = JSON.parse(errorMessage || '{}');
+      const error = JSON.parse(errorMessage);
       throw Errors.create(Errors.GeneralErrorCodes.INVALID_CALCULATED_FIELD, {
-        customMessage: error?.message || 'Invalid calculated field',
+        customMessage: error?.message,
         originalError: error,
       });
     }
@@ -253,11 +245,10 @@ export class ModelService implements IModelService {
       const model = models.find((m) => m.sourceTableName === table.tableName);
       if (!model) {
         logger.debug(`Model not found, table name: ${table.tableName}`);
-        continue;
       }
       await this.modelColumnRepository.setModelPrimaryKey(
         model.id,
-        table.primaryKey || '',
+        table.primaryKey,
       );
     }
   }
@@ -297,7 +288,7 @@ export class ModelService implements IModelService {
       (await this.modelColumnRepository.findColumnsByModelIds(
         models.map((m) => m.id),
       )) as ModelColumn[];
-    const transformedColumns = tables.reduce((acc: any[], table) => {
+    const transformedColumns = tables.reduce((acc, table) => {
       const columns = table.columns?.map((column) => {
         return { ...column, tableName: table.tableName };
       });
@@ -315,9 +306,6 @@ export class ModelService implements IModelService {
         const model = models.find(
           (m) => m.sourceTableName === column.tableName,
         );
-        if (!model) {
-          return;
-        }
         const sourceColumn = sourceColumns.find(
           (sourceColumn) =>
             sourceColumn.modelId === model.id &&
@@ -455,17 +443,14 @@ export class ModelService implements IModelService {
     const calculatedFields = await this.modelColumnRepository.findAllBy({
       isCalculated: true,
     });
-    const relatedCalculatedFields = calculatedFields.reduce(
-      (acc: ModelColumn[], field) => {
-        const lineage = JSON.parse(field.lineage || '[]');
-        const relationIds = lineage.slice(0, lineage.length - 1);
-        if (relationIds.includes(relationId)) {
-          acc.push(field);
-        }
-        return acc;
-      },
-      [],
-    );
+    const relatedCalculatedFields = calculatedFields.reduce((acc, field) => {
+      const lineage = JSON.parse(field.lineage);
+      const relationIds = lineage.slice(0, lineage.length - 1);
+      if (relationIds.includes(relationId)) {
+        acc.push(field);
+      }
+      return acc;
+    }, []);
     return relatedCalculatedFields;
   }
 
@@ -540,10 +525,6 @@ export class ModelService implements IModelService {
     const toColumn = columns.find(
       (column) => column.id === relation.toColumnId,
     );
-
-    if (!fromColumn || !toColumn) {
-      throw new Error('Column not found');
-    }
 
     return (
       capitalize(fromModel.sourceTableName) +
@@ -652,9 +633,9 @@ export class ModelService implements IModelService {
     const manifest = mdlBuilder.getManifest();
 
     // find the calculated field in manifest
-    const calculatedField = manifest?.models
-      ?.find((m) => m.name === modelName)
-      ?.columns?.find((c) => c.name === referenceName);
+    const calculatedField = manifest.models
+      .find((m) => m.name === modelName)
+      ?.columns.find((c) => c.name === referenceName);
 
     logger.debug(`Calculated field MDL: ${JSON.stringify(calculatedField)}`);
 

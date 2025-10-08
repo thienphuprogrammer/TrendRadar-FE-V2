@@ -2,14 +2,13 @@ import { pick } from 'lodash';
 import { IWrenAIAdaptor } from '@server/adaptors';
 import { InstructionInput, UpdateInstructionInput } from '@server/models';
 import {
-  GenerateInstructionInput,
   InstructionResult,
   InstructionStatus,
+  GenerateInstructionInput,
 } from '@server/models/adaptor';
 import { IInstructionRepository, Instruction } from '@server/repositories';
 import * as Errors from '@server/utils/error';
 import { GeneralErrorCodes } from '@server/utils/error';
-
 export interface IInstructionService {
   getInstructions(projectId: number): Promise<Instruction[]>;
   getInstruction(id: number): Promise<Instruction>;
@@ -38,11 +37,7 @@ export class InstructionService implements IInstructionService {
   }
 
   public async getInstruction(id: number): Promise<Instruction> {
-    const instruction = await this.instructionRepository.findOneBy({ id });
-    if (!instruction) {
-      throw new Error(`Instruction with id ${id} not found`);
-    }
-    return instruction;
+    return this.instructionRepository.findOneBy({ id });
   }
 
   public async createInstruction(

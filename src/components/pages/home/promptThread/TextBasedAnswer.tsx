@@ -89,7 +89,7 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
     if (isStreaming) {
       setTextAnswer(answerStreamTask);
     } else {
-      setTextAnswer(content || '');
+      setTextAnswer(content);
     }
   }, [answerStreamTask, isStreaming, content]);
 
@@ -111,10 +111,7 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
     [numRowsUsedInLLM, status],
   );
 
-  const allowPreviewData = useMemo(
-    () => Boolean((rowsUsed || 0) > 0),
-    [rowsUsed],
-  );
+  const allowPreviewData = useMemo(() => Boolean(rowsUsed > 0), [rowsUsed]);
 
   const [previewData, previewDataResult] = usePreviewDataMutation({
     onError: (error) => console.error(error),
@@ -140,21 +137,18 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
     }
   }, [isLastThreadResponse, allowPreviewData]);
 
-  const loading = !getIsLoadingFinished(
-    status || ThreadResponseAnswerStatus.NOT_STARTED,
-  );
+  const loading = !getIsLoadingFinished(status);
 
   const onRegenerateAnswer = () => {
     setTextAnswer('');
     onGenerateTextBasedAnswer(id);
   };
 
-  const onMoreClick = async (
-    payload: MORE_ACTION | { type: MORE_ACTION; data: any },
-  ) => {
-    const type = typeof payload === 'string' ? payload : payload.type;
-    const data =
-      typeof payload === 'string' ? adjustAnswerDropdownData : payload.data;
+  const onMoreClick = async (payload: {
+    type: MORE_ACTION;
+    data: typeof adjustAnswerDropdownData;
+  }) => {
+    const { type, data } = payload;
     if (type === MORE_ACTION.ADJUST_STEPS) {
       onOpenAdjustReasoningStepsModal({
         responseId: data.responseId,
@@ -162,7 +156,7 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
         sqlGenerationReasoning: data.sqlGenerationReasoning,
       });
     } else if (type === MORE_ACTION.ADJUST_SQL) {
-      onOpenAdjustSQLModal({ responseId: id, sql: data.sql || '' });
+      onOpenAdjustSQLModal({ responseId: id, sql: data.sql });
     }
   };
 

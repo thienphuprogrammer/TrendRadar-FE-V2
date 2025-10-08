@@ -8,12 +8,12 @@ import { Project } from '../repositories';
 import { IIbisAdaptor } from '../adaptors/ibisAdaptor';
 import {
   DialectSQL,
-  QuestionsResult,
-  QuestionsStatus,
+  WrenSQL,
+  WrenAILanguage,
   SqlPairResult,
   SqlPairStatus,
-  WrenAILanguage,
-  WrenSQL,
+  QuestionsResult,
+  QuestionsStatus,
 } from '../models/adaptor';
 import { Manifest } from '@server/mdl/type';
 import { DataSourceName } from '@server/types';
@@ -106,9 +106,7 @@ export class SqlPairService implements ISqlPairService {
   ): Promise<string[]> {
     try {
       const configurations = {
-        language: project.language
-          ? (WrenAILanguage as any)[project.language] || WrenAILanguage.EN
-          : WrenAILanguage.EN,
+        language: WrenAILanguage[project.language] || WrenAILanguage.EN,
       };
 
       const { queryId } = await this.wrenAIAdaptor.generateQuestions({
@@ -122,10 +120,10 @@ export class SqlPairService implements ISqlPairService {
           customMessage: result.error.message,
         });
       }
-      return result.questions || [];
+      return result.questions;
     } catch (err) {
       throw Errors.create(Errors.GeneralErrorCodes.GENERATE_QUESTIONS_ERROR, {
-        customMessage: (err as Error).message,
+        customMessage: err.message,
       });
     }
   }
@@ -178,8 +176,8 @@ export class SqlPairService implements ISqlPairService {
       { tx },
     );
     // batch parall process with size of 10
-    const successPairs: any[] = [];
-    const errorPairs: any[] = [];
+    const successPairs = [];
+    const errorPairs = [];
     const chunks = chunk(newPairs, 10);
     for (const pairs of chunks) {
       await Promise.allSettled(
@@ -267,7 +265,7 @@ export class SqlPairService implements ISqlPairService {
       logger.error(`edit sql pair failed. ${error}`);
       await tx.rollback();
       throw Errors.create(Errors.GeneralErrorCodes.DEPLOY_SQL_PAIR_ERROR, {
-        customMessage: (error as Error).message,
+        customMessage: error.message,
       });
     }
   }
@@ -294,7 +292,7 @@ export class SqlPairService implements ISqlPairService {
       logger.error(`delete sql pair failed. ${error}`);
       await tx.rollback();
       throw Errors.create(Errors.GeneralErrorCodes.DEPLOY_SQL_PAIR_ERROR, {
-        customMessage: (error as Error).message,
+        customMessage: error.message,
       });
     }
   }
@@ -315,7 +313,6 @@ export class SqlPairService implements ISqlPairService {
   ): Promise<Partial<QuestionsResult>> {
     let result = await this.wrenAIAdaptor.getQuestionsResult(queryId);
     while (
-      result.status &&
       ![QuestionsStatus.SUCCEEDED, QuestionsStatus.FAILED].includes(
         result.status,
       )

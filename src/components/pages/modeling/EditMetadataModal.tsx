@@ -1,4 +1,4 @@
-import { Form, Modal } from 'antd';
+import { Modal, Form } from 'antd';
 import { ModalAction } from '@/hooks/useModalAction';
 import { NODE_TYPE } from '@/utils/enum';
 import { EditableContext } from '@/components/EditableWrapper';
@@ -31,9 +31,7 @@ export default function EditMetadataModal(props: Props) {
       .then(async () => {
         // Get the saved metadata values to submit if there is no editing failed
         const values = form.getFieldValue(formNamespace);
-        if (onSubmit) {
-          await onSubmit({ data: values, nodeType });
-        }
+        await onSubmit({ data: values, nodeType });
         onClose();
       })
       .catch(console.error);
@@ -57,15 +55,15 @@ export default function EditMetadataModal(props: Props) {
         <Form form={form} component={false}>
           {nodeType === NODE_TYPE.MODEL && (
             <EditModelMetadata
-              {...(defaultValue as EditModelProps)}
               formNamespace={formNamespace}
+              {...(defaultValue as EditModelProps)}
             />
           )}
 
           {nodeType === NODE_TYPE.VIEW && (
             <EditViewMetadata
-              {...(defaultValue as EditViewProps)}
               formNamespace={formNamespace}
+              {...(defaultValue as EditViewProps)}
             />
           )}
         </Form>

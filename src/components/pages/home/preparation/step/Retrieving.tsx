@@ -1,4 +1,4 @@
-import { Tag, Typography } from 'antd';
+import { Typography, Tag } from 'antd';
 import { makeIterable } from '@/utils/iteration';
 import { Spinner } from '@/components/PageLoading';
 

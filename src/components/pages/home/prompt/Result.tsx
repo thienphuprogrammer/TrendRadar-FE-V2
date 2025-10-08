@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { memo, ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useRef, memo, useState } from 'react';
 import { Button } from 'antd';
 import styled from 'styled-components';
 import { PROCESS_STATE } from '@/utils/enum';
@@ -41,10 +41,10 @@ const StyledResult = styled.div`
 interface Props {
   processState: PROCESS_STATE;
   data: {
-    type?: AskingTaskType | null;
+    type: AskingTaskType;
     originalQuestion: string;
     askingStreamTask: string;
-    recommendedQuestions?: RecommendedQuestionsTask | null;
+    recommendedQuestions: RecommendedQuestionsTask;
     intentReasoning: string;
   };
   error?: any;
@@ -61,11 +61,7 @@ interface Props {
   loading?: boolean;
 }
 
-interface WrapperProps {
-  children: ReactNode;
-}
-
-const Wrapper = ({ children }: WrapperProps) => {
+const Wrapper = ({ children }) => {
   return (
     <StyledResult
       className="border border-gray-3 rounded p-4"
@@ -256,31 +252,34 @@ const MisleadingQuery = makeProcessingError({
 });
 
 const getGeneralAnswerStateComponent = (state: PROCESS_STATE) => {
-  const components: Record<PROCESS_STATE, any> = {
-    [PROCESS_STATE.FINISHED]: GeneralAnswer,
-  } as any;
-  return components[state] || null;
+  return (
+    {
+      [PROCESS_STATE.FINISHED]: GeneralAnswer,
+    }[state] || null
+  );
 };
 
 const getMisleadingQueryStateComponent = (state: PROCESS_STATE) => {
-  const components: Record<PROCESS_STATE, any> = {
-    [PROCESS_STATE.FINISHED]: MisleadingQuery,
-  } as any;
-  return components[state] || null;
+  return (
+    {
+      [PROCESS_STATE.FINISHED]: MisleadingQuery,
+    }[state] || null
+  );
 };
 
 const getDefaultStateComponent = (state: PROCESS_STATE) => {
-  const components: Record<PROCESS_STATE, any> = {
-    [PROCESS_STATE.UNDERSTANDING]: Understanding,
-    // Polling AI status for every 1 second might skip the searching state.
-    [PROCESS_STATE.SEARCHING]: IntentionFinished,
-    [PROCESS_STATE.PLANNING]: IntentionFinished,
-    [PROCESS_STATE.GENERATING]: IntentionFinished,
-    // The finished status will respond by AI directly if viewId found, so we need to handle with intention finished.
-    [PROCESS_STATE.FINISHED]: IntentionFinished,
-    [PROCESS_STATE.FAILED]: Failed,
-  } as any;
-  return components[state] || null;
+  return (
+    {
+      [PROCESS_STATE.UNDERSTANDING]: Understanding,
+      // Polling AI status for every 1 second might skip the searching state.
+      [PROCESS_STATE.SEARCHING]: IntentionFinished,
+      [PROCESS_STATE.PLANNING]: IntentionFinished,
+      [PROCESS_STATE.GENERATING]: IntentionFinished,
+      // The finished status will respond by AI directly if viewId found, so we need to handle with intention finished.
+      [PROCESS_STATE.FINISHED]: IntentionFinished,
+      [PROCESS_STATE.FAILED]: Failed,
+    }[state] || null
+  );
 };
 
 const makeProcessStateStrategy = (type: AskingTaskType) => {

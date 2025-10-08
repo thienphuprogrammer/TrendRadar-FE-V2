@@ -2,26 +2,26 @@ import styled from 'styled-components';
 import { Columns } from '@styled-icons/fa-solid';
 import {
   Calendar,
-  Cube,
-  IdCard,
-  InfoCircle,
-  LineChart,
   Text,
+  InfoCircle,
+  Cube,
+  LineChart,
+  IdCard,
 } from '@styled-icons/boxicons-regular';
 import { Braces, Map2 } from '@styled-icons/remix-line';
 import {
-  SortAlphabetically,
   SortNumerically,
+  SortAlphabetically,
   Tick,
 } from '@styled-icons/typicons';
 import {
-  CenterFocusWeak,
-  Explore,
-  OpenInNew,
-  Pageview,
-  Refresh,
-  Translate,
   VpnKey,
+  CenterFocusWeak,
+  Refresh,
+  Pageview,
+  Explore,
+  Translate,
+  OpenInNew,
 } from '@styled-icons/material-outlined';
 import FieldBinaryOutlined from '@ant-design/icons/FieldBinaryOutlined';
 import MonitorOutlined from '@ant-design/icons/MonitorOutlined';

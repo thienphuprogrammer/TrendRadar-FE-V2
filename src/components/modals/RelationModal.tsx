@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { isEmpty } from 'lodash';
-import { Form, Modal, Select } from 'antd';
+import { Modal, Form, Select } from 'antd';
 import { ModalAction } from '@/hooks/useModalAction';
 import { ERROR_TEXTS } from '@/utils/error';
 import CombineFieldSelector from '@/components/selectors/CombineFieldSelector';
-import { convertIdentifierToObject, FORM_MODE, JOIN_TYPE } from '@/utils/enum';
+import { JOIN_TYPE, FORM_MODE, convertIdentifierToObject } from '@/utils/enum';
 import { getJoinTypeText } from '@/utils/data';
 import {
   createRelationshipFromFieldValidator,

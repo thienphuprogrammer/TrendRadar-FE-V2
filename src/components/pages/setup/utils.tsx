@@ -2,7 +2,7 @@ import { merge } from 'lodash';
 import { IconComponentProps } from '@/import/icon';
 import ShoppingCartOutlined from '@ant-design/icons/ShoppingCartOutlined';
 import IdCardOutlined from '@ant-design/icons/IdcardOutlined';
-import { DATA_SOURCES, SETUP } from '@/utils/enum';
+import { SETUP, DATA_SOURCES } from '@/utils/enum';
 import Starter from './Starter';
 import ConnectDataSource from './ConnectDataSource';
 import SelectModels from './SelectModels';
@@ -140,7 +140,7 @@ export const getDataSource = (dataSource: DATA_SOURCES) => {
 
 export const getTemplates = () => {
   return Object.keys(TEMPLATE_OPTIONS).map((key) => ({
-    ...(TEMPLATE_OPTIONS as any)[key],
+    ...TEMPLATE_OPTIONS[key],
     value: key,
   })) as ButtonOption[];
 };

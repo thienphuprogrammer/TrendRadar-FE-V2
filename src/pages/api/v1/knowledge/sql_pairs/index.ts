@@ -3,8 +3,8 @@ import { components } from '@/common';
 import { ApiType } from '@server/repositories/apiHistoryRepository';
 import {
   ApiError,
-  handleApiError,
   respondWithSimple,
+  handleApiError,
   validateSql,
 } from '@/apollo/server/utils/apiUtils';
 import { getLogger } from '@server/utils';

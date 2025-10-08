@@ -1,9 +1,9 @@
 import {
-  forwardRef,
   useEffect,
-  useImperativeHandle,
   useMemo,
   useState,
+  forwardRef,
+  useImperativeHandle,
 } from 'react';
 import styled from 'styled-components';
 import { PROCESS_STATE } from '@/utils/enum';
@@ -39,7 +39,7 @@ interface Attributes {
   close: () => void;
 }
 
-const PromptStyle = styled.div<{ children?: React.ReactNode }>`
+const PromptStyle = styled.div`
   position: fixed;
   width: 680px;
   left: 50%;
@@ -73,10 +73,10 @@ export default forwardRef<Attributes, Props>(function Prompt(props, ref) {
 
   const result = useMemo(
     () => ({
-      type: askingTask?.type || null, // question's type
+      type: askingTask?.type, // question's type
       originalQuestion, // original question
       askingStreamTask, // for general answer
-      recommendedQuestions: recommendedQuestions || null, // guiding user to ask
+      recommendedQuestions, // guiding user to ask
       intentReasoning: askingTask?.intentReasoning || '',
     }),
     [data],

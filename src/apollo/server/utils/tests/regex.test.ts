@@ -1,4 +1,4 @@
-import { replaceAllowableSyntax, validateDisplayName } from '../regex';
+import { validateDisplayName, replaceAllowableSyntax } from '../regex';
 
 describe('validateDisplayName', () => {
   it('should return valid when displayName contains only allowable syntax and start with a letter', () => {

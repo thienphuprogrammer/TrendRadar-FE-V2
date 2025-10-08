@@ -5,7 +5,7 @@ export const isValidCronLength = (cron: string) => {
   return cron?.trim().split(' ').length === 5;
 };
 
-export const cronValidator = (_: any, value: string) => {
+export const cronValidator = (_, value: string) => {
   if (!value) return Promise.reject(ERROR_TEXTS.CRON.REQUIRED);
   if (!isValidCronLength(value)) {
     return Promise.reject(ERROR_TEXTS.CRON.INVALID);
@@ -14,6 +14,6 @@ export const cronValidator = (_: any, value: string) => {
     CronExpressionParser.parse(value, { tz: 'UTC' });
     return Promise.resolve();
   } catch (error) {
-    return Promise.reject((error as Error).message);
+    return Promise.reject(error.message);
   }
 };

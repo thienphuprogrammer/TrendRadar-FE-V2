@@ -1,29 +1,29 @@
 import {
-  HostBasedConnectionInfo,
-  IbisAthenaConnectionInfo,
   IbisBigQueryConnectionInfo,
   IbisPostgresConnectionInfo,
-  IbisRedshiftConnectionInfo,
-  IbisRedshiftConnectionType,
+  HostBasedConnectionInfo,
+  UrlBasedConnectionInfo,
   IbisSnowflakeConnectionInfo,
   IbisTrinoConnectionInfo,
-  UrlBasedConnectionInfo,
+  IbisAthenaConnectionInfo,
+  IbisRedshiftConnectionType,
+  IbisRedshiftConnectionInfo,
 } from './adaptors/ibisAdaptor';
 import {
   ATHENA_CONNECTION_INFO,
   BIG_QUERY_CONNECTION_INFO,
-  CLICK_HOUSE_CONNECTION_INFO,
   DUCKDB_CONNECTION_INFO,
-  MS_SQL_CONNECTION_INFO,
   MYSQL_CONNECTION_INFO,
-  ORACLE_CONNECTION_INFO,
   POSTGRES_CONNECTION_INFO,
+  MS_SQL_CONNECTION_INFO,
+  WREN_AI_CONNECTION_INFO,
+  CLICK_HOUSE_CONNECTION_INFO,
+  TRINO_CONNECTION_INFO,
+  SNOWFLAKE_CONNECTION_INFO,
+  ORACLE_CONNECTION_INFO,
   REDSHIFT_CONNECTION_INFO,
   REDSHIFT_IAM_AUTH,
   REDSHIFT_PASSWORD_AUTH,
-  SNOWFLAKE_CONNECTION_INFO,
-  TRINO_CONNECTION_INFO,
-  WREN_AI_CONNECTION_INFO,
 } from './repositories';
 import { DataSourceName } from './types';
 import { getConfig } from './config';
@@ -38,7 +38,7 @@ export function encryptConnectionInfo(
 ) {
   return dataSource[dataSourceType].sensitiveProps.reduce(
     (acc, prop: string) => {
-      const value = (connectionInfo as any)[prop];
+      const value = connectionInfo[prop];
       if (value) {
         const encryption = encryptor.encrypt(
           JSON.parse(JSON.stringify({ [prop]: value })),
@@ -51,22 +51,16 @@ export function encryptConnectionInfo(
   );
 }
 
-export function toIbisConnectionInfo(
-  dataSourceType: DataSourceName,
-  connectionInfo: WREN_AI_CONNECTION_INFO,
-) {
-  return dataSource[dataSourceType].toIbisConnectionInfo(connectionInfo as any);
+export function toIbisConnectionInfo(dataSourceType, connectionInfo) {
+  return dataSource[dataSourceType].toIbisConnectionInfo(connectionInfo);
 }
 
-export function toMultipleIbisConnectionInfos(
-  dataSourceType: DataSourceName,
-  connectionInfo: WREN_AI_CONNECTION_INFO,
-) {
+export function toMultipleIbisConnectionInfos(dataSourceType, connectionInfo) {
   if (!dataSource[dataSourceType].toMultipleIbisConnectionInfos) {
     return null;
   }
-  return (dataSource[dataSourceType].toMultipleIbisConnectionInfos as any)(
-    connectionInfo as any,
+  return dataSource[dataSourceType].toMultipleIbisConnectionInfos(
+    connectionInfo,
   );
 }
 
@@ -193,12 +187,12 @@ const dataSource = {
         user,
         password,
         dsn,
-      }).reduce((acc: any, [key, value]) => {
+      }).reduce((acc, [key, value]) => {
         if (value !== undefined && value !== '') {
           acc[key] = value;
         }
         return acc;
-      }, {} as any);
+      }, {});
     },
   } as IDataSourceConnectionInfo<
     ORACLE_CONNECTION_INFO,
@@ -425,7 +419,7 @@ function decryptConnectionInfo(
 ): WREN_AI_CONNECTION_INFO {
   return dataSource[dataSourceType].sensitiveProps.reduce(
     (acc, prop: string) => {
-      const value = (connectionInfo as any)[prop];
+      const value = connectionInfo[prop];
       if (value) {
         const decryption = encryptor.decrypt(value);
         const decryptedValue = JSON.parse(decryption)[prop];

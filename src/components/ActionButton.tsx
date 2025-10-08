@@ -21,15 +21,15 @@ const makeActionButton = (icon: React.ReactNode) => (props: Props) => {
     marginRight,
     ...restProps
   } = props;
-  const click = (event: React.MouseEvent) => {
+  const click = (event) => {
     onClick && onClick(event);
     event.stopPropagation();
   };
-  const mouseEnter = (event: React.MouseEvent) => {
+  const mouseEnter = (event) => {
     onMouseEnter && onMouseEnter(event);
     event.stopPropagation();
   };
-  const mouseLeave = (event: React.MouseEvent) => {
+  const mouseLeave = (event) => {
     onMouseLeave && onMouseLeave(event);
     event.stopPropagation();
   };

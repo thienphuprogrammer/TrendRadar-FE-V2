@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
-import { Form, FormInstance, Input, InputRef } from 'antd';
+import { Input, InputRef, Form, FormInstance } from 'antd';
 import styled from 'styled-components';
 import { get } from 'lodash';
 import EllipsisWrapper from '@/components/EllipsisWrapper';
@@ -56,12 +56,12 @@ export default function EditableWrapper(props: Props) {
     if (textRef.current) inputWidth.current = textRef.current.clientWidth;
     setEditing(!editing);
     const value = get(record, dataIndexKey);
-    form?.setFieldsValue({ [dataIndexKey]: value });
+    form.setFieldsValue({ [dataIndexKey]: value });
   };
 
   const save = async () => {
     try {
-      const values = await form?.validateFields();
+      const values = await form.validateFields();
 
       toggleEdit();
       handleSave(record.id, values);

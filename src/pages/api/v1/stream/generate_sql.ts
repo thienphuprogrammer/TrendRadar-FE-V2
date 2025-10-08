@@ -5,8 +5,8 @@ import * as Errors from '@/apollo/server/utils/error';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ApiError,
-  isAskResultFinished,
   MAX_WAIT_TIME,
+  isAskResultFinished,
   transformHistoryInput,
   validateAskResult,
 } from '@/apollo/server/utils/apiUtils';
@@ -17,13 +17,13 @@ import {
 } from '@/apollo/server/models/adaptor';
 import { getLogger } from '@server/utils';
 import {
+  StateType,
   AsyncAskRequest,
-  endStream,
-  getSqlGenerationState,
-  sendError,
   sendMessageStart,
   sendStateUpdate,
-  StateType,
+  sendError,
+  getSqlGenerationState,
+  endStream,
 } from '@/apollo/server/utils';
 
 const logger = getLogger('API_STREAM_GENERATE_SQL');

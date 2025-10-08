@@ -61,7 +61,7 @@ export default function DescriptiveSelector(props: Props) {
     dropdownMatchSelectWidth,
   } = props;
   // Condition when met group option
-  const [firstOption] = options || [];
+  const [firstOption] = options;
   const [currentOption, setCurrentOption] = useState<any>(
     firstOption.options ? firstOption.options[0] : firstOption,
   );
@@ -100,20 +100,20 @@ export default function DescriptiveSelector(props: Props) {
     );
   };
 
-  const extendOptionMouseEnter = (option: any) => {
+  const extendOptionMouseEnter = (option) => {
     setCurrentOption(option);
   };
 
-  const getOptionStructure = (option: any) => ({
+  const getOptionStructure = (option) => ({
     ...omit(option, ['content']),
     'data-value': option.value,
-    onMouseEnter: (event: any) => {
+    onMouseEnter: (event) => {
       extendOptionMouseEnter(option);
       option.onMouseEnter && option.onMouseEnter(event);
     },
   });
 
-  const mainOptions = (options || []).map((option) => {
+  const mainOptions = options.map((option) => {
     const isOptionGroup = Boolean(option.options);
     return isOptionGroup
       ? { ...option, options: option.options!.map(getOptionStructure) }

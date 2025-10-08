@@ -40,10 +40,6 @@ export const Block = styled.div<{
   maxHeight?: string;
   inline?: boolean;
   backgroundColor?: string;
-  children?: React.ReactNode;
-  className?: string;
-  tabIndex?: number;
-  onKeyDown?: (e: React.KeyboardEvent<Element>) => void;
 }>`
   position: relative;
   white-space: pre;
@@ -145,10 +141,8 @@ export const createCodeBlock = (HighlightRules: any) => {
 
     const lines = (code || '').split('\n').map((line, index) => {
       const tokens = tokenizer.getLineTokens(line).tokens;
-      const children = tokens.map((token: any, index: number) => {
-        const classNames = token.type
-          .split('.')
-          .map((name: string) => `ace_${name}`);
+      const children = tokens.map((token, index) => {
+        const classNames = token.type.split('.').map((name) => `ace_${name}`);
         return (
           <span key={index} className={classNames.join(' ')}>
             {token.value}

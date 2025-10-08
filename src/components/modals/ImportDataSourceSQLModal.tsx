@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Alert, Form, Modal } from 'antd';
+import { Modal, Form, Alert } from 'antd';
 import { ModalAction } from '@/hooks/useModalAction';
 import { getDataSourceImage, getDataSourceName } from '@/utils/dataSourceType';
 import { DATA_SOURCES } from '@/utils/enum';

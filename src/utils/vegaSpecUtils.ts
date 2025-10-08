@@ -1,4 +1,4 @@
-import { Config, TopLevelSpec } from 'vega-lite';
+import { TopLevelSpec, Config } from 'vega-lite';
 
 // Enum for mark types matching the frontend implementation
 export enum MarkType {

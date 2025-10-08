@@ -7,8 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { PreviewDataResponse } from '@server/services/queryService';
 import {
   ApiError,
-  handleApiError,
   respondWith,
+  handleApiError,
 } from '@/apollo/server/utils/apiUtils';
 import { transformToObjects } from '@server/utils/dataUtils';
 
@@ -111,7 +111,7 @@ export default async function handler(
     } catch (queryError) {
       logger.error('Error executing SQL:', queryError);
       throw new ApiError(
-        (queryError as Error).message || 'Error executing SQL query',
+        queryError.message || 'Error executing SQL query',
         400,
         Errors.GeneralErrorCodes.INVALID_SQL_ERROR,
       );

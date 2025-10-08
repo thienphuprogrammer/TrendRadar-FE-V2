@@ -8,19 +8,19 @@ export const editCalculatedField = (
 ) => {
   const { diagramData, data } = payload;
   const sourceModel = diagramData.models.find(
-    (model) => model?.modelId === data.modelId,
+    (model) => model.modelId === data.modelId,
   );
 
   const getField = (model: DiagramModel, columnId: number) => {
     return [...(model?.fields || []), ...(model?.calculatedFields || [])].find(
-      (field) => field?.columnId === columnId,
+      (field) => field.columnId === columnId,
     );
   };
 
   // Retrieve from the source model directly if only one id in lineage
   const isSourceModelField = data.lineage.length === 1;
   if (isSourceModelField) {
-    const field = getField(sourceModel as DiagramModel, data.lineage[0]);
+    const field = getField(sourceModel, data.lineage[0]);
     openCalculatedFieldModal &&
       openCalculatedFieldModal(
         {
@@ -31,7 +31,7 @@ export const editCalculatedField = (
         },
         {
           models: diagramData.models,
-          sourceModel: sourceModel || undefined,
+          sourceModel,
         },
       );
     return;
@@ -42,23 +42,18 @@ export const editCalculatedField = (
   const relationIds = [...data.lineage];
   const lastColumnId = relationIds.pop(); // it will also remove the last column id from relationIds
 
-  let nextModel: any = null;
-  const relations = relationIds.reduce((result: any[], relationId: any) => {
-    const relation = (nextModel || sourceModel)?.relationFields?.find(
-      (relation: any) => relation?.relationId === relationId,
+  let nextModel = null;
+  const relations = relationIds.reduce((result, relationId) => {
+    const relation = (nextModel || sourceModel).relationFields.find(
+      (relation) => relation.relationId === relationId,
     );
-    if (relation) {
-      nextModel = allModelsMap[relation.referenceName];
-      return [...result, relation];
-    }
-    return result;
+    nextModel = allModelsMap[relation.referenceName];
+    return [...result, relation];
   }, []);
 
   const lastRelation = relations[relations.length - 1];
-  const lastModel = lastRelation
-    ? allModelsMap[lastRelation.referenceName]
-    : null;
-  const field = lastModel ? getField(lastModel, lastColumnId) : null;
+  const lastModel = allModelsMap[lastRelation.referenceName];
+  const field = getField(lastModel, lastColumnId);
 
   openCalculatedFieldModal &&
     openCalculatedFieldModal(
@@ -66,7 +61,7 @@ export const editCalculatedField = (
         columnId: data.columnId,
         name: data.displayName,
         expression: data.aggregation,
-        lineage: [...relations, field].filter(Boolean).map(getFieldValue),
+        lineage: [...relations, field].map(getFieldValue),
       },
       {
         models: diagramData.models,

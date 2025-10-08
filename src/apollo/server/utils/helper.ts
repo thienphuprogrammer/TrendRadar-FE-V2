@@ -2,7 +2,7 @@
  * @function
  * @description Retrieve json without error
  */
-export const safeParseJson = (data: string) => {
+export const safeParseJson = (data) => {
   try {
     return JSON.parse(data);
   } catch (_e) {
@@ -10,7 +10,7 @@ export const safeParseJson = (data: string) => {
   }
 };
 
-export const safeStringify = (data: any) => {
+export const safeStringify = (data) => {
   if (typeof data === 'string') {
     return data;
   }

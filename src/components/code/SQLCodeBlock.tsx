@@ -1,4 +1,4 @@
-import { BaseProps, createCodeBlock } from './BaseCodeBlock';
+import { createCodeBlock, BaseProps } from './BaseCodeBlock';
 
 const SQLCodeBlock = (props: BaseProps) => {
   const { ace } = window as any;

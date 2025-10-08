@@ -23,15 +23,5 @@ ops/init-scripts/
 ops/kind
 
 *.egg-info/
-uv.lock
 
-backend/
 .next/
-
-yarn.lock
-pnpm-lock.yaml
-package-lock.json
-bun.lockb
-bun.lock
-
-.yarn/install-state.gz

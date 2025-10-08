@@ -1,8 +1,8 @@
 import { Spin } from 'antd';
 import styled from 'styled-components';
-import { LoadingOutlined } from '@ant-design/icons';
+import LoadingOutlined from '@ant-design/icons/LoadingOutlined';
 
-const Wrapper = styled.div<{ className?: string; children?: React.ReactNode }>`
+const Wrapper = styled.div`
   position: absolute;
   top: 48px;
   left: 0;
@@ -54,7 +54,7 @@ export default function PageLoading(props: Props) {
   );
 }
 
-export const FlexLoading = (props: any) => {
+export const FlexLoading = (props) => {
   const { height, tip } = props;
   return (
     <div

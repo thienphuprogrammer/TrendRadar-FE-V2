@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Layout, Modal } from 'antd';
+import { Modal, Layout, Button } from 'antd';
 import styled from 'styled-components';
 import { SETTINGS } from '@/utils/enum';
 import { makeIterable } from '@/utils/iteration';
@@ -10,8 +10,8 @@ import DataSourceSettings from './DataSourceSettings';
 import ProjectSettings from './ProjectSettings';
 import { getSettingMenu } from './utils';
 import {
-  GetSettingsQuery,
   useGetSettingsLazyQuery,
+  GetSettingsQuery,
 } from '@/apollo/client/graphql/settings.generated';
 
 const { Sider, Content } = Layout;
@@ -62,7 +62,7 @@ const DynamicComponent = ({
     {
       [SETTINGS.DATA_SOURCE]: (
         <DataSourceSettings
-          type={dataSource?.type || 'POSTGRES'}
+          type={dataSource?.type}
           sampleDataset={dataSource?.sampleDataset}
           properties={dataSource?.properties}
           refetchSettings={refetch}
@@ -74,7 +74,7 @@ const DynamicComponent = ({
   );
 };
 
-const MenuTemplate = ({ currentMenu, value, onClick }: any) => {
+const MenuTemplate = ({ currentMenu, value, onClick }) => {
   const current = getSettingMenu(value);
   return (
     <StyledButton
@@ -97,7 +97,7 @@ export default function Settings(props: Props) {
   const current = getSettingMenu(menu);
   const menuList = Object.keys(SETTINGS).map((key) => ({
     key,
-    value: (SETTINGS as any)[key],
+    value: SETTINGS[key],
   }));
   const [fetchSettings, { data, refetch }] = useGetSettingsLazyQuery({
     fetchPolicy: 'cache-and-network',
@@ -111,7 +111,7 @@ export default function Settings(props: Props) {
     if (visible) fetchSettings();
   }, [visible]);
 
-  const onMenuClick = ({ value }: any) => setMenu(value);
+  const onMenuClick = ({ value }) => setMenu(value);
 
   return (
     <StyledModal
@@ -139,7 +139,7 @@ export default function Settings(props: Props) {
           {!!productVersion && (
             <div className="gray-7 d-flex align-center p-3 px-5">
               <InfoCircleOutlined className="mr-2 text-sm" />
-              Wren AI version: {productVersion}
+              TrendRadar AI version: {productVersion}
             </div>
           )}
         </StyledSider>

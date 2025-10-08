@@ -241,21 +241,12 @@ export const useSidebarTreeState = () => {
 };
 
 export default function SidebarTree(props: TreeProps) {
-  const { onSelect, ...restProps } = props;
-
-  const handleSelect = (selectedKeys: any, info: any) => {
-    if (onSelect) {
-      onSelect(selectedKeys, info);
-    }
-  };
-
   return (
     <StyledTree
       blockNode
       showIcon
       motion={null} // https://github.com/ant-design/ant-design/issues/16943#issuecomment-859966751
-      {...restProps}
-      onSelect={handleSelect}
+      {...props}
     />
   );
 }

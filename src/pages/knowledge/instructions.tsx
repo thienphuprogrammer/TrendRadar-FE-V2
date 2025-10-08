@@ -1,14 +1,13 @@
 import Link from 'next/link';
 import {
   Button,
-  message,
+  Tag,
   Table,
   TableColumnsType,
-  Tag,
   Typography,
+  message,
 } from 'antd';
 import styled from 'styled-components';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import { InstructionsSVG } from '@/utils/svgs';
@@ -24,10 +23,10 @@ import InstructionModal from '@/components/modals/InstructionModal';
 import InstructionDrawer from '@/components/pages/knowledge/InstructionDrawer';
 import { Instruction } from '@/apollo/client/graphql/__types__';
 import {
-  useCreateInstructionMutation,
-  useDeleteInstructionMutation,
   useInstructionsQuery,
+  useCreateInstructionMutation,
   useUpdateInstructionMutation,
+  useDeleteInstructionMutation,
 } from '@/apollo/client/graphql/instructions.generated';
 
 const { Paragraph, Text } = Typography;
@@ -49,7 +48,7 @@ const StyledInstructionsIcon = styled(InstructionsSVG)`
   height: 20px;
 `;
 
-function InstructionsPage() {
+export default function ManageInstructions() {
   const instructionModal = useModalAction();
   const instructionDrawer = useDrawerAction();
 
@@ -58,9 +57,9 @@ function InstructionsPage() {
   });
   const instructions = data?.instructions || [];
 
-  const getBaseOptions = (options: any) => {
+  const getBaseOptions = (options) => {
     return {
-      onError: (error: any) => console.error(error),
+      onError: (error) => console.error(error),
       refetchQueries: ['Instructions'],
       awaitRefetchQueries: true,
       ...options,
@@ -93,7 +92,7 @@ function InstructionsPage() {
     }),
   );
 
-  const onMoreClick = async (payload: any) => {
+  const onMoreClick = async (payload) => {
     const { type, data } = payload;
     if (type === MORE_ACTION.DELETE) {
       await deleteInstructionMutation({
@@ -128,7 +127,7 @@ function InstructionsPage() {
 
         return (
           <StyledQuestionsBlock>
-            {displayQuestions.map((question: any) => (
+            {displayQuestions.map((question) => (
               <div key={question} className="mb-1">
                 <StyledTag className="bg-gray-1 border-gray-5 text-truncate">
                   <QuestionOutlined className="geekblue-6" />
@@ -182,8 +181,8 @@ function InstructionsPage() {
         }
         description={
           <>
-            On this page, you can manage saved instructions that guide Wren AI
-            in generating SQL queries. These instructions help Wren AI
+            On this page, you can manage saved instructions that guide TrendRadarAI
+            in generating SQL queries. These instructions help TrendRadarAI
             understand your data model and business rules, improving query
             accuracy and reducing the need for manual refinements.{' '}
             <Link
@@ -199,11 +198,9 @@ function InstructionsPage() {
       >
         <Table
           className="ant-table-has-header"
-          dataSource={instructions.filter(
-            (instruction): instruction is Instruction => instruction != null,
-          )}
+          dataSource={instructions}
           loading={loading}
-          columns={columns as TableColumnsType<Instruction>}
+          columns={columns}
           rowKey="id"
           pagination={{
             hideOnSinglePage: true,
@@ -214,7 +211,6 @@ function InstructionsPage() {
         />
         <InstructionDrawer
           {...instructionDrawer.state}
-          defaultValue={null}
           onClose={instructionDrawer.closeDrawer}
         />
         <InstructionModal
@@ -233,13 +229,5 @@ function InstructionsPage() {
         />
       </PageLayout>
     </SiderLayout>
-  );
-}
-
-export default function ManageInstructions() {
-  return (
-    <ProtectedRoute>
-      <InstructionsPage />
-    </ProtectedRoute>
   );
 }

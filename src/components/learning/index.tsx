@@ -65,7 +65,7 @@ const PlayIcon = styled.div`
   }
 `;
 
-const List = styled.div<{ finished?: boolean }>`
+const List = styled.div<{ finished: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -92,7 +92,7 @@ const ListTemplate = (props: IterableComponent<LearningConfig>) => {
   return (
     <List
       className="select-none"
-      finished={finished || false}
+      finished={finished}
       onClick={onClick}
       as={as}
       {...hrefAttrs}
@@ -121,7 +121,7 @@ const getData = (
 ) => {
   const getDispatcher = (id: LEARNING) => ({
     onDone: () => saveRecord(id),
-    onSaveLanguage: (value: string) => saveLanguage(value as ProjectLanguage),
+    onSaveLanguage: saveLanguage,
   });
 
   const modeling = [
@@ -313,8 +313,7 @@ export default function SidebarSection(_props: Props) {
         },
       };
 
-      const action = routerAction[router.pathname as keyof typeof routerAction];
-      action && action();
+      routerAction[router.pathname] && routerAction[router.pathname]();
     }
   }, [learningRecordResult?.learningRecord, router.pathname]);
 
@@ -329,7 +328,7 @@ export default function SidebarSection(_props: Props) {
   // Hide learning section if the page not in whitelist
   return (
     <>
-      <LearningGuide ref={$guide} />
+      {/* <LearningGuide ref={$guide} />
       {isLearningAccessible(router.pathname) && (
         <div className="border-t border-gray-4">
           <div
@@ -355,7 +354,7 @@ export default function SidebarSection(_props: Props) {
             </div>
           </CollapseBlock>
         </div>
-      )}
+      )} */}
     </>
   );
 }

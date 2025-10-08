@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Table, Tag, Transfer } from 'antd';
+import { Table, Transfer, Tag } from 'antd';
 import difference from 'lodash/difference';
 import { TransferItem, TransferProps } from 'antd/es/transfer';
 import { ColumnsType, TableRowSelection } from 'antd/es/table/interface';

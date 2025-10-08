@@ -15,8 +15,8 @@ import useHomeSidebar from '@/hooks/useHomeSidebar';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import Prompt from '@/components/pages/home/prompt';
 import useAskPrompt, {
-  canFetchThreadResponse,
   getIsFinished,
+  canFetchThreadResponse,
   isRecommendedFinished,
 } from '@/hooks/useAskPrompt';
 import useAdjustAnswer from '@/hooks/useAdjustAnswer';
@@ -30,22 +30,22 @@ import { getAnswerIsFinished } from '@/components/pages/home/promptThread/TextBa
 import { getIsChartFinished } from '@/components/pages/home/promptThread/ChartAnswer';
 import { PromptThreadProvider } from '@/components/pages/home/promptThread/store';
 import {
-  useAdjustThreadResponseChartMutation,
   useCreateThreadResponseMutation,
-  useGenerateThreadRecommendationQuestionsMutation,
-  useGenerateThreadResponseAnswerMutation,
-  useGenerateThreadResponseChartMutation,
-  useGetThreadRecommendationQuestionsLazyQuery,
   useThreadQuery,
   useThreadResponseLazyQuery,
   useUpdateThreadResponseMutation,
+  useGenerateThreadRecommendationQuestionsMutation,
+  useGetThreadRecommendationQuestionsLazyQuery,
+  useGenerateThreadResponseAnswerMutation,
+  useGenerateThreadResponseChartMutation,
+  useAdjustThreadResponseChartMutation,
 } from '@/apollo/client/graphql/home.generated';
 import { useCreateViewMutation } from '@/apollo/client/graphql/view.generated';
 import {
   AdjustThreadResponseChartInput,
-  CreateSqlPairInput,
   CreateThreadResponseInput,
   ThreadResponse,
+  CreateSqlPairInput,
 } from '@/apollo/client/graphql/__types__';
 import { useCreateSqlPairMutation } from '@/apollo/client/graphql/sqlPairs.generated';
 
@@ -58,15 +58,13 @@ const getThreadResponseIsFinished = (threadResponse: ThreadResponse) => {
   let isAnswerFinished = isBreakdownOnly ? null : false;
   let isChartFinished = null;
 
-  // answerDetail status can be FAILED before getting queryId from Wren AI adapter
+  // answerDetail status can be FAILED before getting queryId from TrendRadar AI adapter
   if (answerDetail?.queryId || answerDetail?.status) {
-    isAnswerFinished = getAnswerIsFinished(
-      answerDetail?.status || 'NOT_STARTED',
-    );
+    isAnswerFinished = getAnswerIsFinished(answerDetail?.status);
   }
 
   if (chartDetail?.queryId) {
-    isChartFinished = getIsChartFinished(chartDetail?.status || 'NOT_STARTED');
+    isChartFinished = getIsChartFinished(chartDetail?.status);
   }
   // if equal false, it means it has task & the task is not finished
   return isAnswerFinished !== false && isChartFinished !== false;
@@ -77,7 +75,7 @@ export default function HomeThread() {
   const router = useRouter();
   const params = useParams();
   const homeSidebar = useHomeSidebar();
-  const threadId = useMemo(() => Number(params?.id) || undefined, [params]);
+  const threadId = useMemo(() => Number(params?.id) || null, [params]);
   const askPrompt = useAskPrompt(threadId);
   const adjustAnswer = useAdjustAnswer(threadId);
   const saveAsViewModal = useModalAction();
@@ -94,9 +92,9 @@ export default function HomeThread() {
   });
 
   const { data, updateQuery: updateThreadQuery } = useThreadQuery({
-    variables: { threadId: threadId || 0 },
+    variables: { threadId },
     fetchPolicy: 'cache-and-network',
-    skip: threadId === undefined,
+    skip: threadId === null,
     onError: () => router.push(Path.Home),
   });
   const [createThreadResponse] = useCreateThreadResponseMutation({
@@ -212,10 +210,8 @@ export default function HomeThread() {
   };
 
   const onGenerateThreadRecommendedQuestions = async () => {
-    if (threadId) {
-      await generateThreadRecommendationQuestions({ variables: { threadId } });
-      fetchThreadRecommendationQuestions({ variables: { threadId } });
-    }
+    await generateThreadRecommendationQuestions({ variables: { threadId } });
+    fetchThreadRecommendationQuestions({ variables: { threadId } });
   };
 
   const handleUnfinishedTasks = useCallback(
@@ -258,7 +254,7 @@ export default function HomeThread() {
 
   // stop all requests when change thread
   useEffect(() => {
-    if (threadId !== undefined) {
+    if (threadId !== null) {
       fetchThreadRecommendationQuestions({ variables: { threadId } });
       setShowRecommendedQuestions(true);
     }
@@ -301,20 +297,18 @@ export default function HomeThread() {
     try {
       askPrompt.onStopPolling();
 
-      if (thread) {
-        const threadId = thread.id;
-        await createThreadResponse({
-          variables: { threadId, data: payload },
-        });
-        setShowRecommendedQuestions(false);
-      }
+      const threadId = thread.id;
+      await createThreadResponse({
+        variables: { threadId, data: payload },
+      });
+      setShowRecommendedQuestions(false);
     } catch (error) {
       console.error(error);
     }
   };
 
   const providerValue = {
-    data: thread || null,
+    data: thread,
     recommendedQuestions,
     showRecommendedQuestions,
     preparation: {

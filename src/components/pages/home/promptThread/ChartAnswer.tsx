@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import dynamic from 'next/dynamic';
 import styled from 'styled-components';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Form, message, Modal, Skeleton } from 'antd';
+import { Alert, Form, Button, Skeleton, Modal, message } from 'antd';
 import { attachLoading } from '@/utils/helper';
 import ReloadOutlined from '@ant-design/icons/ReloadOutlined';
 import BasicProperties from '@/components/chart/properties/BasicProperties';
@@ -33,7 +33,7 @@ const StyledSkeleton = styled(Skeleton)`
   }
 `;
 
-const ChartWrapper = styled.div<{ className?: string }>`
+const ChartWrapper = styled.div`
   position: relative;
   padding-top: 0;
   transition: padding-top 0.2s ease-out;
@@ -42,7 +42,7 @@ const ChartWrapper = styled.div<{ className?: string }>`
   }
 `;
 
-const Toolbar = styled.div<{ className?: string }>`
+const Toolbar = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -67,13 +67,13 @@ export const getIsChartFinished = (status: ChartTaskStatus) => {
 };
 
 const getDynamicProperties = (chartType: ChartType) => {
-  const propertiesMap: Record<ChartType, any> = {
+  const propertiesMap = {
     [ChartType.GROUPED_BAR]: GroupedBarProperties,
     [ChartType.STACKED_BAR]: StackedBarProperties,
     [ChartType.LINE]: LineProperties,
     [ChartType.MULTI_LINE]: LineProperties,
     [ChartType.PIE]: DonutProperties,
-  } as any;
+  };
   return propertiesMap[chartType] || BasicProperties;
 };
 
@@ -134,8 +134,8 @@ export default function ChartAnswer(props: AnswerResultProps) {
 
   const dataValues = useMemo(() => {
     const { data, columns } = previewDataResult.data?.previewData || {};
-    return (data || []).map((val: any) => {
-      return (columns || []).reduce((acc: any, col: any, index: number) => {
+    return (data || []).map((val) => {
+      return (columns || []).reduce((acc, col, index) => {
         acc[col.name] = val[index];
         return acc;
       }, {});
@@ -148,9 +148,7 @@ export default function ChartAnswer(props: AnswerResultProps) {
   }, [previewDataResult.data]);
 
   const loading =
-    previewDataResult.loading ||
-    !getIsChartFinished(status || ChartTaskStatus.NOT_STARTED) ||
-    regenerating;
+    previewDataResult.loading || !getIsChartFinished(status) || regenerating;
 
   const DynamicProperties = getDynamicProperties(chartType as ChartType);
 

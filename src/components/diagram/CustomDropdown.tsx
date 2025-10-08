@@ -12,12 +12,12 @@ import DatabaseOutlined from '@ant-design/icons/DatabaseOutlined';
 import { EditSVG } from '@/utils/svgs';
 import {
   DeleteCalculatedFieldModal,
-  DeleteDashboardItemModal,
-  DeleteInstructionModal,
-  DeleteModelModal,
-  DeleteQuestionSQLPairModal,
   DeleteRelationshipModal,
+  DeleteModelModal,
   DeleteViewModal,
+  DeleteDashboardItemModal,
+  DeleteQuestionSQLPairModal,
+  DeleteInstructionModal,
 } from '@/components/modals/DeleteModal';
 
 const StyledMenu = styled(Menu)`
@@ -27,12 +27,11 @@ const StyledMenu = styled(Menu)`
 `;
 
 interface Props {
+  [key: string]: any;
   onMoreClick: (type: MORE_ACTION | { type: MORE_ACTION; data: any }) => void;
   onMenuEnter?: (event: React.MouseEvent) => void;
   children: React.ReactNode;
   onDropdownVisibleChange?: (visible: boolean) => void;
-
-  [key: string]: any;
 }
 
 const makeDropdown =
@@ -105,12 +104,11 @@ export const ColumnDropdown = makeDropdown((props: Props) => {
   const { onMoreClick, data } = props;
   const { nodeType } = data;
 
-  const deleteModalMap: Record<string, any> = {
-    [NODE_TYPE.CALCULATED_FIELD]: DeleteCalculatedFieldModal,
-    [NODE_TYPE.RELATION]: DeleteRelationshipModal,
-  };
   const DeleteColumnModal =
-    deleteModalMap[nodeType] || DeleteCalculatedFieldModal;
+    {
+      [NODE_TYPE.CALCULATED_FIELD]: DeleteCalculatedFieldModal,
+      [NODE_TYPE.RELATION]: DeleteRelationshipModal,
+    }[nodeType] || DeleteCalculatedFieldModal;
 
   const items: ItemType[] = [
     {

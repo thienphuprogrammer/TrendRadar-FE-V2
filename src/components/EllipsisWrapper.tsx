@@ -9,13 +9,7 @@ interface Props {
   showMoreCount?: boolean;
 }
 
-const Wrapper = styled.div<{
-  multipleLine?: number;
-  children?: React.ReactNode;
-  ref?: React.Ref<HTMLDivElement>;
-  title?: string;
-  style?: React.CSSProperties;
-}>`
+const Wrapper = styled.div<{ multipleLine?: number }>`
   overflow: hidden;
   text-overflow: ellipsis;
   ${(props) =>
@@ -34,24 +28,21 @@ export default function EllipsisWrapper(props: Props) {
   const { text, multipleLine, minHeight, children, showMoreCount } = props;
   const ref = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
-  const [width, setWidth] = useState<number | string | undefined>(undefined);
+  const [width, setWidth] = useState(undefined);
   const hasWidth = width !== undefined;
   // Stage for counting the children that will be shown
-  const [stage, setStage] = useState<ReactNode[]>([]);
+  const [stage, setStage] = useState([]);
 
   const isStageEnd = useRef(false);
   const calculateStageShow = () => {
     if (isStageEnd.current) return;
     const remainSpace = 60; // remain space for showing more tip
     const stageWidth = stageRef.current?.clientWidth;
-    const canPrintNext =
-      (stageWidth ?? 0) < (typeof width === 'number' ? width : 0) - remainSpace;
+    const canPrintNext = stageWidth < width - remainSpace;
 
     if (canPrintNext) {
-      const hasMoreChildren = (children as ReactNode[])?.length > stage.length;
-      hasMoreChildren &&
-        children &&
-        setStage([...stage, (children as ReactNode[])[stage.length]]);
+      const hasMoreChildren = (children as ReactNode[]).length > stage.length;
+      hasMoreChildren && setStage([...stage, children[stage.length]]);
     } else {
       setStage(stage.slice(0, stage.length - 1));
       isStageEnd.current = true;
@@ -78,7 +69,7 @@ export default function EllipsisWrapper(props: Props) {
     if (!showMoreCount) return;
     // Run only once when showMoreCount is true
     if (stage.length === 0) {
-      children && setStage([(children as ReactNode[])[0]]);
+      setStage([children[0]]);
       return;
     }
     calculateStageShow();

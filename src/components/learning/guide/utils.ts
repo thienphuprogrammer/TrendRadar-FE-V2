@@ -1,4 +1,4 @@
-import { Config, Driver, Popover, PopoverDOM } from 'driver.js';
+import { Driver, Config, Popover, PopoverDOM } from 'driver.js';
 
 export type DriverPopover = Popover;
 export type DriverObj = Driver;

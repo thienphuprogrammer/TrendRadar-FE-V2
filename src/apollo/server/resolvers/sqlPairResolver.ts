@@ -55,7 +55,7 @@ export class SqlPairResolver {
     ctx: IContext,
   ): Promise<SqlPair> {
     const project = await ctx.projectService.getCurrentProject();
-    await this.validateSql(arg.data.sql || '', ctx);
+    await this.validateSql(arg.data.sql, ctx);
     return ctx.sqlPairService.editSqlPair(project.id, arg.where.id, arg.data);
   }
 
@@ -114,19 +114,6 @@ export class SqlPairResolver {
     return safeFormatSQL(wrenSQL, { language: 'postgresql' }) as WrenSQL;
   }
 
-  public getSqlPairNestedResolver = () => ({
-    createdAt: (sqlPair: SqlPair, _args: any, _ctx: IContext) => {
-      return sqlPair.createdAt
-        ? new Date(sqlPair.createdAt).toISOString()
-        : null;
-    },
-    updatedAt: (sqlPair: SqlPair, _args: any, _ctx: IContext) => {
-      return sqlPair.updatedAt
-        ? new Date(sqlPair.updatedAt).toISOString()
-        : null;
-    },
-  });
-
   private async validateSql(sql: string, ctx: IContext) {
     const project = await ctx.projectService.getCurrentProject();
     const lastDeployment = await ctx.deployService.getLastDeployment(
@@ -141,8 +128,17 @@ export class SqlPairResolver {
       });
     } catch (err) {
       throw Errors.create(Errors.GeneralErrorCodes.INVALID_SQL_ERROR, {
-        customMessage: err instanceof Error ? err.message : String(err),
+        customMessage: err.message,
       });
     }
   }
+
+  public getSqlPairNestedResolver = () => ({
+    createdAt: (sqlPair: SqlPair, _args: any, _ctx: IContext) => {
+      return new Date(sqlPair.createdAt).toISOString();
+    },
+    updatedAt: (sqlPair: SqlPair, _args: any, _ctx: IContext) => {
+      return new Date(sqlPair.updatedAt).toISOString();
+    },
+  });
 }

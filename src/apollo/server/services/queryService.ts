@@ -2,11 +2,11 @@ import { DataSourceName } from '@server/types';
 import { Manifest } from '@server/mdl/type';
 import { IWrenEngineAdaptor } from '../adaptors/wrenEngineAdaptor';
 import {
-  IbisQueryResponse,
-  IbisResponse,
-  IIbisAdaptor,
   SupportedDataSource,
+  IIbisAdaptor,
+  IbisQueryResponse,
   ValidationRules,
+  IbisResponse,
 } from '../adaptors/ibisAdaptor';
 import { getLogger } from '@server/utils';
 import { Project } from '../repositories';
@@ -110,14 +110,14 @@ export class QueryService implements IQueryService {
     const { type: dataSource, connectionInfo } = project;
     if (this.useEngine(dataSource)) {
       if (dryRun) {
-        logger.debug('Using wren engine to dry run');
+        logger.debug('Using TrendRadarengine to dry run');
         await this.wrenEngineAdaptor.dryRun(sql, {
           manifest: mdl,
           limit,
         });
         return true;
       } else {
-        logger.debug('Using wren engine to preview');
+        logger.debug('Using TrendRadarengine to preview');
         const data = await this.wrenEngineAdaptor.previewData(sql, mdl, limit);
         return data as PreviewDataResponse;
       }
@@ -132,7 +132,7 @@ export class QueryService implements IQueryService {
           dataSource,
           connectionInfo,
           mdl,
-          limit || 1000,
+          limit,
           refresh,
           cacheEnabled,
         );
@@ -156,7 +156,7 @@ export class QueryService implements IQueryService {
   }
 
   public async validate(
-    project: any,
+    project,
     rule: ValidationRules,
     manifest: Manifest,
     parameters: Record<string, any>,
@@ -169,10 +169,7 @@ export class QueryService implements IQueryService {
       manifest,
       parameters,
     );
-    return {
-      ...res,
-      message: res.message || undefined,
-    };
+    return res;
   }
 
   private useEngine(dataSource: DataSourceName): boolean {

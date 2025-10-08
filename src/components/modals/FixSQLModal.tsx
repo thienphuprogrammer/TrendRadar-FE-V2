@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Form, Modal, Typography } from 'antd';
+import { Button, Form, Modal, Typography, Alert } from 'antd';
 import { ERROR_TEXTS } from '@/utils/error';
 import { ModalAction } from '@/hooks/useModalAction';
 import { attachLoading } from '@/utils/helper';

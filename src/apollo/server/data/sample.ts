@@ -1885,10 +1885,6 @@ export const buildInitSql = (datasetName: SampleDatasetName) => {
         return `${baseStatement}${headerPart}${schemaPart});`;
       };
 
-      if (!fileExtension) {
-        throw new Error(`No file extension found for file: ${table.filePath}`);
-      }
-
       return createTableStatement(fileExtension, schema);
     })
     .join('\n');

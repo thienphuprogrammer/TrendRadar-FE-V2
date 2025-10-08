@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Button, Form, Input, message, Radio, Upload, UploadProps } from 'antd';
+import { Button, Form, Input, Radio, Upload, UploadProps, message } from 'antd';
 import UploadOutlined from '@ant-design/icons/UploadOutlined';
 import { ERROR_TEXTS } from '@/utils/error';
 import { FORM_MODE } from '@/utils/enum';
-import { extractPrivateKeyString, readFileContent } from '@/utils/file';
+import { readFileContent, extractPrivateKeyString } from '@/utils/file';
 
 const TAB_KEY = {
   PASSWORD_AUTHENTICATION: 'password_authentication',
@@ -26,7 +26,7 @@ const UploadPrivateKey = (props: {
     if (!value) setFileList([]);
   }, [value]);
 
-  const onUploadChange = async (info: any) => {
+  const onUploadChange = async (info) => {
     const { file, fileList } = info;
     if (fileList.length) {
       const uploadFile = fileList[0];
@@ -47,7 +47,7 @@ const UploadPrivateKey = (props: {
 
   const onRemove = () => {
     setFileList([]);
-    onChange && onChange('');
+    onChange && onChange(undefined);
   };
 
   return (
@@ -68,7 +68,7 @@ export default function SnowflakeProperties(props: Props) {
   const isEditMode = mode === FORM_MODE.EDIT;
   const [tabKey, setTabKey] = useState(TAB_KEY.PASSWORD_AUTHENTICATION);
 
-  const changeTabKey = (e: any) => {
+  const changeTabKey = (e) => {
     setTabKey(e.target.value);
   };
 

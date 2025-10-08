@@ -1,11 +1,5 @@
 import { useRouter } from 'next/router';
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { getUserConfig, UserConfig } from '@/utils/env';
 import { trackUserTelemetry } from '@/utils/telemetry';
 
@@ -13,15 +7,9 @@ type ContextProps = {
   config?: UserConfig | null;
 };
 
-interface GlobalConfigProviderProps {
-  children: ReactNode;
-}
-
 const GlobalConfigContext = createContext<ContextProps>({});
 
-export const GlobalConfigProvider = ({
-  children,
-}: GlobalConfigProviderProps) => {
+export const GlobalConfigProvider = ({ children }) => {
   const router = useRouter();
   const [config, setConfig] = useState<UserConfig | null>(null);
 

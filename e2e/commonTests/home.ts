@@ -1,7 +1,6 @@
 import { Page, expect } from '@playwright/test';
 import * as helper from '../helper';
 import {
-  AskingTask,
   AskingTaskStatus,
 } from '@/apollo/client/graphql/__types__';
 import * as modelingHelper from './modeling';
@@ -123,6 +122,9 @@ const checkThreadResponseBreakdownContent = async (page: Page) => {
 export const askSuggestionQuestionTest = async ({
   page,
   suggestedQuestion,
+}: {
+  page: Page;
+  suggestedQuestion: string;
 }) => {
   await page.goto('/home');
   await expect(page).toHaveURL('/home', { timeout: 60000 });
@@ -160,7 +162,13 @@ export const askSuggestionQuestionTest = async ({
   await checkThreadResponseBreakdownContent(page);
 };
 
-export const followUpQuestionTest = async ({ page, question }) => {
+export const followUpQuestionTest = async ({
+  page,
+  question,
+}: {
+  page: Page;
+  question: string;
+}) => {
   await page.goto('/home');
   await expect(page).toHaveURL('/home', { timeout: 60000 });
 

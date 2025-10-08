@@ -117,7 +117,7 @@ export enum SupportedDataSource {
   REDSHIFT = 'REDSHIFT',
 }
 
-const dataSourceUrlMap: Record<string, string> = {
+const dataSourceUrlMap: Record<SupportedDataSource, string> = {
   [SupportedDataSource.POSTGRES]: 'postgres',
   [SupportedDataSource.BIG_QUERY]: 'bigquery',
   [SupportedDataSource.SNOWFLAKE]: 'snowflake',
@@ -245,10 +245,9 @@ export class IbisAdaptor implements IIbisAdaptor {
         body,
       );
       return res.data;
-    } catch (e: any) {
+    } catch (e) {
       logger.debug(`Dry plan error: ${e.response?.data || e.message}`);
       this.throwError(e, 'Error during dry plan execution');
-      throw e;
     }
   }
 
@@ -288,10 +287,9 @@ export class IbisAdaptor implements IIbisAdaptor {
           new Date(parseInt(res.headers['x-cache-override-at'])).toISOString(),
         override: res.headers['x-cache-override'] === 'true',
       };
-    } catch (e: any) {
+    } catch (e) {
       logger.debug(`Query error: ${e.response?.data || e.message}`);
       this.throwError(e, 'Error querying ibis server');
-      throw e;
     }
   }
 
@@ -318,10 +316,9 @@ export class IbisAdaptor implements IIbisAdaptor {
         correlationId: response.headers['x-correlation-id'],
         processTime: response.headers['x-process-time'],
       };
-    } catch (err: any) {
+    } catch (err) {
       logger.debug(`Dry run error: ${err.response?.data || err.message}`);
       this.throwError(err, 'Error during dry run execution');
-      throw err;
     }
   }
 
@@ -330,7 +327,7 @@ export class IbisAdaptor implements IIbisAdaptor {
     connectionInfo: WREN_AI_CONNECTION_INFO,
   ): Promise<CompactTable[]> {
     try {
-      const getTablesByConnectionInfo = async (ibisConnectionInfo: any) => {
+      const getTablesByConnectionInfo = async (ibisConnectionInfo) => {
         const body = {
           connectionInfo: ibisConnectionInfo,
         };
@@ -363,10 +360,9 @@ export class IbisAdaptor implements IIbisAdaptor {
         connectionInfo,
       );
       return await getTablesByConnectionInfo(ibisConnectionInfo);
-    } catch (e: any) {
+    } catch (e) {
       logger.debug(`Get tables error: ${e.response?.data || e.message}`);
       this.throwError(e, 'Error getting table from ibis server');
-      throw e;
     }
   }
 
@@ -386,10 +382,9 @@ export class IbisAdaptor implements IIbisAdaptor {
         body,
       );
       return res.data;
-    } catch (e: any) {
+    } catch (e) {
       logger.debug(`Get constraints error: ${e.response?.data || e.message}`);
       this.throwError(e, 'Error getting constraint from ibis server');
-      throw e;
     }
   }
 
@@ -414,7 +409,7 @@ export class IbisAdaptor implements IIbisAdaptor {
         body,
       );
       return { valid: true, message: null };
-    } catch (e: any) {
+    } catch (e) {
       logger.debug(`Validation error: ${e.response?.data || e.message}`);
       return { valid: false, message: e.response?.data || e.message };
     }
@@ -453,7 +448,7 @@ export class IbisAdaptor implements IIbisAdaptor {
         },
       );
       return res.data as WrenSQL;
-    } catch (e: any) {
+    } catch (e) {
       logger.debug(
         `Model substitution error: ${e.response?.data || e.message}`,
       );
@@ -462,7 +457,6 @@ export class IbisAdaptor implements IIbisAdaptor {
         'Error running model substitution with ibis server',
         this.modelSubstituteErrorMessageBuilder,
       );
-      throw e;
     }
   }
 
@@ -482,10 +476,9 @@ export class IbisAdaptor implements IIbisAdaptor {
         body,
       );
       return res.data;
-    } catch (e: any) {
+    } catch (e) {
       logger.debug(`Get version error: ${e.response?.data || e.message}`);
       this.throwError(e, 'Error getting version from ibis server');
-      throw e;
     }
   }
 
@@ -514,7 +507,7 @@ export class IbisAdaptor implements IIbisAdaptor {
       return { ...column, properties, nestedColumns };
     };
 
-    const transformed = tables.map((table) => {
+    return tables.map((table) => {
       try {
         const properties = table?.properties || {};
         if (table.description) {
@@ -526,13 +519,11 @@ export class IbisAdaptor implements IIbisAdaptor {
           );
           table.columns = transformedColumns;
         }
-        return { ...table, properties } as CompactTable;
+        return { ...table, properties };
       } catch (e) {
         console.log('e', e);
-        return undefined;
       }
     });
-    return transformed.filter((t): t is CompactTable => Boolean(t));
   }
 
   private getIbisApiVersion(apiType: IBIS_API_TYPE) {

@@ -4,35 +4,35 @@ import {
   AskCandidateType,
   AskDetailInput,
   AskDetailResult,
-  AskFeedbackInput,
-  AskFeedbackResult,
-  AskFeedbackStatus,
   AskHistory,
-  AskInput,
   AskResult,
   AskResultStatus,
   AsyncQueryResponse,
-  ChartAdjustmentInput,
+  RecommendationQuestionsInput,
+  RecommendationQuestionsResult,
+  WrenAIDeployStatusEnum,
+  WrenAISystemStatus,
+  WrenAIDeployResponse,
+  DeployData,
+  AskInput,
+  TextBasedAnswerInput,
+  TextBasedAnswerResult,
   ChartInput,
+  ChartAdjustmentInput,
   ChartResult,
   ChartStatus,
-  DeployData,
-  GenerateInstructionInput,
-  InstructionResult,
-  InstructionStatus,
+  TextBasedAnswerStatus,
+  SqlPairResult,
+  SqlPairStatus,
   QuestionInput,
   QuestionsResult,
   QuestionsStatus,
-  RecommendationQuestionsInput,
-  RecommendationQuestionsResult,
-  SqlPairResult,
-  SqlPairStatus,
-  TextBasedAnswerInput,
-  TextBasedAnswerResult,
-  TextBasedAnswerStatus,
-  WrenAIDeployResponse,
-  WrenAIDeployStatusEnum,
-  WrenAISystemStatus,
+  GenerateInstructionInput,
+  InstructionStatus,
+  InstructionResult,
+  AskFeedbackInput,
+  AskFeedbackResult,
+  AskFeedbackStatus,
 } from '@server/models/adaptor';
 import { getLogger } from '@server/utils';
 import * as Errors from '@server/utils/error';
@@ -151,13 +151,13 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       });
 
       if (response.status === 200) {
-        logger.info(`Wren AI: Deleted semantics for project ${projectId}`);
+        logger.info(`TrendRadarAI: Deleted semantics for project ${projectId}`);
       } else {
         throw new Error(`Failed to delete semantics. ${response.data?.error}`);
       }
     } catch (error: any) {
       throw new Error(
-        `Wren AI: Failed to delete semantics: ${getAIServiceError(error)}`,
+        `TrendRadarAI: Failed to delete semantics: ${getAIServiceError(error)}`,
       );
     }
   }
@@ -198,7 +198,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       const { status, error } = this.transformStatusAndError(res.data);
       return {
         status: status as SqlPairStatus,
-        error: error ?? undefined,
+        error,
       };
     } catch (err: any) {
       logger.debug(
@@ -242,7 +242,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       });
       return { queryId: res.data.query_id };
     } catch (err: any) {
-      logger.debug(`Got error when asking wren AI: ${getAIServiceError(err)}`);
+      logger.debug(`Got error when asking TrendRadarAI: ${getAIServiceError(err)}`);
       throw err;
     }
   }
@@ -344,25 +344,25 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       );
       const deployId = res.data.id;
       logger.debug(
-        `Wren AI: Deploying wren AI, hash: ${hash}, deployId: ${deployId}`,
+        `TrendRadarAI: Deploying TrendRadarAI, hash: ${hash}, deployId: ${deployId}`,
       );
       const deploySuccess = await this.waitDeployFinished(deployId);
       if (deploySuccess) {
-        logger.debug(`Wren AI: Deploy wren AI success, hash: ${hash}`);
+        logger.debug(`TrendRadarAI: Deploy TrendRadarAI success, hash: ${hash}`);
         return { status: WrenAIDeployStatusEnum.SUCCESS };
       } else {
         return {
           status: WrenAIDeployStatusEnum.FAILED,
-          error: `Wren AI: Deploy wren AI failed or timeout, hash: ${hash}`,
+          error: `TrendRadarAI: Deploy TrendRadarAI failed or timeout, hash: ${hash}`,
         };
       }
     } catch (err: any) {
       logger.debug(
-        `Got error when deploying to wren AI, hash: ${hash}. Error: ${err.message}`,
+        `Got error when deploying to TrendRadarAI, hash: ${hash}. Error: ${err.message}`,
       );
       return {
         status: WrenAIDeployStatusEnum.FAILED,
-        error: `Wren AI Error: deployment hash:${hash}, ${err.message}`,
+        error: `TrendRadarAI Error: deployment hash:${hash}, ${err.message}`,
       };
     }
   }
@@ -377,14 +377,14 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       max_categories: input.maxCategories,
       configuration: input.configuration,
     };
-    logger.info(`Wren AI: Generating recommendation questions`);
+    logger.info(`TrendRadarAI: Generating recommendation questions`);
     try {
       const res = await axios.post(
         `${this.wrenAIBaseEndpoint}/v1/question-recommendations`,
         body,
       );
       logger.info(
-        `Wren AI: Generating recommendation questions, queryId: ${res.data.id}`,
+        `TrendRadarAI: Generating recommendation questions, queryId: ${res.data.id}`,
       );
       return { queryId: res.data.id };
     } catch (err: any) {
@@ -611,7 +611,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       const { status, error } = this.transformStatusAndError(res.data);
       return {
         status: status as QuestionsStatus,
-        error: error ?? undefined,
+        error,
         questions: res.data.questions || [],
       };
     } catch (err: any) {
@@ -718,7 +718,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     const { status, error } = this.transformStatusAndError(body);
     return {
       status: status as AskFeedbackStatus,
-      error: error ?? undefined,
+      error,
       response:
         body.response?.map((result: any) => ({
           sql: result.sql,
@@ -751,7 +751,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     const { status, error } = this.transformStatusAndError(body);
     return {
       status: status as ChartStatus,
-      error: error ?? undefined,
+      error,
       response: {
         reasoning: body.response?.reasoning,
         chartType: body.response?.chart_type,
@@ -765,7 +765,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     return {
       status: status as TextBasedAnswerStatus,
       numRowsUsedInLLM: body.num_rows_used_in_llm,
-      error: error ?? undefined,
+      error,
     };
   }
 
@@ -775,7 +775,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     for (let waitTime = 1; waitTime <= 7; waitTime++) {
       try {
         const status = await this.getDeployStatus(deployId);
-        logger.debug(`Wren AI: Deploy status: ${status}`);
+        logger.debug(`TrendRadarAI: Deploy status: ${status}`);
         if (status === WrenAISystemStatus.FINISHED) {
           deploySuccess = true;
           break;
@@ -784,8 +784,8 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
         } else if (status === WrenAISystemStatus.INDEXING) {
           // do nothing
         } else {
-          logger.debug(`Wren AI: Unknown Wren AI deploy status: ${status}`);
-          return false;
+          logger.debug(`TrendRadarAI: Unknown TrendRadarAI deploy status: ${status}`);
+          return;
         }
       } catch (err: any) {
         throw err;
@@ -825,7 +825,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     return {
       type: body?.type,
       status: status as AskResultStatus,
-      error: error ?? null,
+      error,
       response: candidates,
       rephrasedQuestion: body?.rephrased_question,
       intentReasoning: body?.intent_reasoning,
@@ -861,7 +861,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     return {
       type,
       status: status as AskResultStatus,
-      error: error ?? null,
+      error,
       response: {
         description: body?.response?.description,
         steps,
@@ -915,22 +915,22 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
           message: error.message,
           shortMessage: error.extensions.shortMessage as string,
         }
-      : undefined;
+      : null;
 
     return {
       status,
-      error: formattedError ?? null,
+      error: formattedError,
     };
   }
 
-  private transformHistoryInput(histories?: ThreadResponse[]): AskHistory[] {
+  private transformHistoryInput(histories: ThreadResponse[]): AskHistory[] {
     if (!histories) {
       return [];
     }
 
     // make it snake_case
     return histories.map((history) => ({
-      sql: history.sql ?? '',
+      sql: history.sql,
       question: history.question,
     }));
   }

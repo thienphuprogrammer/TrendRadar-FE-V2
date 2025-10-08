@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
-import { MENU_KEY, Path } from '@/utils/enum';
+import { Path, MENU_KEY } from '@/utils/enum';
 import { OpenInNewIcon } from '@/utils/icons';
 import ApiOutlined from '@ant-design/icons/ApiOutlined';
 import ReadOutlined from '@ant-design/icons/ReadOutlined';
@@ -46,7 +46,7 @@ export default function APIManagement() {
           href="https://wrenai.readme.io/reference/sql-generation"
           target="_blank"
           rel="noopener noreferrer"
-          legacyBehavior>
+        >
           API reference
           <OpenInNewIcon className="ml-1" />
         </Link>
@@ -61,7 +61,7 @@ export default function APIManagement() {
     <Layout>
       <SidebarMenu
         items={menuItems}
-        selectedKeys={(MENU_KEY_MAP as any)[router.pathname]}
+        selectedKeys={MENU_KEY_MAP[router.pathname]}
       />
     </Layout>
   );

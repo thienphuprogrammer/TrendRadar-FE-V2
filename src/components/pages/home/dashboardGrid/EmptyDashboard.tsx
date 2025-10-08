@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Col, Row } from 'antd';
+import { Row, Col } from 'antd';
 import { Logo } from '@/components/Logo';
 import { makeIterable } from '@/utils/iteration';
 

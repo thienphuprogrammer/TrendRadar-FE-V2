@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 import {
-  Alert,
-  Button,
-  Collapse,
   Modal,
-  Popconfirm,
+  Button,
   Table,
-  Tag,
   Typography,
+  Collapse,
+  Alert,
+  Tag,
+  Popconfirm,
 } from 'antd';
 import styled from 'styled-components';
 import WarningOutlined from '@ant-design/icons/WarningOutlined';
@@ -17,9 +17,9 @@ import FileDoneOutlined from '@ant-design/icons/FileDoneOutlined';
 import { ModalAction } from '@/hooks/useModalAction';
 import EllipsisWrapper from '@/components/EllipsisWrapper';
 import {
+  DetailedChangeTable,
   DetailedAffectedCalculatedFields,
   DetailedAffectedRelationships,
-  DetailedChangeTable,
   NodeType,
   SchemaChange,
   SchemaChangeType,

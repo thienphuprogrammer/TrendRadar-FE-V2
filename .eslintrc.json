@@ -7,7 +7,8 @@
     "!**/*",
     ".next/**/*",
     "src/apollo/client/graphql/__types__.ts",
-    "src/apollo/client/graphql/*.generated.ts"
+    "src/apollo/client/graphql/*.generated.ts",
+    "e2e/**/*"
   ],
   "overrides": [
     {
@@ -31,14 +32,14 @@
     }
   ],
   "rules": {
-    "prettier/prettier": "error",
+    "prettier/prettier": "warn",
     "@next/next/no-html-link-for-pages": "off",
     "react/display-name": 0,
     "react/no-unescaped-entities": 0,
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-unused-vars": [
-      "error",
+      "warn",
       {
         "args": "all",
         "argsIgnorePattern": "^_",

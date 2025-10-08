@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { omit } from 'lodash';
 import {
-  Alert,
   Button,
   Col,
   Popconfirm,
@@ -9,6 +8,7 @@ import {
   Space,
   Spin,
   Typography,
+  Alert,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
@@ -169,7 +169,7 @@ export default function DefineRelations(props: Props) {
   const [selectedRelation, setSelectedRelation] = useState<{
     modelName: string;
     defaultValue?: RelationsDataType;
-  } | null>(null);
+  }>(null);
 
   const [showNoRecommendationAlert, setShowNoRecommendationAlert] =
     useState<boolean>(false);

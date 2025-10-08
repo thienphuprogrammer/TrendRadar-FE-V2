@@ -1,7 +1,7 @@
 import { pickBy } from 'lodash';
 
 export interface IConfig {
-  // wren ui
+  // TrendRadarui
   otherServiceUsingDocker: boolean;
 
   // database
@@ -14,10 +14,10 @@ export interface IConfig {
 
   persistCredentialDir?: string;
 
-  // wren engine
+  // TrendRadarengine
   wrenEngineEndpoint: string;
 
-  // wren AI
+  // TrendRadarAI
   wrenAIEndpoint: string;
   generationModel?: string;
 
@@ -49,7 +49,7 @@ export interface IConfig {
 }
 
 const defaultConfig = {
-  // wren ui
+  // TrendRadarui
   otherServiceUsingDocker: false,
 
   // database
@@ -64,15 +64,15 @@ const defaultConfig = {
 
   persistCredentialDir: `${process.cwd()}/.tmp`,
 
-  // wren engine
+  // TrendRadarengine
   wrenEngineEndpoint: 'http://localhost:8080',
 
-  // wren AI
-  wrenAIEndpoint: 'http://localhost:5555',
+  // TrendRadarAI
+  wrenAIEndpoint: 'http://localhost:8007',
 
   // ibis server
   experimentalEngineRustVersion: true,
-  ibisServerEndpoint: 'http://127.0.0.1:8000',
+  ibisServerEndpoint: 'http://localhost:8082',
 
   // encryption
   encryptionPassword: 'sementic',
@@ -101,10 +101,10 @@ const config = {
     return undefined;
   })(),
 
-  // wren engine
+  // TrendRadarengine
   wrenEngineEndpoint: process.env.WREN_ENGINE_ENDPOINT,
 
-  // wren AI
+  // TrendRadarAI
   wrenAIEndpoint: process.env.WREN_AI_ENDPOINT,
   generationModel: process.env.GENERATION_MODEL,
 
@@ -149,22 +149,6 @@ const config = {
     ? parseInt(process.env.THREAD_RECOMMENDATION_QUESTIONS_MAX_QUESTIONS)
     : 1,
 };
-
-// Derive sensible defaults when running other services via docker and the
-// endpoints are not explicitly provided via environment variables.
-// This helps local dev where Next.js runs on host and other services run in docker.
-if (!config.wrenEngineEndpoint && (config.otherServiceUsingDocker ?? false)) {
-  const enginePort = process.env.WREN_ENGINE_PORT || '8080';
-  config.wrenEngineEndpoint = `http://localhost:${enginePort}`;
-}
-if (!config.wrenAIEndpoint && (config.otherServiceUsingDocker ?? false)) {
-  const aiPort = process.env.WREN_AI_SERVICE_PORT || '5556';
-  config.wrenAIEndpoint = `http://localhost:${aiPort}`;
-}
-if (!config.ibisServerEndpoint && (config.otherServiceUsingDocker ?? false)) {
-  const ibisPort = process.env.WREN_IBIS_SERVER_PORT || '8082';
-  config.ibisServerEndpoint = `http://localhost:${ibisPort}`;
-}
 
 export function getConfig(): IConfig {
   return { ...defaultConfig, ...pickBy(config) };

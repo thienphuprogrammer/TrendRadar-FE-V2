@@ -4,7 +4,6 @@ import { useSearchParams } from 'next/navigation';
 import { forwardRef, useEffect, useMemo, useRef } from 'react';
 import { message } from 'antd';
 import styled from 'styled-components';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { MORE_ACTION, NODE_TYPE } from '@/utils/enum';
 import { editCalculatedField } from '@/utils/modelingHelper';
 import SiderLayout from '@/components/layouts/SiderLayout';
@@ -37,8 +36,8 @@ import {
 } from '@/apollo/client/graphql/metadata.generated';
 import {
   useCreateCalculatedFieldMutation,
-  useDeleteCalculatedFieldMutation,
   useUpdateCalculatedFieldMutation,
+  useDeleteCalculatedFieldMutation,
 } from '@/apollo/client/graphql/calculatedField.generated';
 import {
   useCreateRelationshipMutation,
@@ -58,7 +57,7 @@ const DiagramWrapper = styled.div`
   height: 100%;
 `;
 
-function ModelingPage() {
+export default function Modeling() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const diagramRef = useRef(null);
@@ -487,13 +486,5 @@ function ModelingPage() {
         />
       </SiderLayout>
     </DeployStatusContext.Provider>
-  );
-}
-
-export default function Modeling() {
-  return (
-    <ProtectedRoute>
-      <ModelingPage />
-    </ProtectedRoute>
   );
 }

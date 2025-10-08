@@ -4,8 +4,8 @@ import { ApiType } from '@server/repositories/apiHistoryRepository';
 import * as Errors from '@/apollo/server/utils/error';
 import {
   ApiError,
-  handleApiError,
   respondWithSimple,
+  handleApiError,
 } from '@/apollo/server/utils/apiUtils';
 import { getLogger } from '@server/utils';
 

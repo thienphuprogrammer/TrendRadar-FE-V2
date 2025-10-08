@@ -1,13 +1,13 @@
 import { getLogger } from '@server/utils';
 import {
-  DashboardCacheRefreshStatus,
-  IDashboardItemRefreshJobRepository,
-  IDashboardItemRepository,
   IDashboardRepository,
+  IDashboardItemRepository,
+  IDashboardItemRefreshJobRepository,
+  DashboardCacheRefreshStatus,
 } from '@server/repositories';
 import {
-  IDeployService,
   IProjectService,
+  IDeployService,
   IQueryService,
 } from '@server/services';
 import { CronExpressionParser } from 'cron-parser';
@@ -83,9 +83,7 @@ export class DashboardCacheBackgroundTracker {
         }
       }
     } catch (error) {
-      logger.error(
-        `Error checking dashboard caches: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      logger.error(`Error checking dashboard caches: ${error.message}`);
     }
   }
 
@@ -148,17 +146,16 @@ export class DashboardCacheBackgroundTracker {
                 {
                   finishedAt: new Date(),
                   status: DashboardCacheRefreshStatus.FAILED,
-                  errorMessage:
-                    error instanceof Error ? error.message : String(error),
+                  errorMessage: error.message,
                 },
               );
               logger.debug(
-                `Error refreshing cache for item ${item.id}: ${error instanceof Error ? error.message : String(error)}`,
+                `Error refreshing cache for item ${item.id}: ${error.message}`,
               );
             }
           } catch (error) {
             logger.debug(
-              `Error creating refresh job record for item ${item.id}: ${error instanceof Error ? error.message : String(error)}`,
+              `Error creating refresh job record for item ${item.id}: ${error.message}`,
             );
           }
         }),
@@ -178,7 +175,7 @@ export class DashboardCacheBackgroundTracker {
       logger.info(`Successfully refreshed cache for dashboard ${dashboard.id}`);
     } catch (error) {
       logger.error(
-        `Error refreshing dashboard ${dashboard.id}: ${error instanceof Error ? error.message : String(error)}`,
+        `Error refreshing dashboard ${dashboard.id}: ${error.message}`,
       );
     } finally {
       this.runningJobs.delete(dashboard.id);
@@ -192,9 +189,7 @@ export class DashboardCacheBackgroundTracker {
       });
       return interval.next().toDate();
     } catch (error) {
-      logger.error(
-        `Failed to parse cron expression: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      logger.error(`Failed to parse cron expression: ${error.message}`);
       return null;
     }
   }

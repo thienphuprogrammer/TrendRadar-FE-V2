@@ -15,9 +15,8 @@ import LabelTitle from '@/components/sidebar/LabelTitle';
 import { StyledSidebarTree } from '@/components/sidebar/Modeling';
 
 interface Props {
-  views: DiagramView[];
-
   [key: string]: any;
+  views: DiagramView[];
 }
 
 export default function ViewTree(props: Props) {

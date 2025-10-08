@@ -1,4 +1,4 @@
-import { Col, Drawer, Row, Tag, Typography } from 'antd';
+import { Drawer, Typography, Row, Col, Tag } from 'antd';
 import { getAbsoluteTime } from '@/utils/time';
 import { DrawerAction } from '@/hooks/useDrawerAction';
 import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';

@@ -2,7 +2,7 @@ import {
   ChartType,
   ThreadResponseChartDetail,
 } from '@/apollo/client/graphql/__types__';
-import { cloneDeep, isNil, isNumber, omit, sortBy, uniq } from 'lodash';
+import { isNil, cloneDeep, uniq, sortBy, omit, isNumber } from 'lodash';
 import { Config, TopLevelSpec } from 'vega-lite';
 
 enum MarkType {
@@ -92,8 +92,6 @@ type ChartOptions = {
   isHideTitle?: boolean;
 };
 
-type ResolvedChartOptions = Required<ChartOptions>;
-
 const config: Config = {
   mark: { tooltip: true },
   font: 'Roboto, Arial, Noto Sans, sans-serif',
@@ -144,13 +142,13 @@ const config: Config = {
 
 export default class ChartSpecHandler {
   public config: Config;
-  public options: ResolvedChartOptions;
-  public $schema!: string;
-  public title!: string | null;
-  public data!: DataSpec;
-  public encoding!: EncodingSpec;
-  public mark!: MarkSpec;
-  public autosize!: AutosizeSpec;
+  public options: ChartOptions;
+  public $schema: string;
+  public title: string;
+  public data: DataSpec;
+  public encoding: EncodingSpec;
+  public mark: MarkSpec;
+  public autosize: AutosizeSpec;
   public params: ParamsSpec;
   public transform: TransformSpec;
 
@@ -170,15 +168,19 @@ export default class ChartSpecHandler {
     ];
     // default options
     this.options = {
-      width: options?.width ?? 'container',
-      height: options?.height ?? 'container',
-      stack: options?.stack ?? 'zero',
-      point: options?.point ?? true,
-      donutInner: options?.donutInner ?? 60,
-      categoriesLimit: options?.categoriesLimit ?? 25,
-      isShowTopCategories: options?.isShowTopCategories ?? false,
-      isHideLegend: options?.isHideLegend ?? false,
-      isHideTitle: options?.isHideTitle ?? false,
+      width: isNil(options?.width) ? 'container' : options.width,
+      height: isNil(options?.height) ? 'container' : options.height,
+      stack: isNil(options?.stack) ? 'zero' : options.stack,
+      point: isNil(options?.point) ? true : options.point,
+      donutInner: isNil(options?.donutInner) ? 60 : options.donutInner,
+      categoriesLimit: isNil(options?.categoriesLimit)
+        ? 25
+        : options.categoriesLimit,
+      isShowTopCategories: isNil(options?.isShowTopCategories)
+        ? false
+        : options?.isShowTopCategories,
+      isHideLegend: isNil(options?.isHideLegend) ? false : options.isHideLegend,
+      isHideTitle: isNil(options?.isHideTitle) ? false : options.isHideTitle,
     };
 
     // avoid mutating the original spec
@@ -233,8 +235,8 @@ export default class ChartSpecHandler {
   }
 
   private parseSpec(spec: TopLevelSpec) {
-    this.$schema = spec.$schema || '';
-    this.title = (spec.title as string) || '';
+    this.$schema = spec.$schema;
+    this.title = spec.title as string;
     this.transform = spec.transform;
 
     if ('mark' in spec) {
@@ -274,10 +276,10 @@ export default class ChartSpecHandler {
     if (isNil(this.encoding.color)) {
       // find the nominal axis
       const nominalAxis = ['x', 'y'].find(
-        (axis) => (encoding as any)[axis]?.type === 'nominal',
+        (axis) => encoding[axis]?.type === 'nominal',
       );
       if (nominalAxis) {
-        const category = (encoding as any)[nominalAxis] as any;
+        const category = encoding[nominalAxis] as any;
         this.encoding.color = {
           field: category.field,
           type: category.type,
@@ -351,26 +353,26 @@ export default class ChartSpecHandler {
 
   private filterTopCategories(encoding: EncodingSpec) {
     const nominalKeys = ['xOffset', 'color', 'x', 'y'].filter(
-      (axis) => (encoding as any)[axis]?.type === 'nominal',
+      (axis) => encoding[axis]?.type === 'nominal',
     );
     const quantitativeKeys = ['theta', 'x', 'y'].filter(
-      (axis) => (encoding as any)[axis]?.type === 'quantitative',
+      (axis) => encoding[axis]?.type === 'quantitative',
     );
     if (!nominalKeys.length || !quantitativeKeys.length) return;
 
     const clonedValues = cloneDeep((this.data as any).values);
 
     const quantitativeAxis = quantitativeKeys[0];
-    const quanAxis = (encoding as any)[quantitativeAxis] as any;
+    const quanAxis = encoding[quantitativeAxis] as any;
     const sortedValues = sortBy(clonedValues, (val) => {
       const value = val[quanAxis.field];
       return isNumber(value) ? -value : 0;
     });
 
     // nominal values probably have different length, so we need to filter them
-    const filteredNominals: any[] = [];
+    const filteredNominals = [];
     for (const nominalKey of nominalKeys) {
-      const nomiAxis = (encoding as any)[nominalKey] as any;
+      const nomiAxis = encoding[nominalKey] as any;
       if (filteredNominals.some((val) => val.field === nomiAxis.field)) {
         continue;
       }
@@ -385,7 +387,7 @@ export default class ChartSpecHandler {
         values: topNominalValues,
       });
     }
-    const values = clonedValues.filter((val: any) =>
+    const values = clonedValues.filter((val) =>
       filteredNominals.every((nominal) =>
         nominal.values.includes(val[nominal.field]),
       ),
@@ -395,12 +397,12 @@ export default class ChartSpecHandler {
 
   private getAllCategories(encoding: EncodingSpec) {
     const nominalAxis = ['xOffset', 'color', 'x', 'y'].find(
-      (axis) => (encoding as any)[axis]?.type === 'nominal',
+      (axis) => encoding[axis]?.type === 'nominal',
     );
     if (!nominalAxis) return [];
-    const axisKey = (encoding as any)[nominalAxis] as any;
+    const axisKey = encoding[nominalAxis] as any;
     const values = (this.data as any).values;
-    const categoryValues = values.map((val: any) => val[axisKey.field]);
+    const categoryValues = values.map((val) => val[axisKey.field]);
     const uniqueCategoryValues = uniq(categoryValues);
 
     return uniqueCategoryValues;
@@ -408,11 +410,9 @@ export default class ChartSpecHandler {
 
   private findFieldTitleInEncoding(encoding: EncodingSpec, field: string) {
     const axis = ['x', 'y', 'xOffset', 'color'].find(
-      (axis) =>
-        (encoding as any)[axis]?.field === field &&
-        (encoding as any)[axis]?.title,
+      (axis) => encoding[axis]?.field === field && encoding[axis]?.title,
     ) as any;
-    return (encoding as any)[axis]?.title || undefined;
+    return encoding[axis]?.title || undefined;
   }
 
   private transformDataValues(
@@ -423,20 +423,18 @@ export default class ChartSpecHandler {
     },
   ) {
     // If axis x is temporal
-    if (encoding?.x?.type === 'temporal' && encoding.x?.field) {
-      const xField = encoding.x.field;
+    if (encoding?.x?.type === 'temporal') {
       const transformedValues = data.values.map((val) => ({
         ...val,
-        [xField]: this.transformTemporalValue(val[xField]),
+        [encoding.x.field]: this.transformTemporalValue(val[encoding.x.field]),
       }));
       return { ...data, values: transformedValues };
     }
     // If axis y is temporal
-    if (encoding?.y?.type === 'temporal' && encoding.y?.field) {
-      const yField = encoding.y.field;
+    if (encoding?.y?.type === 'temporal') {
       const transformedValues = data.values.map((val) => ({
         ...val,
-        [yField]: this.transformTemporalValue(val[yField]),
+        [encoding.y.field]: this.transformTemporalValue(val[encoding.y.field]),
       }));
       return { ...data, values: transformedValues };
     }
@@ -513,15 +511,12 @@ export const getChartSpecOptionValues = (
 
 export const getChartSpecFieldTitleMap = (encoding: EncodingSpec) => {
   if (!encoding) return {};
-  const allFields: Record<string, any> = ['x', 'y', 'xOffset', 'color'].reduce(
-    (result: Record<string, any>, key) => {
-      const axis = (encoding as any)[key] as any;
-      if (axis?.field && axis?.title) {
-        result[axis?.field] = axis?.title;
-      }
-      return result;
-    },
-    {} as Record<string, any>,
-  );
+  const allFields = ['x', 'y', 'xOffset', 'color'].reduce((result, key) => {
+    const axis = encoding[key] as any;
+    if (axis?.field && axis?.title) {
+      result[axis?.field] = axis?.title;
+    }
+    return result;
+  }, {});
   return allFields;
 };

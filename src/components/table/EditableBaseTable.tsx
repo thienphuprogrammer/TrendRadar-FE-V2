@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { cloneDeep, isEmpty, set } from 'lodash';
+import { set, cloneDeep, isEmpty } from 'lodash';
 import { COLUMN, Props as BaseTableProps } from '@/components/table/BaseTable';
 import EditableWrapper from '@/components/EditableWrapper';
 

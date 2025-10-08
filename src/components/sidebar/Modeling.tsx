@@ -20,7 +20,7 @@ export const StyledSidebarTree = styled(SidebarTree)`
 export interface Props {
   data: Diagram;
   onOpenModelDrawer: () => void;
-  onSelect: (selectKeys: any) => void;
+  onSelect: (selectKeys) => void;
 }
 
 export default function Modeling(props: Props) {
@@ -30,16 +30,12 @@ export default function Modeling(props: Props) {
   return (
     <>
       <ModelTree
-        models={models.filter(Boolean)}
+        models={models}
         onSelect={onSelect}
         selectedKeys={[]}
         onOpenModelDrawer={onOpenModelDrawer}
       />
-      <ViewTree
-        views={views.filter(Boolean)}
-        onSelect={onSelect}
-        selectedKeys={[]}
-      />
+      <ViewTree views={views} onSelect={onSelect} selectedKeys={[]} />
     </>
   );
 }

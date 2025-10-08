@@ -1,4 +1,4 @@
-import { ApiHistory, ApiType } from '@server/repositories/apiHistoryRepository';
+import { ApiType, ApiHistory } from '@server/repositories/apiHistoryRepository';
 import { IContext } from '@server/types';
 
 export interface ApiHistoryFilter {

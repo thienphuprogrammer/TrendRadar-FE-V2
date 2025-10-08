@@ -54,10 +54,10 @@ Step 5. Run the development server:
 # Execute this if you start wren-engine and ibis-server via docker
 # Linux or MacOS
 export OTHER_SERVICE_USING_DOCKER=true
-export EXPERIMENTAL_ENGINE_RUST_VERSION=false # set to true if you want to use the experimental Rust version of the Wren Engine
+export EXPERIMENTAL_ENGINE_RUST_VERSION=false # set to true if you want to use the experimental Rust version of the TrendRadarEngine
 # Windows
 SET OTHER_SERVICE_USING_DOCKER=true
-SET EXPERIMENTAL_ENGINE_RUST_VERSION=false # set to true if you want to use the experimental Rust version of the Wren Engine
+SET EXPERIMENTAL_ENGINE_RUST_VERSION=false # set to true if you want to use the experimental Rust version of the TrendRadarEngine
 
 # Run the development server
 yarn dev
@@ -69,7 +69,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 
 ## Development wren-ui module on local
-There are many modules in Wren AI, to develop wren-ui, you can start other modules(services) via docker-compose.
+There are many modules in TrendRadarAI, to develop wren-ui, you can start other modules(services) via docker-compose.
 In the [Start wren-ui from source code](#Start-wren-ui-from-source-code) section, you've know how to start wren-ui from the source code to develop.
 To start other modules via docker-compose, you can follow the steps below.
 
@@ -157,9 +157,9 @@ eg: refer to the [ai-service README](https://github.com/Canner/WrenAI/blob/main/
 
 
 ## FAQ
-### Can I have multiple project at the same time in Wren AI?
-We currently do not support multiple projects in Wren AI. You can only have one project at a time.
-But there is a workaround for this. Since Wren Engine is stateless and we store your semantic model in the database(Sqlite or Postgres), 
+### Can I have multiple project at the same time in TrendRadarAI?
+We currently do not support multiple projects in TrendRadarAI. You can only have one project at a time.
+But there is a workaround for this. Since TrendRadarEngine is stateless and we store your semantic model in the database(Sqlite or Postgres), 
 you can switch between projects by switching the database and make sure you deploying after server started.
 
 > Tip: Define the `DB_TYPE` and `SQLITE_FILE` or `PG_URL` variable to specify which database you intend to use.
@@ -185,7 +185,7 @@ export SQLITE_FILE=./first_project.sqlite
 yarn dev  # no need to do migration again
 
 # in the modeling page, click the deploy button to deploy the project to the wren-ai-service.
-# your Wren AI is ready to answer your question.
+# your TrendRadarAI is ready to answer your question.
 ```
 
 ## Learn More

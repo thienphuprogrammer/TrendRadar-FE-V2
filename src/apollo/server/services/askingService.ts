@@ -1,13 +1,13 @@
 import { IWrenAIAdaptor } from '@server/adaptors/wrenAIAdaptor';
 import {
   AskResultStatus,
-  ChartAdjustmentOption,
-  ChartStatus,
-  RecommendationQuestion,
-  RecommendationQuestionsInput,
   RecommendationQuestionsResult,
-  RecommendationQuestionStatus,
+  RecommendationQuestionsInput,
+  RecommendationQuestion,
   WrenAIError,
+  RecommendationQuestionStatus,
+  ChartStatus,
+  ChartAdjustmentOption,
   WrenAILanguage,
 } from '@server/models/adaptor';
 import { IDeployService } from './deployService';
@@ -17,7 +17,6 @@ import {
   IThreadResponseRepository,
   ThreadResponse,
   ThreadResponseAdjustmentType,
-  ThreadResponseBreakdownDetail,
 } from '../repositories/threadResponseRepository';
 import { getLogger } from '@server/utils';
 import { isEmpty, isNil } from 'lodash';
@@ -35,10 +34,10 @@ import {
 import { IQueryService, PreviewDataResponse } from './queryService';
 import { IMDLService } from './mdlService';
 import {
-  AdjustmentBackgroundTaskTracker,
-  ChartAdjustmentBackgroundTracker,
-  ChartBackgroundTracker,
   ThreadRecommendQuestionBackgroundTracker,
+  ChartBackgroundTracker,
+  ChartAdjustmentBackgroundTracker,
+  AdjustmentBackgroundTaskTracker,
   TrackedAdjustmentResult,
 } from '../backgrounds';
 import { getConfig } from '@server/config';
@@ -324,11 +323,11 @@ class BreakdownBackgroundTracker {
 
           // get the latest result from AI service
           const result = await this.wrenAIAdaptor.getAskDetailResult(
-            breakdownDetail?.queryId || '',
+            breakdownDetail.queryId,
           );
 
           // check if status change
-          if (breakdownDetail?.status === result.status) {
+          if (breakdownDetail.status === result.status) {
             // mark the job as finished
             logger.debug(
               `Job ${threadResponse.id} status not changed, finished`,
@@ -339,7 +338,7 @@ class BreakdownBackgroundTracker {
 
           // update database
           const updatedBreakdownDetail = {
-            queryId: breakdownDetail?.queryId,
+            queryId: breakdownDetail.queryId,
             status: result?.status,
             error: result?.error,
             description: result?.response?.description,
@@ -347,8 +346,7 @@ class BreakdownBackgroundTracker {
           };
           logger.debug(`Job ${threadResponse.id} status changed, updating`);
           await this.threadResponseRepository.updateOne(threadResponse.id, {
-            breakdownDetail:
-              updatedBreakdownDetail as ThreadResponseBreakdownDetail,
+            breakdownDetail: updatedBreakdownDetail,
           });
 
           // remove the task from tracker if it is finalized
@@ -506,13 +504,11 @@ export class AskingService implements IAskingService {
     const res: ThreadRecommendQuestionResult = {
       status: RecommendQuestionResultStatus.NOT_STARTED,
       questions: [],
-      error: undefined,
+      error: null,
     };
     if (thread.queryId && thread.questionsStatus) {
-      res.status = (RecommendQuestionResultStatus as any)[
-        thread.questionsStatus
-      ]
-        ? (RecommendQuestionResultStatus as any)[thread.questionsStatus]
+      res.status = RecommendQuestionResultStatus[thread.questionsStatus]
+        ? RecommendQuestionResultStatus[thread.questionsStatus]
         : res.status;
       res.questions = thread.questions || [];
       res.error = thread.questionsError as WrenAIError;
@@ -560,7 +556,7 @@ export class AskingService implements IAskingService {
       queryId: result.queryId,
       questionsStatus: RecommendationQuestionStatus.GENERATING,
       questions: [],
-      questionsError: undefined,
+      questionsError: null,
     });
     this.threadRecommendQuestionBackgroundTracker.addTask(updatedThread);
     return;
@@ -606,7 +602,7 @@ export class AskingService implements IAskingService {
       : null;
     const response = await this.askingTaskTracker.createAskingTask({
       query: input.question,
-      histories: histories || [],
+      histories,
       deployId,
       configurations: { language },
       rerunFromCancelled,
@@ -662,20 +658,16 @@ export class AskingService implements IAskingService {
     }
   }
 
-  public async getAskingTask(taskId: string): Promise<TrackedAskingResult> {
-    const result = await this.askingTaskTracker.getAskingResult(taskId);
-    if (!result) {
-      throw new Error(`Asking task not found: ${taskId}`);
-    }
-    return result;
+  public async getAskingTask(
+    taskId: string,
+  ): Promise<TrackedAskingResult | null> {
+    return this.askingTaskTracker.getAskingResult(taskId);
   }
 
-  public async getAskingTaskById(id: number): Promise<TrackedAskingResult> {
-    const result = await this.askingTaskTracker.getAskingResultById(id);
-    if (!result) {
-      throw new Error(`Asking task not found: ${id}`);
-    }
-    return result;
+  public async getAskingTaskById(
+    id: number,
+  ): Promise<TrackedAskingResult | null> {
+    return this.askingTaskTracker.getAskingResultById(id);
   }
 
   /**
@@ -801,7 +793,7 @@ export class AskingService implements IAskingService {
     // 1. create a task on AI service to generate the detail
     const response = await this.wrenAIAdaptor.generateAskDetail({
       query: threadResponse.question,
-      sql: threadResponse.sql || '',
+      sql: threadResponse.sql,
       configurations: { language },
     });
 
@@ -865,7 +857,7 @@ export class AskingService implements IAskingService {
     // 1. create a task on AI service to generate the chart
     const response = await this.wrenAIAdaptor.generateChart({
       query: threadResponse.question,
-      sql: threadResponse.sql || '',
+      sql: threadResponse.sql,
       configurations,
     });
 
@@ -902,9 +894,9 @@ export class AskingService implements IAskingService {
     // 1. create a task on AI service to adjust the chart
     const response = await this.wrenAIAdaptor.adjustChart({
       query: threadResponse.question,
-      sql: threadResponse.sql || '',
+      sql: threadResponse.sql,
       adjustmentOption: input,
-      chartSchema: threadResponse.chartDetail?.chartSchema || {},
+      chartSchema: threadResponse.chartDetail?.chartSchema,
       configurations,
     });
 
@@ -930,14 +922,8 @@ export class AskingService implements IAskingService {
     return this.threadResponseRepository.getResponsesWithThread(threadId);
   }
 
-  public async getResponse(responseId: number): Promise<ThreadResponse> {
-    const response = await this.threadResponseRepository.findOneBy({
-      id: responseId,
-    });
-    if (!response) {
-      throw new Error(`Thread response ${responseId} not found`);
-    }
-    return response;
+  public async getResponse(responseId: number) {
+    return this.threadResponseRepository.findOneBy({ id: responseId });
   }
 
   public async previewData(responseId: number, limit?: number) {
@@ -950,7 +936,7 @@ export class AskingService implements IAskingService {
     const mdl = deployment.manifest;
     const eventName = TelemetryEvent.HOME_PREVIEW_ANSWER;
     try {
-      const data = (await this.queryService.preview(response.sql || '', {
+      const data = (await this.queryService.preview(response.sql, {
         project,
         manifest: mdl,
         limit,
@@ -988,7 +974,7 @@ export class AskingService implements IAskingService {
     const project = await this.projectService.getCurrentProject();
     const deployment = await this.deployService.getLastDeployment(project.id);
     const mdl = deployment.manifest;
-    const steps = response?.breakdownDetail?.steps || [];
+    const steps = response?.breakdownDetail?.steps;
     const sql = safeFormatSQL(constructCteSql(steps, stepIndex));
     const eventName = TelemetryEvent.HOME_PREVIEW_ANSWER;
     try {
@@ -1050,7 +1036,7 @@ export class AskingService implements IAskingService {
     }
 
     if (response.answerDetail?.status === status) {
-      return response;
+      return;
     }
 
     const updatedResponse = await this.threadResponseRepository.updateOne(
@@ -1065,6 +1051,12 @@ export class AskingService implements IAskingService {
     );
 
     return updatedResponse;
+  }
+
+  private async getDeployId() {
+    const { id } = await this.projectService.getCurrentProject();
+    const lastDeploy = await this.deployService.getLastDeployment(id);
+    return lastDeploy.hash;
   }
 
   public async adjustThreadResponseWithSQL(
@@ -1110,7 +1102,7 @@ export class AskingService implements IAskingService {
         threadId: originalThreadResponse.threadId,
         tables: input.tables,
         sqlGenerationReasoning: input.sqlGenerationReasoning,
-        sql: originalThreadResponse.sql || '',
+        sql: originalThreadResponse.sql,
         projectId: input.projectId,
         configurations,
         question: originalThreadResponse.question,
@@ -1148,30 +1140,14 @@ export class AskingService implements IAskingService {
 
   public async getAdjustmentTask(
     taskId: string,
-  ): Promise<TrackedAdjustmentResult> {
-    const result =
-      await this.adjustmentBackgroundTracker.getAdjustmentResult(taskId);
-    if (!result) {
-      throw new Error(`Adjustment task not found: ${taskId}`);
-    }
-    return result;
+  ): Promise<TrackedAdjustmentResult | null> {
+    return this.adjustmentBackgroundTracker.getAdjustmentResult(taskId);
   }
 
   public async getAdjustmentTaskById(
     id: number,
-  ): Promise<TrackedAdjustmentResult> {
-    const result =
-      await this.adjustmentBackgroundTracker.getAdjustmentResultById(id);
-    if (!result) {
-      throw new Error(`Adjustment task not found: ${id}`);
-    }
-    return result;
-  }
-
-  private async getDeployId() {
-    const { id } = await this.projectService.getCurrentProject();
-    const lastDeploy = await this.deployService.getLastDeployment(id);
-    return lastDeploy.hash;
+  ): Promise<TrackedAdjustmentResult | null> {
+    return this.adjustmentBackgroundTracker.getAdjustmentResultById(id);
   }
 
   /**
@@ -1208,9 +1184,7 @@ export class AskingService implements IAskingService {
       maxCategories: config.threadRecommendationQuestionMaxCategories,
       maxQuestions: config.threadRecommendationQuestionsMaxQuestions,
       configuration: {
-        language: project.language
-          ? (WrenAILanguage as any)[project.language] || WrenAILanguage.EN
-          : WrenAILanguage.EN,
+        language: WrenAILanguage[project.language] || WrenAILanguage.EN,
       },
     };
   }

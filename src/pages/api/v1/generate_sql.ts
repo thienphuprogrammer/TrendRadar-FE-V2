@@ -7,12 +7,12 @@ import { getLogger } from '@server/utils';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ApiError,
-  handleApiError,
-  isAskResultFinished,
-  MAX_WAIT_TIME,
   respondWith,
-  transformHistoryInput,
+  handleApiError,
+  MAX_WAIT_TIME,
+  isAskResultFinished,
   validateAskResult,
+  transformHistoryInput,
 } from '@/apollo/server/utils/apiUtils';
 import { DataSourceName } from '@server/types';
 
@@ -79,14 +79,10 @@ export default async function handler(
     const task = await wrenAIAdaptor.ask({
       query: question,
       deployId: lastDeploy.hash,
-      histories: transformHistoryInput(histories || []) as any,
+      histories: transformHistoryInput(histories) as any,
       configurations: {
         language:
-          language ||
-          (project.language
-            ? WrenAILanguage[project.language as keyof typeof WrenAILanguage]
-            : undefined) ||
-          WrenAILanguage.EN,
+          language || WrenAILanguage[project.language] || WrenAILanguage.EN,
       },
     });
 
@@ -154,7 +150,7 @@ export default async function handler(
       threadId: newThreadId,
       headers: req.headers as Record<string, string>,
     });
-  } catch (error: any) {
+  } catch (error) {
     await handleApiError({
       error,
       res,

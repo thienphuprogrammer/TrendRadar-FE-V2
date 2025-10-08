@@ -45,7 +45,7 @@ export function findColumnsToUpdate(
       const shouldKeep = columns.includes(sourceColumnName);
       return shouldKeep ? undefined : id;
     })
-    .filter((id): id is number => id !== undefined);
+    .filter((id) => id);
   const existColumnNames = existingColumns.map(
     ({ sourceColumnName }) => sourceColumnName,
   );
@@ -53,29 +53,26 @@ export function findColumnsToUpdate(
     (columnName) => !existColumnNames.includes(columnName),
   );
 
-  const toUpdateColumns = sourceTableColumns.reduce(
-    (acc: any[], sourceColumn) => {
-      const existingColumn = existingColumns.find(
-        (col) => col.sourceColumnName === sourceColumn.name,
-      );
-      if (!existingColumn) return acc;
+  const toUpdateColumns = sourceTableColumns.reduce((acc, sourceColumn) => {
+    const existingColumn = existingColumns.find(
+      (col) => col.sourceColumnName === sourceColumn.name,
+    );
+    if (!existingColumn) return acc;
 
-      const columnName = columns.find((col) => col === sourceColumn.name);
-      if (!columnName) return acc;
+    const columnName = columns.find((col) => col === sourceColumn.name);
+    if (!columnName) return acc;
 
-      if (sourceColumn.type === existingColumn.type) return acc;
+    if (sourceColumn.type === existingColumn.type) return acc;
 
-      return [
-        ...acc,
-        {
-          id: existingColumn.id,
-          sourceColumnName: sourceColumn.name,
-          type: sourceColumn.type || 'string',
-        },
-      ];
-    },
-    [],
-  );
+    return [
+      ...acc,
+      {
+        id: existingColumn.id,
+        sourceColumnName: sourceColumn.name,
+        type: sourceColumn.type || 'string',
+      },
+    ];
+  }, []);
 
   return {
     toDeleteColumnIds,

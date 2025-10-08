@@ -75,7 +75,7 @@ export interface IWrenEngineAdaptor {
   // metadata related, used to fetch metadata of duckdb
   listTables(): Promise<CompactTable[]>;
 
-  // config wren engine
+  // config TrendRadarengine
   patchConfig(config: Record<string, any>): Promise<void>;
 
   // query
@@ -115,14 +115,14 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
     modelName: string,
     columnName: string,
   ) {
-    const model = manifest.models?.find((m) => m.name === modelName);
+    const model = manifest.models.find((m) => m.name === modelName);
     if (!model) {
       return {
         valid: false,
         message: `Model ${modelName} not found in the manifest`,
       };
     }
-    const column = model.columns?.find((c) => c.name === columnName);
+    const column = model.columns.find((c) => c.name === columnName);
     if (!column) {
       return {
         valid: false,
@@ -287,8 +287,8 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
       return res.data;
     } catch (err: any) {
       logger.debug(`Got error when getting native SQL: ${err.message}`);
-      throw Errors.create(Errors.GeneralErrorCodes.DRY_PLAN_ERROR, {
-        customMessage: err.response?.data?.message || err.message,
+      Errors.create(Errors.GeneralErrorCodes.DRY_PLAN_ERROR, {
+        customMessage: err.message,
         originalError: err,
       });
     }
@@ -305,7 +305,7 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
         manifest,
       };
       logger.debug(
-        `Dry run wren engine with body: ${JSON.stringify(sql, null, 2)}`,
+        `Dry run TrendRadarengine with body: ${JSON.stringify(sql, null, 2)}`,
       );
       const url = new URL(this.dryRunUrlPath, this.wrenEngineBaseEndpoint);
       const res: AxiosResponse<WrenEngineDryRunResponse[]> = await axios({
@@ -313,7 +313,7 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
         url: url.href,
         data: body,
       });
-      logger.debug(`Wren Engine Dry run success`);
+      logger.debug(`TrendRadarEngine Dry run success`);
       return res.data;
     } catch (err: any) {
       logger.info(`Got error when dry running`);
@@ -338,7 +338,7 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
     }
   }
 
-  private async initDatabase(sql: string) {
+  private async initDatabase(sql) {
     try {
       const url = new URL(this.initSqlUrlPath, this.wrenEngineBaseEndpoint);
       const headers = {
@@ -367,7 +367,7 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
         data_type,
       ] = row;
       let table = acc.find(
-        (t) => t.name === table_name && t.properties?.schema === table_schema,
+        (t) => t.name === table_name && t.properties.schema === table_schema,
       );
       if (!table) {
         table = {
@@ -379,7 +379,7 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
             catalog: table_catalog,
             table: table_name,
           },
-          primaryKey: undefined,
+          primaryKey: null,
         };
         acc.push(table);
       }

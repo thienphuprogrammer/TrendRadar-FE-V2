@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Input, Select } from 'antd';
+import { Select, Input } from 'antd';
 
 interface Value {
   model?: string;

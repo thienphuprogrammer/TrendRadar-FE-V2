@@ -2,7 +2,6 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Button, message, Table, TableColumnsType, Typography } from 'antd';
 import { format } from 'sql-formatter';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import FunctionOutlined from '@ant-design/icons/FunctionOutlined';
@@ -16,10 +15,10 @@ import QuestionSQLPairModal from '@/components/modals/QuestionSQLPairModal';
 import SQLPairDrawer from '@/components/pages/knowledge/SQLPairDrawer';
 import { SqlPair } from '@/apollo/client/graphql/__types__';
 import {
-  useCreateSqlPairMutation,
-  useDeleteSqlPairMutation,
   useSqlPairsQuery,
+  useCreateSqlPairMutation,
   useUpdateSqlPairMutation,
+  useDeleteSqlPairMutation,
 } from '@/apollo/client/graphql/sqlPairs.generated';
 
 const SQLCodeBlock = dynamic(() => import('@/components/code/SQLCodeBlock'), {
@@ -28,7 +27,7 @@ const SQLCodeBlock = dynamic(() => import('@/components/code/SQLCodeBlock'), {
 
 const { Paragraph, Text } = Typography;
 
-function QuestionSQLPairsPage() {
+export default function ManageQuestionSQLPairs() {
   const questionSqlPairModal = useModalAction();
   const sqlPairDrawer = useDrawerAction();
 
@@ -37,9 +36,9 @@ function QuestionSQLPairsPage() {
   });
   const sqlPairs = data?.sqlPairs || [];
 
-  const getBaseOptions = (options: any) => {
+  const getBaseOptions = (options) => {
     return {
-      onError: (error: any) => console.error(error),
+      onError: (error) => console.error(error),
       refetchQueries: ['SqlPairs'],
       awaitRefetchQueries: true,
       ...options,
@@ -72,7 +71,7 @@ function QuestionSQLPairsPage() {
       }),
     );
 
-  const onMoreClick = async (payload: any) => {
+  const onMoreClick = async (payload) => {
     const { type, data } = payload;
     if (type === MORE_ACTION.DELETE) {
       await deleteSqlPairMutation({
@@ -146,7 +145,7 @@ function QuestionSQLPairsPage() {
         description={
           <>
             On this page, you can manage your saved question-SQL pairs. These
-            pairs help Wren AI learn how your organization writes SQL, allowing
+            pairs help TrendRadarAI learn how your organization writes SQL, allowing
             it to generate queries that better align with your expectations.{' '}
             <Link
               className="gray-8 underline"
@@ -161,11 +160,9 @@ function QuestionSQLPairsPage() {
       >
         <Table
           className="ant-table-has-header"
-          dataSource={sqlPairs.filter(
-            (sqlPair): sqlPair is SqlPair => sqlPair != null,
-          )}
+          dataSource={sqlPairs}
           loading={loading}
-          columns={columns as TableColumnsType<SqlPair>}
+          columns={columns}
           rowKey="id"
           pagination={{
             hideOnSinglePage: true,
@@ -176,9 +173,6 @@ function QuestionSQLPairsPage() {
         />
         <SQLPairDrawer
           {...sqlPairDrawer.state}
-          defaultValue={
-            sqlPairDrawer.state.open ? sqlPairDrawer.state.defaultValue : null
-          }
           onClose={sqlPairDrawer.closeDrawer}
         />
         <QuestionSQLPairModal
@@ -197,13 +191,5 @@ function QuestionSQLPairsPage() {
         />
       </PageLayout>
     </SiderLayout>
-  );
-}
-
-export default function ManageQuestionSQLPairs() {
-  return (
-    <ProtectedRoute>
-      <QuestionSQLPairsPage />
-    </ProtectedRoute>
   );
 }

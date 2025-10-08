@@ -5,21 +5,21 @@ import * as Errors from '@/apollo/server/utils/error';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ApiError,
-  handleApiError,
-  isAskResultFinished,
-  MAX_WAIT_TIME,
   respondWith,
-  transformHistoryInput,
+  handleApiError,
+  MAX_WAIT_TIME,
+  isAskResultFinished,
   validateSummaryResult,
+  transformHistoryInput,
 } from '@/apollo/server/utils/apiUtils';
 import {
   AskResult,
-  AskResultType,
+  WrenAILanguage,
   TextBasedAnswerInput,
   TextBasedAnswerResult,
   TextBasedAnswerStatus,
+  AskResultType,
   WrenAIError,
-  WrenAILanguage,
 } from '@/apollo/server/models/adaptor';
 import { getLogger } from '@server/utils';
 
@@ -84,15 +84,11 @@ export default async function handler(
     const askTask = await wrenAIAdaptor.ask({
       query: question,
       deployId: lastDeploy.hash,
-      histories: transformHistoryInput(histories || []) as any,
+      histories: transformHistoryInput(histories) as any,
       configurations: {
         language:
-          language ||
-          (project.language
-            ? WrenAILanguage[project.language as keyof typeof WrenAILanguage]
-            : undefined) ||
-          WrenAILanguage.EN,
-      } as any,
+          language || WrenAILanguage[project.language] || WrenAILanguage.EN,
+      },
     });
 
     // Poll for the SQL generation result
@@ -203,7 +199,7 @@ export default async function handler(
         modelingOnly: false,
       });
       sqlData = queryResult;
-    } catch (queryError: any) {
+    } catch (queryError) {
       throw new ApiError(
         queryError.message || 'Error executing SQL query',
         400,
@@ -219,11 +215,7 @@ export default async function handler(
       threadId: newThreadId,
       configurations: {
         language:
-          language ||
-          (project.language
-            ? WrenAILanguage[project.language as keyof typeof WrenAILanguage]
-            : undefined) ||
-          WrenAILanguage.EN,
+          language || WrenAILanguage[project.language] || WrenAILanguage.EN,
       },
     };
 
@@ -313,7 +305,7 @@ export default async function handler(
       threadId: newThreadId,
       headers: req.headers as Record<string, string>,
     });
-  } catch (error: any) {
+  } catch (error) {
     await handleApiError({
       error,
       res,

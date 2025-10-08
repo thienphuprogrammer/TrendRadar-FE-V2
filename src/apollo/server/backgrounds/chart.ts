@@ -46,14 +46,6 @@ export class ChartBackgroundTracker {
     this.start();
   }
 
-  public addTask(threadResponse: ThreadResponse) {
-    this.tasks[threadResponse.id] = threadResponse;
-  }
-
-  public getTasks() {
-    return this.tasks;
-  }
-
   private start() {
     logger.info('Chart background tracker started');
     setInterval(() => {
@@ -70,17 +62,7 @@ export class ChartBackgroundTracker {
           // get the chart detail
           const chartDetail = threadResponse.chartDetail;
 
-          if (!chartDetail) {
-            this.runningJobs.delete(threadResponse.id);
-            return;
-          }
-
           // get the latest result from AI service
-          if (!chartDetail.queryId) {
-            this.runningJobs.delete(threadResponse.id);
-            return;
-          }
-
           const result = await this.wrenAIAdaptor.getChartResult(
             chartDetail.queryId,
           );
@@ -101,7 +83,7 @@ export class ChartBackgroundTracker {
             status: result?.status,
             error: result?.error,
             description: result?.response?.reasoning,
-            chartType: result?.response?.chartType?.toUpperCase() || undefined,
+            chartType: result?.response?.chartType?.toUpperCase() || null,
             chartSchema: result?.response?.chartSchema,
           };
           logger.debug(
@@ -152,6 +134,14 @@ export class ChartBackgroundTracker {
       });
     }, this.intervalTime);
   }
+
+  public addTask(threadResponse: ThreadResponse) {
+    this.tasks[threadResponse.id] = threadResponse;
+  }
+
+  public getTasks() {
+    return this.tasks;
+  }
 }
 
 export class ChartAdjustmentBackgroundTracker {
@@ -178,14 +168,6 @@ export class ChartAdjustmentBackgroundTracker {
     this.start();
   }
 
-  public addTask(threadResponse: ThreadResponse) {
-    this.tasks[threadResponse.id] = threadResponse;
-  }
-
-  public getTasks() {
-    return this.tasks;
-  }
-
   private start() {
     logger.info('Chart adjustment background tracker started');
     setInterval(() => {
@@ -202,17 +184,7 @@ export class ChartAdjustmentBackgroundTracker {
           // get the chart detail
           const chartDetail = threadResponse.chartDetail;
 
-          if (!chartDetail) {
-            this.runningJobs.delete(threadResponse.id);
-            return;
-          }
-
           // get the latest result from AI service
-          if (!chartDetail.queryId) {
-            this.runningJobs.delete(threadResponse.id);
-            return;
-          }
-
           const result = await this.wrenAIAdaptor.getChartAdjustmentResult(
             chartDetail.queryId,
           );
@@ -233,7 +205,7 @@ export class ChartAdjustmentBackgroundTracker {
             status: result?.status,
             error: result?.error,
             description: result?.response?.reasoning,
-            chartType: result?.response?.chartType?.toUpperCase() || undefined,
+            chartType: result?.response?.chartType?.toUpperCase() || null,
             chartSchema: result?.response?.chartSchema,
             adjustment: true,
           };
@@ -284,5 +256,13 @@ export class ChartAdjustmentBackgroundTracker {
         });
       });
     }, this.intervalTime);
+  }
+
+  public addTask(threadResponse: ThreadResponse) {
+    this.tasks[threadResponse.id] = threadResponse;
+  }
+
+  public getTasks() {
+    return this.tasks;
   }
 }

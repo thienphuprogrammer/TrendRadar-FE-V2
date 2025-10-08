@@ -1,11 +1,11 @@
 import {
-  CreateCalculatedFieldData,
   CreateModelData,
-  PreviewSQLData,
-  UpdateCalculatedFieldData,
   UpdateModelData,
   UpdateModelMetadataInput,
+  CreateCalculatedFieldData,
+  UpdateCalculatedFieldData,
   UpdateViewMetadataInput,
+  PreviewSQLData,
 } from '../models';
 import {
   DataSourceName,
@@ -266,7 +266,7 @@ export class ModelResolver {
         .filter((c) => c.modelId === model.id)
         .map((c) => ({
           ...c,
-          properties: c.properties ? JSON.parse(c.properties) : {},
+          properties: JSON.parse(c.properties),
           nestedColumns: c.type.includes('STRUCT')
             ? modelNestedColumnList.filter((nc) => nc.columnId === c.id)
             : undefined,
@@ -278,7 +278,7 @@ export class ModelResolver {
         fields,
         calculatedFields,
         properties: {
-          ...(model.properties ? JSON.parse(model.properties) : {}),
+          ...JSON.parse(model.properties),
         },
       });
     }
@@ -301,7 +301,7 @@ export class ModelResolver {
 
     const columns = modelColumns.map((c) => ({
       ...c,
-      properties: c.properties ? JSON.parse(c.properties) : {},
+      properties: JSON.parse(c.properties),
       nestedColumns: c.type.includes('STRUCT')
         ? modelNestedColumns.filter((nc) => nc.columnId === c.id)
         : undefined,
@@ -322,7 +322,7 @@ export class ModelResolver {
       calculatedFields: columns.filter((c) => c.isCalculated),
       relations,
       properties: {
-        ...(model.properties ? JSON.parse(model.properties) : {}),
+        ...JSON.parse(model.properties),
       },
     };
   }
@@ -355,6 +355,77 @@ export class ModelResolver {
     }
   }
 
+  private async handleCreateModel(
+    ctx: IContext,
+    sourceTableName: string,
+    fields: [string],
+    primaryKey: string,
+  ) {
+    const project = await ctx.projectService.getCurrentProject();
+    const dataSourceTables =
+      await ctx.projectService.getProjectDataSourceTables(project);
+    this.validateTableExist(sourceTableName, dataSourceTables);
+    this.validateColumnsExist(sourceTableName, fields, dataSourceTables);
+
+    // create model
+    const dataSourceTable = dataSourceTables.find(
+      (table) => table.name === sourceTableName,
+    );
+    if (!dataSourceTable) {
+      throw new Error('Table not found in the data source');
+    }
+    const properties = dataSourceTable?.properties;
+    const modelValue = {
+      projectId: project.id,
+      displayName: sourceTableName, //use table name as displayName, referenceName and tableName
+      referenceName: replaceInvalidReferenceName(sourceTableName),
+      sourceTableName: sourceTableName,
+      cached: false,
+      refreshTime: null,
+      properties: properties ? JSON.stringify(properties) : null,
+    } as Partial<Model>;
+    const model = await ctx.modelRepository.createOne(modelValue);
+
+    // create columns
+    const compactColumns = dataSourceTable.columns.filter((c) =>
+      fields.includes(c.name),
+    );
+    const columnValues = compactColumns.map(
+      (column) =>
+        ({
+          modelId: model.id,
+          isCalculated: false,
+          displayName: column.name,
+          referenceName: transformInvalidColumnName(column.name),
+          sourceColumnName: column.name,
+          type: column.type || 'string',
+          notNull: column.notNull || false,
+          isPk: primaryKey === column.name,
+          properties: column.properties
+            ? JSON.stringify(column.properties)
+            : null,
+        }) as Partial<ModelColumn>,
+    );
+    const columns = await ctx.modelColumnRepository.createMany(columnValues);
+
+    // create nested columns
+    const nestedColumnValues = compactColumns.flatMap((compactColumn) => {
+      const column = columns.find(
+        (c) => c.sourceColumnName === compactColumn.name,
+      );
+      if (!column) return [];
+      return handleNestedColumns(compactColumn, {
+        modelId: column.modelId,
+        columnId: column.id,
+        sourceColumnName: column.sourceColumnName,
+      });
+    });
+    await ctx.modelNestedColumnRepository.createMany(nestedColumnValues);
+    logger.info(`Model created: ${JSON.stringify(model)}`);
+
+    return model;
+  }
+
   public async updateModel(
     _root: any,
     args: { data: UpdateModelData; where: { id: number } },
@@ -376,6 +447,105 @@ export class ModelResolver {
       );
       throw err;
     }
+  }
+
+  private async handleUpdateModel(
+    ctx: IContext,
+    args: { data: UpdateModelData; where: { id: number } },
+    fields: [string],
+    primaryKey: string,
+  ) {
+    const project = await ctx.projectService.getCurrentProject();
+    const dataSourceTables =
+      await ctx.projectService.getProjectDataSourceTables(project);
+    const model = await ctx.modelRepository.findOneBy({ id: args.where.id });
+    const existingColumns = await ctx.modelColumnRepository.findAllBy({
+      modelId: model.id,
+      isCalculated: false,
+    });
+    const { sourceTableName } = model;
+    this.validateTableExist(sourceTableName, dataSourceTables);
+    this.validateColumnsExist(sourceTableName, fields, dataSourceTables);
+
+    const sourceTableColumns = dataSourceTables.find(
+      (table) => table.name === sourceTableName,
+    )?.columns;
+    const { toDeleteColumnIds, toCreateColumns, toUpdateColumns } =
+      findColumnsToUpdate(fields, existingColumns, sourceTableColumns);
+    await updateModelPrimaryKey(
+      ctx.modelColumnRepository,
+      model.id,
+      primaryKey,
+    );
+
+    // delete columns
+    if (toDeleteColumnIds.length) {
+      await ctx.modelColumnRepository.deleteMany(toDeleteColumnIds);
+    }
+
+    // create columns
+    if (toCreateColumns.length) {
+      const compactColumns = sourceTableColumns.filter((sourceColumn) =>
+        toCreateColumns.includes(sourceColumn.name),
+      );
+      const columnValues = compactColumns.map((column) => {
+        const columnValue = {
+          modelId: model.id,
+          isCalculated: false,
+          displayName: column.name,
+          sourceColumnName: column.name,
+          referenceName: transformInvalidColumnName(column.name),
+          type: column.type || 'string',
+          notNull: column.notNull,
+          isPk: primaryKey === column.name,
+          properties: column.properties
+            ? JSON.stringify(column.properties)
+            : null,
+        } as Partial<ModelColumn>;
+        return columnValue;
+      });
+      const columns = await ctx.modelColumnRepository.createMany(columnValues);
+
+      // create nested columns
+      const nestedColumnValues = compactColumns.flatMap((compactColumn) => {
+        const column = columns.find(
+          (c) => c.sourceColumnName === compactColumn.name,
+        );
+        return handleNestedColumns(compactColumn, {
+          modelId: column.modelId,
+          columnId: column.id,
+          sourceColumnName: column.sourceColumnName,
+        });
+      });
+      await ctx.modelNestedColumnRepository.createMany(nestedColumnValues);
+    }
+
+    // update columns
+    if (toUpdateColumns.length) {
+      for (const { id, sourceColumnName, type } of toUpdateColumns) {
+        const column = await ctx.modelColumnRepository.updateOne(id, { type });
+
+        // if the struct type is changed, need to re-create nested columns
+        if (type.includes('STRUCT')) {
+          const sourceColumn = sourceTableColumns.find(
+            (sourceColumn) => sourceColumn.name === sourceColumnName,
+          );
+          await ctx.modelNestedColumnRepository.deleteAllBy({
+            columnId: column.id,
+          });
+          await ctx.modelNestedColumnRepository.createMany(
+            handleNestedColumns(sourceColumn, {
+              modelId: column.modelId,
+              columnId: column.id,
+              sourceColumnName: sourceColumnName,
+            }),
+          );
+        }
+      }
+    }
+
+    logger.info(`Model updated: ${JSON.stringify(model)}`);
+    return model;
   }
 
   // delete model
@@ -445,6 +615,161 @@ export class ModelResolver {
     }
   }
 
+  private async handleUpdateModelMetadata(
+    data: UpdateModelMetadataInput,
+    model: Model,
+    ctx: IContext,
+    modelId: number,
+  ) {
+    const modelMetadata: any = {};
+
+    // if displayName is not null, or undefined, update the displayName
+    if (!isNil(data.displayName)) {
+      modelMetadata.displayName = this.determineMetadataValue(data.displayName);
+    }
+
+    // if description is not null, or undefined, update the description in properties
+    if (!isNil(data.description)) {
+      const properties = isNil(model.properties)
+        ? {}
+        : JSON.parse(model.properties);
+
+      properties.description = this.determineMetadataValue(data.description);
+      modelMetadata.properties = JSON.stringify(properties);
+    }
+
+    if (!isEmpty(modelMetadata)) {
+      await ctx.modelRepository.updateOne(modelId, modelMetadata);
+    }
+  }
+
+  private async handleUpdateRelationshipMetadata(
+    data: UpdateModelMetadataInput,
+    ctx: IContext,
+  ) {
+    const relationshipIds = data.relationships.map((r) => r.id);
+    const relationships =
+      await ctx.relationRepository.findRelationsByIds(relationshipIds);
+    for (const rel of relationships) {
+      const requestedMetadata = data.relationships.find((r) => r.id === rel.id);
+
+      const relationMetadata: any = {};
+
+      if (!isNil(requestedMetadata.description)) {
+        const properties = rel.properties ? JSON.parse(rel.properties) : {};
+        properties.description = this.determineMetadataValue(
+          requestedMetadata.description,
+        );
+        relationMetadata.properties = JSON.stringify(properties);
+      }
+
+      if (!isEmpty(relationMetadata)) {
+        await ctx.relationRepository.updateOne(rel.id, relationMetadata);
+      }
+    }
+  }
+
+  private async handleUpdateCFMetadata(
+    data: UpdateModelMetadataInput,
+    ctx: IContext,
+  ) {
+    const calculatedFieldIds = data.calculatedFields.map((c) => c.id);
+    const modelColumns =
+      await ctx.modelColumnRepository.findColumnsByIds(calculatedFieldIds);
+    for (const col of modelColumns) {
+      const requestedMetadata = data.calculatedFields.find(
+        (c) => c.id === col.id,
+      );
+
+      const columnMetadata: any = {};
+      // check if description is empty
+      // if description is empty, skip the update
+      // if description is not empty, update the description in properties
+      if (!isNil(requestedMetadata.description)) {
+        const properties = col.properties ? JSON.parse(col.properties) : {};
+        properties.description = this.determineMetadataValue(
+          requestedMetadata.description,
+        );
+        columnMetadata.properties = JSON.stringify(properties);
+      }
+
+      if (!isEmpty(columnMetadata)) {
+        await ctx.modelColumnRepository.updateOne(col.id, columnMetadata);
+      }
+    }
+  }
+
+  private async handleUpdateColumnMetadata(
+    data: UpdateModelMetadataInput,
+    ctx: IContext,
+  ) {
+    const columnIds = data.columns.map((c) => c.id);
+    const modelColumns =
+      await ctx.modelColumnRepository.findColumnsByIds(columnIds);
+    for (const col of modelColumns) {
+      const requestedMetadata = data.columns.find((c) => c.id === col.id);
+
+      // update metadata
+      const columnMetadata: any = {};
+
+      if (!isNil(requestedMetadata.displayName)) {
+        columnMetadata.displayName = this.determineMetadataValue(
+          requestedMetadata.displayName,
+        );
+      }
+
+      if (!isNil(requestedMetadata.description)) {
+        const properties = col.properties ? JSON.parse(col.properties) : {};
+        properties.description = this.determineMetadataValue(
+          requestedMetadata.description,
+        );
+        columnMetadata.properties = JSON.stringify(properties);
+      }
+
+      if (!isEmpty(columnMetadata)) {
+        await ctx.modelColumnRepository.updateOne(col.id, columnMetadata);
+      }
+    }
+  }
+
+  private async handleUpdateNestedColumnMetadata(
+    data: UpdateModelMetadataInput,
+    ctx: IContext,
+  ) {
+    const nestedColumnIds = data.nestedColumns.map((nc) => nc.id);
+    const modelNestedColumns =
+      await ctx.modelNestedColumnRepository.findNestedColumnsByIds(
+        nestedColumnIds,
+      );
+    for (const col of modelNestedColumns) {
+      const requestedMetadata = data.nestedColumns.find((c) => c.id === col.id);
+
+      const nestedColumnMetadata: any = {};
+
+      if (!isNil(requestedMetadata.displayName)) {
+        nestedColumnMetadata.displayName = this.determineMetadataValue(
+          requestedMetadata.displayName,
+        );
+      }
+
+      if (!isNil(requestedMetadata.description)) {
+        nestedColumnMetadata.properties = {
+          ...col.properties,
+          description: this.determineMetadataValue(
+            requestedMetadata.description,
+          ),
+        };
+      }
+
+      if (!isEmpty(nestedColumnMetadata)) {
+        await ctx.modelNestedColumnRepository.updateOne(
+          col.id,
+          nestedColumnMetadata,
+        );
+      }
+    }
+  }
+
   // list views
   public async listViews(_root: any, _args: any, ctx: IContext) {
     const { id } = await ctx.projectService.getCurrentProject();
@@ -496,7 +821,7 @@ export class ModelResolver {
     }
 
     // construct cte sql and format it
-    const statement = safeFormatSQL(response.sql || '');
+    const statement = safeFormatSQL(response.sql);
 
     // describe columns
     const { columns } = await ctx.queryService.describeStatement(statement, {
@@ -605,6 +930,7 @@ export class ModelResolver {
     return data;
   }
 
+  // Notice: this is used by AI service.
   // any change to this resolver should be synced with AI service.
   public async previewSql(
     _root: any,
@@ -648,8 +974,8 @@ export class ModelResolver {
     // construct cte sql and format it
     let nativeSql: string;
     if (project.type === DataSourceName.DUCKDB) {
-      logger.info(`Getting native sql from wren engine`);
-      nativeSql = await ctx.wrenEngineAdaptor.getNativeSQL(response.sql || '', {
+      logger.info(`Getting native sql from TrendRadarengine`);
+      nativeSql = await ctx.wrenEngineAdaptor.getNativeSQL(response.sql, {
         manifest,
         modelingOnly: false,
       });
@@ -657,7 +983,7 @@ export class ModelResolver {
       logger.info(`Getting native sql from ibis server`);
       nativeSql = await ctx.ibisServerAdaptor.getNativeSql({
         dataSource: project.type,
-        sql: response.sql || '',
+        sql: response.sql,
         mdl: manifest,
       });
     }
@@ -680,7 +1006,7 @@ export class ModelResolver {
     }
 
     // update view metadata
-    const properties = JSON.parse(view.properties || '{}');
+    const properties = JSON.parse(view.properties);
     let newName = view.name;
     // if displayName is not null, or undefined, update the displayName
     if (!isNil(data.displayName)) {
@@ -702,7 +1028,7 @@ export class ModelResolver {
           (c) => c.referenceName === col.name,
         );
 
-        if (requestedMetadata && !isNil(requestedMetadata.description)) {
+        if (!isNil(requestedMetadata.description)) {
           col.properties = col.properties || {};
           col.properties.description = this.determineMetadataValue(
             requestedMetadata.description,
@@ -719,340 +1045,6 @@ export class ModelResolver {
     });
 
     return true;
-  }
-
-  private async handleCreateModel(
-    ctx: IContext,
-    sourceTableName: string,
-    fields: [string],
-    primaryKey: string,
-  ) {
-    const project = await ctx.projectService.getCurrentProject();
-    const dataSourceTables =
-      await ctx.projectService.getProjectDataSourceTables(project);
-    this.validateTableExist(sourceTableName, dataSourceTables);
-    this.validateColumnsExist(sourceTableName, fields, dataSourceTables);
-
-    // create model
-    const dataSourceTable = dataSourceTables.find(
-      (table) => table.name === sourceTableName,
-    );
-    if (!dataSourceTable) {
-      throw new Error('Table not found in the data source');
-    }
-    const properties = dataSourceTable?.properties;
-    const modelValue = {
-      projectId: project.id,
-      displayName: sourceTableName, //use table name as displayName, referenceName and tableName
-      referenceName: replaceInvalidReferenceName(sourceTableName),
-      sourceTableName: sourceTableName,
-      cached: false,
-      refreshTime: null,
-      properties: properties ? JSON.stringify(properties) : null,
-    } as Partial<Model>;
-    const model = await ctx.modelRepository.createOne(modelValue);
-
-    // create columns
-    const compactColumns = dataSourceTable.columns.filter((c) =>
-      fields.includes(c.name),
-    );
-    const columnValues = compactColumns.map(
-      (column) =>
-        (({
-          modelId: model.id,
-          isCalculated: false,
-          displayName: column.name,
-          referenceName: transformInvalidColumnName(column.name),
-          sourceColumnName: column.name,
-          type: column.type || 'string',
-          notNull: column.notNull || false,
-          isPk: primaryKey === column.name,
-
-          properties: column.properties
-            ? JSON.stringify(column.properties)
-            : null
-        }) as Partial<ModelColumn>),
-    );
-    const columns = await ctx.modelColumnRepository.createMany(columnValues);
-
-    // create nested columns
-    const nestedColumnValues = compactColumns.flatMap((compactColumn) => {
-      const column = columns.find(
-        (c) => c.sourceColumnName === compactColumn.name,
-      );
-      if (!column) return [];
-      return handleNestedColumns(compactColumn, {
-        modelId: column.modelId,
-        columnId: column.id,
-        sourceColumnName: column.sourceColumnName,
-      });
-    });
-    await ctx.modelNestedColumnRepository.createMany(nestedColumnValues);
-    logger.info(`Model created: ${JSON.stringify(model)}`);
-
-    return model;
-  }
-
-  private async handleUpdateModel(
-    ctx: IContext,
-    args: { data: UpdateModelData; where: { id: number } },
-    fields: [string],
-    primaryKey: string,
-  ) {
-    const project = await ctx.projectService.getCurrentProject();
-    const dataSourceTables =
-      await ctx.projectService.getProjectDataSourceTables(project);
-    const model = await ctx.modelRepository.findOneBy({ id: args.where.id });
-    if (!model) {
-      throw new Error('Model not found');
-    }
-    const existingColumns = await ctx.modelColumnRepository.findAllBy({
-      modelId: model.id,
-      isCalculated: false,
-    });
-    const { sourceTableName } = model;
-    this.validateTableExist(sourceTableName, dataSourceTables);
-    this.validateColumnsExist(sourceTableName, fields, dataSourceTables);
-
-    const sourceTableColumns = dataSourceTables.find(
-      (table) => table.name === sourceTableName,
-    )?.columns;
-    const { toDeleteColumnIds, toCreateColumns, toUpdateColumns } =
-      findColumnsToUpdate(fields, existingColumns, sourceTableColumns || []);
-    await updateModelPrimaryKey(
-      ctx.modelColumnRepository,
-      model.id,
-      primaryKey,
-    );
-
-    // delete columns
-    if (toDeleteColumnIds.length) {
-      await ctx.modelColumnRepository.deleteMany(toDeleteColumnIds);
-    }
-
-    // create columns
-    if (toCreateColumns.length && sourceTableColumns) {
-      const compactColumns = sourceTableColumns.filter((sourceColumn) =>
-        toCreateColumns.includes(sourceColumn.name),
-      );
-      const columnValues = compactColumns.map((column) => {
-        const columnValue = {
-          modelId: model.id,
-          isCalculated: false,
-          displayName: column.name,
-          sourceColumnName: column.name,
-          referenceName: transformInvalidColumnName(column.name),
-          type: column.type || 'string',
-          notNull: column.notNull,
-          isPk: primaryKey === column.name,
-          properties: column.properties
-            ? JSON.stringify(column.properties)
-            : null,
-        } as Partial<ModelColumn>;
-        return columnValue;
-      });
-      const columns = await ctx.modelColumnRepository.createMany(columnValues);
-
-      // create nested columns
-      const nestedColumnValues = compactColumns.flatMap((compactColumn) => {
-        const column = columns.find(
-          (c) => c.sourceColumnName === compactColumn.name,
-        );
-        if (!column) return [];
-        return handleNestedColumns(compactColumn, {
-          modelId: column.modelId,
-          columnId: column.id,
-          sourceColumnName: column.sourceColumnName,
-        });
-      });
-      await ctx.modelNestedColumnRepository.createMany(nestedColumnValues);
-    }
-
-    // update columns
-    if (toUpdateColumns.length) {
-      for (const { id, sourceColumnName, type } of toUpdateColumns) {
-        const column = await ctx.modelColumnRepository.updateOne(id, { type });
-
-        // if the struct type is changed, need to re-create nested columns
-        if (type.includes('STRUCT')) {
-          const sourceColumn = sourceTableColumns?.find(
-            (sourceColumn) => sourceColumn.name === sourceColumnName,
-          );
-          await ctx.modelNestedColumnRepository.deleteAllBy({
-            columnId: column.id,
-          });
-          if (sourceColumn) {
-            await ctx.modelNestedColumnRepository.createMany(
-              handleNestedColumns(sourceColumn, {
-                modelId: column.modelId,
-                columnId: column.id,
-                sourceColumnName: sourceColumnName,
-              }),
-            );
-          }
-        }
-      }
-    }
-
-    logger.info(`Model updated: ${JSON.stringify(model)}`);
-    return model;
-  }
-
-  private async handleUpdateModelMetadata(
-    data: UpdateModelMetadataInput,
-    model: Model,
-    ctx: IContext,
-    modelId: number,
-  ) {
-    const modelMetadata: any = {};
-
-    // if displayName is not null, or undefined, update the displayName
-    if (!isNil(data.displayName)) {
-      modelMetadata.displayName = this.determineMetadataValue(data.displayName);
-    }
-
-    // if description is not null, or undefined, update the description in properties
-    if (!isNil(data.description)) {
-      const properties = isNil(model.properties)
-        ? {}
-        : JSON.parse(model.properties);
-
-      properties.description = this.determineMetadataValue(data.description);
-      modelMetadata.properties = JSON.stringify(properties);
-    }
-
-    if (!isEmpty(modelMetadata)) {
-      await ctx.modelRepository.updateOne(modelId, modelMetadata);
-    }
-  }
-
-  private async handleUpdateRelationshipMetadata(
-    data: UpdateModelMetadataInput,
-    ctx: IContext,
-  ) {
-    const relationshipIds = data.relationships.map((r) => r.id);
-    const relationships =
-      await ctx.relationRepository.findRelationsByIds(relationshipIds);
-    for (const rel of relationships) {
-      const requestedMetadata = data.relationships.find((r) => r.id === rel.id);
-
-      const relationMetadata: any = {};
-
-      if (requestedMetadata && !isNil(requestedMetadata.description)) {
-        const properties = rel.properties ? JSON.parse(rel.properties) : {};
-        properties.description = this.determineMetadataValue(
-          requestedMetadata.description,
-        );
-        relationMetadata.properties = JSON.stringify(properties);
-      }
-
-      if (!isEmpty(relationMetadata)) {
-        await ctx.relationRepository.updateOne(rel.id, relationMetadata);
-      }
-    }
-  }
-
-  // Notice: this is used by AI service.
-
-  private async handleUpdateCFMetadata(
-    data: UpdateModelMetadataInput,
-    ctx: IContext,
-  ) {
-    const calculatedFieldIds = data.calculatedFields.map((c) => c.id);
-    const modelColumns =
-      await ctx.modelColumnRepository.findColumnsByIds(calculatedFieldIds);
-    for (const col of modelColumns) {
-      const requestedMetadata = data.calculatedFields.find(
-        (c) => c.id === col.id,
-      );
-
-      const columnMetadata: any = {};
-      // check if description is empty
-      // if description is empty, skip the update
-      // if description is not empty, update the description in properties
-      if (requestedMetadata && !isNil(requestedMetadata.description)) {
-        const properties = col.properties ? JSON.parse(col.properties) : {};
-        properties.description = this.determineMetadataValue(
-          requestedMetadata.description,
-        );
-        columnMetadata.properties = JSON.stringify(properties);
-      }
-
-      if (!isEmpty(columnMetadata)) {
-        await ctx.modelColumnRepository.updateOne(col.id, columnMetadata);
-      }
-    }
-  }
-
-  private async handleUpdateColumnMetadata(
-    data: UpdateModelMetadataInput,
-    ctx: IContext,
-  ) {
-    const columnIds = data.columns.map((c) => c.id);
-    const modelColumns =
-      await ctx.modelColumnRepository.findColumnsByIds(columnIds);
-    for (const col of modelColumns) {
-      const requestedMetadata = data.columns.find((c) => c.id === col.id);
-
-      // update metadata
-      const columnMetadata: any = {};
-
-      if (requestedMetadata && !isNil(requestedMetadata.displayName)) {
-        columnMetadata.displayName = this.determineMetadataValue(
-          requestedMetadata.displayName,
-        );
-      }
-
-      if (requestedMetadata && !isNil(requestedMetadata.description)) {
-        const properties = col.properties ? JSON.parse(col.properties) : {};
-        properties.description = this.determineMetadataValue(
-          requestedMetadata.description,
-        );
-        columnMetadata.properties = JSON.stringify(properties);
-      }
-
-      if (!isEmpty(columnMetadata)) {
-        await ctx.modelColumnRepository.updateOne(col.id, columnMetadata);
-      }
-    }
-  }
-
-  private async handleUpdateNestedColumnMetadata(
-    data: UpdateModelMetadataInput,
-    ctx: IContext,
-  ) {
-    const nestedColumnIds = data.nestedColumns.map((nc) => nc.id);
-    const modelNestedColumns =
-      await ctx.modelNestedColumnRepository.findNestedColumnsByIds(
-        nestedColumnIds,
-      );
-    for (const col of modelNestedColumns) {
-      const requestedMetadata = data.nestedColumns.find((c) => c.id === col.id);
-
-      const nestedColumnMetadata: any = {};
-
-      if (requestedMetadata && !isNil(requestedMetadata.displayName)) {
-        nestedColumnMetadata.displayName = this.determineMetadataValue(
-          requestedMetadata.displayName,
-        );
-      }
-
-      if (requestedMetadata && !isNil(requestedMetadata.description)) {
-        nestedColumnMetadata.properties = {
-          ...col.properties,
-          description: this.determineMetadataValue(
-            requestedMetadata.description,
-          ),
-        };
-      }
-
-      if (!isEmpty(nestedColumnMetadata)) {
-        await ctx.modelNestedColumnRepository.updateOne(
-          col.id,
-          nestedColumnMetadata,
-        );
-      }
-    }
   }
 
   private determineMetadataValue(value: string) {
@@ -1078,7 +1070,7 @@ export class ModelResolver {
     if (!valid) {
       return {
         valid: false,
-        message: message || '',
+        message,
       };
     }
     const referenceName = replaceAllowableSyntax(viewDisplayName);
@@ -1115,7 +1107,7 @@ export class ModelResolver {
       (c) => c.name === tableName,
     )?.columns;
     for (const field of fields) {
-      if (!tableColumns?.find((c) => c.name === field)) {
+      if (!tableColumns.find((c) => c.name === field)) {
         throw new Error(
           `Column "${field}" not found in table "${tableName}" in the data Source`,
         );

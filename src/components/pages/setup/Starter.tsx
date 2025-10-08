@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ComponentProps, useState } from 'react';
-import { Col, Row, Typography } from 'antd';
+import { Typography, Row, Col } from 'antd';
 import { getDataSources, getTemplates } from './utils';
 import { makeIterable } from '@/utils/iteration';
 import ButtonItem from './ButtonItem';
@@ -20,7 +20,7 @@ const ButtonTemplate = (props: ComponentProps<typeof ButtonItem>) => {
 const DataSourceIterator = makeIterable(ButtonTemplate);
 const TemplatesIterator = makeIterable(ButtonTemplate);
 
-export default function Starter(props: any) {
+export default function Starter(props) {
   const { onNext, submitting } = props;
 
   const [template, setTemplate] = useState<SampleDatasetName>();

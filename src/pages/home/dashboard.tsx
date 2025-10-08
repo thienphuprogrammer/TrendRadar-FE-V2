@@ -15,8 +15,8 @@ import CacheSettingsDrawer, {
 import {
   useDashboardQuery,
   useDeleteDashboardItemMutation,
-  useSetDashboardScheduleMutation,
   useUpdateDashboardItemLayoutsMutation,
+  useSetDashboardScheduleMutation,
 } from '@/apollo/client/graphql/dashboard.generated';
 import { useGetSettingsQuery } from '@/apollo/client/graphql/settings.generated';
 import {
@@ -25,12 +25,10 @@ import {
   ItemLayoutInput,
 } from '@/apollo/client/graphql/__types__';
 
-const isSupportCachedSettings = (dataSource?: DataSource | null) => {
+const isSupportCachedSettings = (dataSource: DataSource) => {
   // DuckDB not supported, sample dataset as well
   return (
-    dataSource &&
-    !dataSource?.sampleDataset &&
-    dataSource?.type !== DataSourceName.DUCKDB
+    !dataSource?.sampleDataset && dataSource?.type !== DataSourceName.DUCKDB
   );
 };
 
@@ -79,9 +77,7 @@ export default function Dashboard() {
     onError: (error) => console.error(error),
     onCompleted: (_, query) => {
       message.success('Successfully deleted dashboard item.');
-      if (query?.variables?.where?.id) {
-        onRemoveDashboardItemFromQueryCache(query.variables.where.id);
-      }
+      onRemoveDashboardItemFromQueryCache(query.variables.where.id);
     },
   });
 
@@ -115,7 +111,7 @@ export default function Dashboard() {
             <DashboardHeader
               isSupportCached={isSupportCached}
               schedule={data?.dashboard?.schedule as Schedule}
-              nextScheduleTime={data?.dashboard?.nextScheduledAt || undefined}
+              nextScheduleTime={data?.dashboard?.nextScheduledAt}
               onCacheSettings={() => {
                 cacheSettingsDrawer.openDrawer({
                   cacheEnabled: data?.dashboard?.cacheEnabled,

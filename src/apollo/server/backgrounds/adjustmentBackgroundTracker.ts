@@ -12,11 +12,8 @@ import {
   ThreadResponseAdjustmentType,
 } from '@server/repositories';
 import { IWrenAIAdaptor } from '../adaptors';
-import {
-  PostHogTelemetry,
-  TelemetryEvent,
-  WrenService,
-} from '../telemetry/telemetry';
+import { TelemetryEvent, WrenService } from '../telemetry/telemetry';
+import { PostHogTelemetry } from '../telemetry/telemetry';
 
 const logger = getLogger('AdjustmentTaskTracker');
 logger.level = 'debug';
@@ -78,7 +75,7 @@ export class AdjustmentBackgroundTaskTracker
   private trackedTasksById: Map<number, TrackedTask> = new Map();
   private pollingInterval: number;
   private memoryRetentionTime: number;
-  private pollingIntervalId: NodeJS.Timeout | undefined;
+  private pollingIntervalId: NodeJS.Timeout;
   private runningJobs = new Set<string>();
   private threadResponseRepository: IThreadResponseRepository;
   private telemetry: PostHogTelemetry;
@@ -124,7 +121,7 @@ export class AdjustmentBackgroundTaskTracker
           adjustment: true,
           status: AskFeedbackStatus.UNDERSTANDING,
           response: [],
-          error: undefined,
+          error: null,
         },
       });
 
@@ -208,16 +205,16 @@ export class AdjustmentBackgroundTaskTracker
     // call createAskFeedback on AI service
     const response = await this.wrenAIAdaptor.createAskFeedback({
       ...input,
-      tables: adjustment.payload?.retrievedTables || [],
-      sqlGenerationReasoning: adjustment.payload?.sqlGenerationReasoning || '',
-      sql: originalThreadResponse.sql || '',
+      tables: adjustment.payload?.retrievedTables,
+      sqlGenerationReasoning: adjustment.payload?.sqlGenerationReasoning,
+      sql: originalThreadResponse.sql,
       question: originalThreadResponse.question,
     });
     const queryId = response.queryId;
 
     // update asking task with new queryId
     await this.askingTaskRepository.updateOne(
-      currentThreadResponse.askingTaskId || 0,
+      currentThreadResponse.askingTaskId,
       {
         queryId,
 
@@ -226,7 +223,7 @@ export class AdjustmentBackgroundTaskTracker
           adjustment: true,
           status: AskFeedbackStatus.UNDERSTANDING,
           response: [],
-          error: undefined,
+          error: null,
         },
       },
     );
@@ -242,9 +239,8 @@ export class AdjustmentBackgroundTaskTracker
       rerun: true,
       adjustmentPayload: {
         originalThreadResponseId: originalThreadResponse.id,
-        retrievedTables: adjustment.payload?.retrievedTables || [],
-        sqlGenerationReasoning:
-          adjustment.payload?.sqlGenerationReasoning || '',
+        retrievedTables: adjustment.payload?.retrievedTables,
+        sqlGenerationReasoning: adjustment.payload?.sqlGenerationReasoning,
       },
     } as TrackedTask;
     this.trackedTasks.set(queryId, task);
@@ -343,20 +339,16 @@ export class AdjustmentBackgroundTaskTracker
             task.lastPolled = now;
 
             // if result is not changed, we don't need to update the database
-            if (
-              result &&
-              task.result &&
-              !this.isResultChanged(task.result, result)
-            ) {
+            if (!this.isResultChanged(task.result, result)) {
               this.runningJobs.delete(queryId);
               return;
             }
 
             // Check if task is now finalized
-            if (result && this.isTaskFinalized(result.status)) {
+            if (this.isTaskFinalized(result.status)) {
               task.isFinalized = true;
               // update thread response if threadResponseId is provided
-              if (task.threadResponseId && result) {
+              if (task.threadResponseId) {
                 await this.updateThreadResponseWhenTaskFinalized(
                   task.threadResponseId,
                   result,
@@ -370,11 +362,11 @@ export class AdjustmentBackgroundTaskTracker
               const eventProperties = {
                 taskId: task.taskId,
                 queryId: task.queryId,
-                status: result?.status,
-                error: result?.error,
+                status: result.status,
+                error: result.error,
                 adjustmentPayload: task.adjustmentPayload,
               };
-              if (result?.status === AskFeedbackStatus.FINISHED) {
+              if (result.status === AskFeedbackStatus.FINISHED) {
                 this.telemetry.sendEvent(eventName, eventProperties);
               } else {
                 this.telemetry.sendEvent(
@@ -386,26 +378,22 @@ export class AdjustmentBackgroundTaskTracker
               }
 
               logger.info(
-                `Task ${queryId} is finalized with status: ${result?.status}`,
+                `Task ${queryId} is finalized with status: ${result.status}`,
               );
             }
 
             // update task in memory if any change
-            if (result) {
-              task.result = result;
-            }
+            task.result = result;
 
             // update the database
             logger.info(`Updating task ${queryId} in database`);
-            if (result) {
-              await this.updateTaskInDatabase({ queryId }, result);
-            }
+            await this.updateTaskInDatabase({ queryId }, result);
 
             // Mark the job as finished
             this.runningJobs.delete(queryId);
           } catch (err) {
             this.runningJobs.delete(queryId);
-            logger.error(err instanceof Error ? err.stack : String(err));
+            logger.error(err.stack);
             throw err;
           }
         },

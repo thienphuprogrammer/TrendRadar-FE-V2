@@ -12,7 +12,7 @@ import TableTransfer, {
 } from '@/components/table/TableTransfer';
 import { useListDataSourceTablesQuery } from '@/apollo/client/graphql/dataSource.generated';
 import { useListModelsQuery } from '@/apollo/client/graphql/model.generated';
-import { CompactColumn, CompactTable } from '@/apollo/client/graphql/__types__';
+import { CompactTable, CompactColumn } from '@/apollo/client/graphql/__types__';
 
 const { Option } = Select;
 
@@ -41,9 +41,7 @@ export default function ModelForm(props: Props) {
   const { defaultValue, form, formMode } = props;
 
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [sourceTableName, setSourceTableName] = useState<string | undefined>(
-    undefined,
-  );
+  const [sourceTableName, setSourceTableName] = useState<string>(undefined);
   const sourceTableFieldValue = Form.useWatch(FormFieldKey.SOURCE_TABLE, form);
 
   const isUpdateMode = formMode === FORM_MODE.EDIT;
@@ -103,7 +101,7 @@ export default function ModelForm(props: Props) {
     if (defaultValue) {
       const fields: string[] = defaultValue.fields
         .map((field: DiagramModelField) => field.referenceName)
-        .filter((col: string) => columns.find((c) => c.name === col));
+        .filter((col) => columns.find((c) => c.name === col));
 
       const primaryKeyField = defaultValue.fields.find(
         (field: DiagramModelField) => field.isPrimaryKey,

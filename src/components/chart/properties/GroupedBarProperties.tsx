@@ -1,10 +1,10 @@
-import { Col, Form, Row, Select } from 'antd';
+import { Form, Row, Col, Select } from 'antd';
 import {
-  AxisProperty,
-  ChartTypeProperty,
+  PropertiesProps,
   getChartTypeOptions,
   getColumnOptions,
-  PropertiesProps,
+  ChartTypeProperty,
+  AxisProperty,
 } from './BasicProperties';
 
 export default function GroupedBarProperties(props: PropertiesProps) {

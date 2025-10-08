@@ -41,7 +41,7 @@ export enum GeneralErrorCodes {
   GENERATE_QUESTIONS_ERROR = 'GENERATE_QUESTIONS_ERROR',
   INVALID_SQL_ERROR = 'INVALID_SQL_ERROR',
 
-  // wren engine error
+  // TrendRadarengine error
   WREN_ENGINE_ERROR = 'WREN_ENGINE_ERROR',
 
   // asking task error
@@ -180,8 +180,8 @@ export const create = (
   const message =
     customMessage ||
     originalError?.message ||
-    (errorMessages as any)[code] ||
-    (errorMessages as any)[GeneralErrorCodes.INTERNAL_SERVER_ERROR];
+    errorMessages[code] ||
+    errorMessages[GeneralErrorCodes.INTERNAL_SERVER_ERROR];
 
   // Return the GraphQLError
   const err = new GraphQLError(message, {
@@ -191,8 +191,8 @@ export const create = (
       message,
       service,
       shortMessage:
-        (shortMessages as any)[code] ||
-        (shortMessages as any)[GeneralErrorCodes.INTERNAL_SERVER_ERROR],
+        shortMessages[code] ||
+        shortMessages[GeneralErrorCodes.INTERNAL_SERVER_ERROR],
       other: options?.other,
     },
   });
@@ -238,7 +238,7 @@ export const defaultApolloErrorHandler = (error: GraphQLError) => {
       extensions: {
         code,
         message: error.message,
-        shortMessage: (shortMessages as any)[code],
+        shortMessage: shortMessages[code],
         stacktrace: error.extensions?.exception?.stacktrace,
         other: error.extensions?.other,
       },

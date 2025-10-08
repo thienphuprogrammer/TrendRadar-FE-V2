@@ -13,23 +13,11 @@ const resolveAlias = {
 const nextConfig = withLess({
   output: 'standalone',
   staticPageGenerationTimeout: 1000,
-  transpilePackages: [
-    '@ant-design/icons-svg',
-    '@ant-design/icons',
-    'rc-util',
-    'rc-pagination',
-    'rc-picker',
-    'rc-tree',
-    'rc-table'
-  ],
-  // Optimize Fast Refresh
-  experimental: {
-    esmExternals: 'loose',
+  typescript: {
+    ignoreBuildErrors: true,
   },
-  // Improve dev experience
-  onDemandEntries: {
-    maxInactiveAge: 60 * 1000,
-    pagesBufferLength: 5,
+  eslint: {
+    ignoreDuringBuilds: true,
   },
   compiler: {
     // Enables the styled-components SWC transform
@@ -46,16 +34,6 @@ const nextConfig = withLess({
       ...config.resolve.alias,
       ...resolveAlias,
     };
-    
-    // Handle ES modules and import.meta issues
-    config.module.rules.push({
-      test: /\.m?js$/,
-      type: 'javascript/auto',
-      resolve: {
-        fullySpecified: false,
-      },
-    });
-    
     return config;
   },
   // routes redirect

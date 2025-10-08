@@ -1,10 +1,10 @@
-import { isUndefined, omitBy } from 'lodash';
+import { omitBy, isUndefined } from 'lodash';
 
 /**
  * @function
  * @description Remove undefined property value in an object
  */
-export const compactObject = <T extends Record<string, any>>(obj: T) => {
+export const compactObject = <T>(obj: T) => {
   return omitBy(obj, isUndefined) as T;
 };
 
@@ -12,7 +12,7 @@ export const compactObject = <T extends Record<string, any>>(obj: T) => {
  * @function
  * @description Retrieve json without error
  */
-export const parseJson = (data: any) => {
+export const parseJson = (data) => {
   try {
     return JSON.parse(data);
   } catch (_e) {
@@ -24,7 +24,7 @@ export const attachLoading = (
   asyncRequest: (...args: any[]) => Promise<any>,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
 ) => {
-  return async (...args: any[]) => {
+  return async (...args) => {
     setLoading(true);
     try {
       await asyncRequest(...args);

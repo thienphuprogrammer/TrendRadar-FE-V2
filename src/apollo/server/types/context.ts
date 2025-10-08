@@ -5,37 +5,37 @@ import {
   IWrenEngineAdaptor,
 } from '@server/adaptors';
 import {
-  IApiHistoryRepository,
-  IDashboardItemRefreshJobRepository,
-  IDashboardItemRepository,
-  IDashboardRepository,
-  IDeployLogRepository,
-  IInstructionRepository,
-  ILearningRepository,
   IModelColumnRepository,
   IModelNestedColumnRepository,
   IModelRepository,
   IProjectRepository,
   IRelationRepository,
-  ISchemaChangeRepository,
-  ISqlPairRepository,
   IViewRepository,
+  ILearningRepository,
+  ISchemaChangeRepository,
+  IDeployLogRepository,
+  IDashboardRepository,
+  IDashboardItemRepository,
+  ISqlPairRepository,
+  IInstructionRepository,
+  IApiHistoryRepository,
+  IDashboardItemRefreshJobRepository,
 } from '@server/repositories';
 import {
-  IAskingService,
-  IDashboardService,
-  IDeployService,
-  IInstructionService,
-  IMDLService,
-  IModelService,
-  IProjectService,
   IQueryService,
+  IAskingService,
+  IDeployService,
+  IModelService,
+  IMDLService,
+  IProjectService,
+  IDashboardService,
+  IInstructionService,
 } from '@server/services';
 import { ITelemetry } from '@server/telemetry/telemetry';
 import {
-  DashboardCacheBackgroundTracker,
   ProjectRecommendQuestionBackgroundTracker,
   ThreadRecommendQuestionBackgroundTracker,
+  DashboardCacheBackgroundTracker,
 } from '@server/backgrounds';
 import { ISqlPairService } from '../services/sqlPairService';
 

@@ -1,7 +1,7 @@
 import { MDLBuilder } from '../mdl/mdlBuilder';
 import {
-  IModelColumnRepository,
   IModelNestedColumnRepository,
+  IModelColumnRepository,
   IModelRepository,
   IProjectRepository,
   IRelationRepository,

@@ -1,3 +1,6 @@
+// import ModernHome from './ModernHome';
+
+// Temporary fallback to original home
 import { ComponentRef, useMemo, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { Button, Typography } from 'antd';
@@ -11,21 +14,16 @@ import useAskPrompt from '@/hooks/useAskPrompt';
 import useRecommendedQuestionsInstruction from '@/hooks/useRecommendedQuestionsInstruction';
 import RecommendedQuestionsPrompt from '@/components/pages/home/prompt/RecommendedQuestionsPrompt';
 import {
-  useCreateThreadMutation,
   useSuggestedQuestionsQuery,
+  useCreateThreadMutation,
   useThreadLazyQuery,
 } from '@/apollo/client/graphql/home.generated';
 import { useGetSettingsQuery } from '@/apollo/client/graphql/settings.generated';
 import { CreateThreadInput } from '@/apollo/client/graphql/__types__';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 const { Text } = Typography;
 
-interface WrapperProps {
-  children: React.ReactNode;
-}
-
-const Wrapper = ({ children }: WrapperProps) => {
+const Wrapper = ({ children }) => {
   return (
     <div
       className="d-flex align-center justify-center flex-column"
@@ -40,7 +38,7 @@ const Wrapper = ({ children }: WrapperProps) => {
   );
 };
 
-const SampleQuestionsInstruction = (props: any) => {
+const SampleQuestionsInstruction = (props) => {
   const { sampleQuestions, onSelect } = props;
 
   return (
@@ -50,7 +48,7 @@ const SampleQuestionsInstruction = (props: any) => {
   );
 };
 
-function RecommendedQuestionsInstruction(props: any) {
+function RecommendedQuestionsInstruction(props) {
   const { onSelect, loading } = props;
 
   const {
@@ -92,7 +90,7 @@ function RecommendedQuestionsInstruction(props: any) {
   );
 }
 
-function HomePage() {
+export default function Home() {
   const $prompt = useRef<ComponentRef<typeof Prompt>>(null);
   const router = useRouter();
   const homeSidebar = useHomeSidebar();
@@ -121,19 +119,17 @@ function HomePage() {
     [suggestedQuestionsData],
   );
 
-  const onSelectQuestion = async ({ question }: any) => {
-    $prompt.current?.submit(question);
+  const onSelectQuestion = async ({ question }) => {
+    $prompt.current.submit(question);
   };
 
   const onCreateResponse = async (payload: CreateThreadInput) => {
     try {
       askPrompt.onStopPolling();
       const response = await createThread({ variables: { data: payload } });
-      const threadId = response.data?.createThread?.id;
-      if (threadId) {
-        await preloadThread({ variables: { threadId } });
-        router.push(Path.Home + `/${threadId}`);
-      }
+      const threadId = response.data.createThread.id;
+      await preloadThread({ variables: { threadId } });
+      router.push(Path.Home + `/${threadId}`);
     } catch (error) {
       console.error(error);
     }
@@ -160,13 +156,5 @@ function HomePage() {
         onCreateResponse={onCreateResponse}
       />
     </SiderLayout>
-  );
-}
-
-export default function Home() {
-  return (
-    <ProtectedRoute>
-      <HomePage />
-    </ProtectedRoute>
   );
 }

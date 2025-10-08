@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useState, useContext, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import AceEditor from '@/components/editor/AceEditor';
 import { FormItemInputContext } from 'antd/lib/form/context';
@@ -81,13 +81,7 @@ export default function SQLEditor(props: Props) {
 
     const langTools = getLangTools();
     const customCompleter = {
-      getCompletions: (
-        _editor: any,
-        _session: any,
-        _pos: any,
-        _prefix: any,
-        callback: any,
-      ) => {
+      getCompletions: (_editor, _session, _pos, _prefix, callback) => {
         callback(null, completers);
       },
     };
@@ -98,7 +92,7 @@ export default function SQLEditor(props: Props) {
 
   const [sql, setSql] = useState(value || '');
 
-  const change = (sql: any) => {
+  const change = (sql) => {
     setSql(sql);
     onChange?.(sql);
   };

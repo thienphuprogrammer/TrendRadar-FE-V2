@@ -102,7 +102,7 @@ export const getDataSourceConfig = (dataSource: DATA_SOURCES | string) => {
   return {
     label: getDataSourceName(dataSource),
     logo: getDataSourceImage(dataSource),
-    value: (DATA_SOURCES as any)[dataSource],
+    value: DATA_SOURCES[dataSource],
   };
 };
 

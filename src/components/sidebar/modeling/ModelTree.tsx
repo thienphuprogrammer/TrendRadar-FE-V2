@@ -29,10 +29,9 @@ import { LIST_MODELS } from '@/apollo/client/graphql/model';
 import { getRelativeTime } from '@/utils/time';
 
 interface Props {
+  [key: string]: any;
   models: DiagramModel[];
   onOpenModelDrawer: () => void;
-
-  [key: string]: any;
 }
 
 const getHasSchemaChange = (schemaChange: SchemaChange) => {

@@ -60,15 +60,9 @@ export default function AdjustSQLModal(props: Props) {
     });
   };
 
-  const handleError = (error: any) => {
+  const handleError = (error) => {
     const graphQLError = parseGraphQLError(error);
-    setError({
-      ...graphQLError,
-      shortMessage: 'Invalid SQL syntax',
-      message: graphQLError.message || 'Unknown error',
-      code: graphQLError.code || '',
-      stacktrace: graphQLError.stacktrace || [],
-    });
+    setError({ ...graphQLError, shortMessage: 'Invalid SQL syntax' });
     console.error(graphQLError);
   };
 
@@ -104,7 +98,7 @@ export default function AdjustSQLModal(props: Props) {
         try {
           await onValidateSQL();
           await onSubmit({
-            responseId: defaultValue?.responseId || 0,
+            responseId: defaultValue?.responseId,
             sql: values.sql,
           });
           onClose();
@@ -148,8 +142,7 @@ export default function AdjustSQLModal(props: Props) {
               type="secondary"
               className="text-sm gray-7 text-left"
             >
-              The SQL statement used here follows <b>Wren SQL</b>, which is
-              based on ANSI SQL and optimized for Wren AI.{` `}
+              The SQL statement used here follows <b>TrendRadar SQL</b>, which is based on ANSI SQL and optimized for TrendRadar.{` `}
               <Typography.Link
                 type="secondary"
                 href="https://docs.getwren.ai/oss/guide/home/wren_sql"

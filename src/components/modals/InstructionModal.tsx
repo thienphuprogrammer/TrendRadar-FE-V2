@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Button, Col, Form, Input, Modal, Radio, Row } from 'antd';
+import { Button, Form, Input, Modal, Row, Col, Radio } from 'antd';
 import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
 import PlusOutlined from '@ant-design/icons/PlusOutlined';
 import { isEmpty } from 'lodash';
@@ -76,7 +76,7 @@ export default function InstructionModal(props: Props) {
         >
           <Input.TextArea
             autoFocus
-            placeholder="Enter a rule that Wren AI should follow when generating SQL queries."
+            placeholder="Enter a rule that TrendRadar should follow when generating SQL queries."
             maxLength={1000}
             rows={3}
             showCount
@@ -116,7 +116,7 @@ export default function InstructionModal(props: Props) {
           <Form.Item
             label="Matching questions"
             required
-            extra="Wren AI will match user queries based on similarity and apply this instruction when relevant."
+            extra="TrendRadar will match user queries based on similarity and apply this instruction when relevant."
           >
             <Form.List name="questions" initialValue={['']}>
               {(fields, { add, remove }) => (

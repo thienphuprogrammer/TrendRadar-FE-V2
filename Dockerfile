@@ -21,8 +21,25 @@ FROM base AS deps
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-RUN yarn install --immutable
-RUN yarn add sharp
+RUN yarn install --immutable && yarn add sharp
+
+# Development image
+FROM base AS dev
+WORKDIR /app
+
+# Use deps to speed up dev container startup; code will be bind-mounted by compose
+COPY --from=deps /app/node_modules ./node_modules
+COPY public ./public
+COPY src ./src
+COPY next.config.js ./next.config.js
+COPY tsconfig.json ./tsconfig.json
+
+ENV NODE_ENV development
+ENV NEXT_TELEMETRY_DISABLED 1
+
+EXPOSE 3000
+
+CMD ["yarn", "dev"]
 
 # Rebuild the source code only when needed
 FROM base AS builder

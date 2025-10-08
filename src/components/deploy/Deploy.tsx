@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Button, message, Space, Typography } from 'antd';
+import { Button, Space, Typography, message } from 'antd';
 import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
 import LoadingOutlined from '@ant-design/icons/LoadingOutlined';
 import WarningOutlined from '@ant-design/icons/WarningOutlined';
@@ -9,10 +9,8 @@ import { useDeployStatusContext } from '@/components/deploy/Context';
 
 const { Text } = Typography;
 
-const getDeployStatus = (deploying: boolean, status?: SyncStatus) => {
-  const syncStatus = deploying
-    ? SyncStatus.IN_PROGRESS
-    : status || SyncStatus.UNSYNCRONIZED;
+const getDeployStatus = (deploying: boolean, status: SyncStatus) => {
+  const syncStatus = deploying ? SyncStatus.IN_PROGRESS : status;
 
   return (
     {
@@ -79,8 +77,7 @@ export default function Deploy() {
   const disabled =
     deploying ||
     loading ||
-    (syncStatus !== undefined &&
-      [SyncStatus.SYNCRONIZED, SyncStatus.IN_PROGRESS].includes(syncStatus));
+    [SyncStatus.SYNCRONIZED, SyncStatus.IN_PROGRESS].includes(syncStatus);
 
   return (
     <Space size={[8, 0]}>

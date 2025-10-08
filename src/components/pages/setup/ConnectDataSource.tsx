@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Alert, Button, Col, Form, Row, Typography } from 'antd';
+import { Alert, Typography, Form, Row, Col, Button } from 'antd';
 import styled from 'styled-components';
 import { DATA_SOURCES } from '@/utils/enum/dataSources';
 import { getDataSource, getPostgresErrorMessage } from './utils';
@@ -10,7 +10,7 @@ const StyledForm = styled(Form)`
   border-radius: 4px;
 `;
 
-const DataSource = styled.div<{ className?: string }>`
+const DataSource = styled.div`
   border: 1px var(--gray-4) solid;
   border-radius: 4px;
 `;
@@ -62,7 +62,7 @@ export default function ConnectDataSource(props: Props) {
             <DataSource className="d-inline-block px-4 py-2 bg-gray-2 gray-8">
               <Image
                 className="mr-2"
-                src={current.logo || ''}
+                src={current.logo}
                 alt={dataSource}
                 width="40"
                 height="40"
@@ -73,7 +73,7 @@ export default function ConnectDataSource(props: Props) {
           <Col className="text-right" span={12}>
             Learn more information in the {current.label}{' '}
             <Link
-              href={current.guide || ''}
+              href={current.guide}
               target="_blank"
               rel="noopener noreferrer"
             >

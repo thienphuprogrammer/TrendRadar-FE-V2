@@ -39,8 +39,8 @@ export default function MetadataDrawer(props: Props) {
         </Button>
       }
     >
-      {isModel && <ModelMetadata {...(defaultValue as ModelMetadataProps)} />}
-      {isView && <ViewMetadata {...(defaultValue as ViewMetadataProps)} />}
+      {isModel && <ModelMetadata {...defaultValue} />}
+      {isView && <ViewMetadata {...defaultValue} />}
     </Drawer>
   );
 }

@@ -62,11 +62,6 @@ export class ProjectRecommendQuestionBackgroundTracker {
 
         // get the latest result from AI service
 
-        if (!project.queryId) {
-          this.runningJobs.delete(this.taskKey(project));
-          return;
-        }
-
         const result =
           await this.wrenAIAdaptor.getRecommendationQuestionsResult(
             project.queryId,
@@ -96,7 +91,7 @@ export class ProjectRecommendQuestionBackgroundTracker {
           await this.projectRepository.updateOne(project.id, {
             questionsStatus: result.status.toUpperCase(),
             questions: result.response?.questions,
-            questionsError: result.error || undefined,
+            questionsError: result.error,
           });
           project.questionsStatus = result.status;
           project.questions = result.response?.questions;
@@ -217,11 +212,6 @@ export class ThreadRecommendQuestionBackgroundTracker {
 
         // get the latest result from AI service
 
-        if (!thread.queryId) {
-          this.runningJobs.delete(this.taskKey(thread));
-          return;
-        }
-
         const result =
           await this.wrenAIAdaptor.getRecommendationQuestionsResult(
             thread.queryId,
@@ -251,7 +241,7 @@ export class ThreadRecommendQuestionBackgroundTracker {
           await this.threadRepository.updateOne(thread.id, {
             questionsStatus: result.status.toUpperCase(),
             questions: result.response?.questions,
-            questionsError: result.error || undefined,
+            questionsError: result.error,
           });
           thread.questionsStatus = result.status;
           thread.questions = result.response?.questions;

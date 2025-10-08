@@ -16,7 +16,7 @@ import {
 import MarkerHandle from '@/components/diagram/customNode/MarkerHandle';
 import { DiagramContext } from '@/components/diagram/Context';
 import Column from '@/components/diagram/customNode/Column';
-import { ModelIcon, PrimaryKeyIcon } from '@/utils/icons';
+import { PrimaryKeyIcon, ModelIcon } from '@/utils/icons';
 import {
   ComposeDiagram,
   ComposeDiagramField,
@@ -27,8 +27,8 @@ import { makeIterable } from '@/utils/iteration';
 import { Config } from '@/utils/diagram';
 import { MORE_ACTION, NODE_TYPE } from '@/utils/enum';
 import {
-  ColumnDropdown,
   ModelDropdown,
+  ColumnDropdown,
 } from '@/components/diagram/CustomDropdown';
 import { AddButton, MoreButton } from '@/components/ActionButton';
 
@@ -36,17 +36,11 @@ const { Text } = Typography;
 
 export const ModelNode = ({ data }: CustomNodeProps<DiagramModel>) => {
   const context = useContext(DiagramContext);
-  const onMoreClick = (
-    type: MORE_ACTION | { type: MORE_ACTION; data: any },
-  ) => {
-    if (typeof type === 'object') {
-      context?.onMoreClick(type);
-    } else {
-      context?.onMoreClick({
-        type,
-        data: data.originalData,
-      });
-    }
+  const onMoreClick = (type: MORE_ACTION) => {
+    context?.onMoreClick({
+      type,
+      data: data.originalData,
+    });
   };
   const onNodeClick = () => {
     context?.onNodeClick({
@@ -94,11 +88,7 @@ export const ModelNode = ({ data }: CustomNodeProps<DiagramModel>) => {
       </NodeHeader>
       <NodeBody draggable={false}>
         <Column.Title show={true}>Columns</Column.Title>
-        {renderColumns(
-          data.originalData.fields.filter(
-            (field) => field != null,
-          ) as ComposeDiagramField[],
-        )}
+        {renderColumns(data.originalData.fields)}
         <Column.Title
           show={true}
           extra={
@@ -111,11 +101,7 @@ export const ModelNode = ({ data }: CustomNodeProps<DiagramModel>) => {
         >
           Calculated Fields
         </Column.Title>
-        {renderColumns(
-          data.originalData.calculatedFields.filter(
-            (field) => field != null,
-          ) as ComposeDiagramField[],
-        )}
+        {renderColumns(data.originalData.calculatedFields)}
         <Column.Title
           show={true}
           extra={
@@ -128,11 +114,7 @@ export const ModelNode = ({ data }: CustomNodeProps<DiagramModel>) => {
         >
           Relationships
         </Column.Title>
-        {renderColumns(
-          data.originalData.relationFields.filter(
-            (field) => field != null,
-          ) as ComposeDiagramField[],
-        )}
+        {renderColumns(data.originalData.relationFields)}
       </NodeBody>
     </StyledNode>
   );
@@ -140,7 +122,7 @@ export const ModelNode = ({ data }: CustomNodeProps<DiagramModel>) => {
 
 export default memo(ModelNode);
 
-const ColumnTemplate = (props: any) => {
+const ColumnTemplate = (props) => {
   const { nodeType, id, type, isPrimaryKey, highlight } = props;
   const isRelationship = nodeType === NODE_TYPE.RELATION;
   const isCalculatedField = nodeType === NODE_TYPE.CALCULATED_FIELD;
@@ -148,17 +130,11 @@ const ColumnTemplate = (props: any) => {
   const reactflowInstance = useReactFlow();
 
   const context = useContext(DiagramContext);
-  const onMoreClick = (
-    type: MORE_ACTION | { type: MORE_ACTION; data: any },
-  ) => {
-    if (typeof type === 'object') {
-      context?.onMoreClick(type);
-    } else {
-      context?.onMoreClick({
-        type,
-        data: props,
-      });
-    }
+  const onMoreClick = (type: MORE_ACTION) => {
+    context?.onMoreClick({
+      type,
+      data: props,
+    });
   };
 
   const onMouseEnter = useCallback(
@@ -168,8 +144,7 @@ const ColumnTemplate = (props: any) => {
       const edges = getEdges();
       const relatedEdge = edges.find(
         (edge: any) =>
-          trimId(edge.sourceHandle || '') === id ||
-          trimId(edge.targetHandle || '') === id,
+          trimId(edge.sourceHandle) === id || trimId(edge.targetHandle) === id,
       );
 
       // skip to highlight & open relationship popup if no related edge
@@ -179,10 +154,7 @@ const ColumnTemplate = (props: any) => {
       setNodes(
         highlightNodes(
           [relatedEdge.source, relatedEdge.target],
-          [
-            trimId(relatedEdge.sourceHandle || ''),
-            trimId(relatedEdge.targetHandle || ''),
-          ],
+          [trimId(relatedEdge.sourceHandle), trimId(relatedEdge.targetHandle)],
         ),
       );
     },

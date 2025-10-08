@@ -13,8 +13,8 @@ export interface ModalAction<TData = any, SData = any> {
 export default function useModalAction() {
   const [visible, setVisible] = useState(false);
   const [formMode, setFormMode] = useState(FORM_MODE.CREATE);
-  const [payload, setPayload] = useState<Record<string, any> | null>(null);
-  const [defaultValue, setDefaultValue] = useState<any>(null);
+  const [payload, setPayload] = useState(null);
+  const [defaultValue, setDefaultValue] = useState(null);
 
   const openModal = (value?: any, payload?: any) => {
     payload && setPayload(payload);
@@ -35,7 +35,7 @@ export default function useModalAction() {
       visible,
       formMode,
       defaultValue,
-      payload: payload || undefined,
+      payload,
     },
     openModal,
     closeModal,

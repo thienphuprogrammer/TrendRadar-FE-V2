@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
-import { debounce, isEmpty } from 'lodash';
+import { isEmpty, debounce } from 'lodash';
 import clsx from 'clsx';
-import { Button, Tabs, Tag, Tooltip, Typography } from 'antd';
+import { Button, Typography, Tabs, Tag, Tooltip } from 'antd';
 import styled from 'styled-components';
 import CheckCircleFilled from '@ant-design/icons/CheckCircleFilled';
 import CodeFilled from '@ant-design/icons/CodeFilled';
@@ -26,10 +26,10 @@ import Preparation from '@/components/pages/home/preparation';
 import {
   AskingTaskStatus,
   ThreadResponse,
-  ThreadResponseAdjustment,
-  ThreadResponseAdjustmentType,
   ThreadResponseAnswerDetail,
   ThreadResponseAnswerStatus,
+  ThreadResponseAdjustment,
+  ThreadResponseAdjustmentType,
 } from '@/apollo/client/graphql/__types__';
 
 const { Title, Text } = Typography;
@@ -41,7 +41,7 @@ const adjustmentType = {
 
 const knowledgeTooltip = (
   <>
-    Store this answer as a Question-SQL pair to help Wren AI improve SQL
+    Store this answer as a Question-SQL pair to help TrendRadarAI improve SQL
     generation.
     <br />
     <Typography.Link
@@ -125,12 +125,7 @@ export interface Props {
   onInitPreviewDone: () => void;
 }
 
-interface QuestionTitleProps {
-  question: string;
-  className?: string;
-}
-
-const QuestionTitle = (props: QuestionTitleProps) => {
+const QuestionTitle = (props) => {
   const { question, className } = props;
   return (
     <Title
@@ -145,7 +140,7 @@ const QuestionTitle = (props: QuestionTitleProps) => {
 
 const renderRecommendedQuestions = (
   isLastThreadResponse: boolean,
-  recommendedQuestionProps: any,
+  recommendedQuestionProps,
   onSelect: RecommendedQuestionsProps['onSelect'],
 ) => {
   if (!isLastThreadResponse || !recommendedQuestionProps.show) return null;
@@ -220,7 +215,7 @@ export default function AnswerResult(props: Props) {
 
   const resultStyle = isLastThreadResponse
     ? { minHeight: 'calc(100vh - (194px))' }
-    : undefined;
+    : null;
 
   const isAdjustment = !!adjustment;
 
@@ -233,7 +228,7 @@ export default function AnswerResult(props: Props) {
   const isBreakdownOnly = useMemo(() => {
     // we support rendering different types of answers now, so we need to check if it's old data.
     // existing thread response's answerDetail is null.
-    return answerDetail == null && !isEmpty(breakdownDetail);
+    return answerDetail === null && !isEmpty(breakdownDetail);
   }, [answerDetail, breakdownDetail]);
 
   // initialize generate answer
@@ -342,7 +337,7 @@ export default function AnswerResult(props: Props) {
                       question:
                         threadResponse?.askingTask?.rephrasedQuestion ||
                         question,
-                      sql: sql || '',
+                      sql,
                     },
                     { isCreateMode: true },
                   )
@@ -356,10 +351,8 @@ export default function AnswerResult(props: Props) {
               </Button>
             </Tooltip>
             <ViewBlock
-              view={view || undefined}
-              onClick={() =>
-                onOpenSaveAsViewModal({ sql: sql || '', responseId: id })
-              }
+              view={view}
+              onClick={() => onOpenSaveAsViewModal({ sql, responseId: id })}
             />
           </div>
           {renderRecommendedQuestions(
