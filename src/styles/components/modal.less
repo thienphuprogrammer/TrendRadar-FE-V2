@@ -1,52 +1,217 @@
-// Enhanced modal styling
+// Professional Enhanced Modal Styling
 .ant-modal {
   .ant-modal-content {
     background: var(--bg-primary);
-    border-radius: 12px;
-    box-shadow: var(--shadow-xl);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
     border: 1px solid var(--border-primary);
+    overflow: hidden;
+    animation: modalFadeIn 0.3s ease;
   }
   
   .ant-modal-header {
-    background: var(--bg-primary);
+    background: linear-gradient(180deg, var(--bg-primary), var(--bg-secondary));
     border-bottom: 1px solid var(--border-primary);
-    border-radius: 12px 12px 0 0;
+    padding: 24px 32px;
     
     .ant-modal-title {
       color: var(--text-primary);
-      font-weight: 600;
-      font-size: 18px;
+      font-weight: 700;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .modal-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+        color: white;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+      }
     }
   }
   
   .ant-modal-body {
+    padding: 32px;
     color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+
+    // Form groups in modal
+    .form-group {
+      margin-bottom: 24px;
+
+      .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 14px;
+      }
+
+      .form-helper {
+        margin-top: 6px;
+        font-size: 12px;
+        color: var(--text-tertiary);
+      }
+    }
+
+    // Info boxes
+    .info-box {
+      padding: 16px;
+      border-radius: 8px;
+      margin: 16px 0;
+      border-left: 4px solid;
+
+      &.info-box-info {
+        background: rgba(14, 165, 233, 0.08);
+        border-color: var(--primary-600);
+        color: var(--text-primary);
+      }
+
+      &.info-box-success {
+        background: rgba(34, 197, 94, 0.08);
+        border-color: #22c55e;
+        color: var(--text-primary);
+      }
+
+      &.info-box-warning {
+        background: rgba(245, 158, 11, 0.08);
+        border-color: #f59e0b;
+        color: var(--text-primary);
+      }
+
+      &.info-box-error {
+        background: rgba(239, 68, 68, 0.08);
+        border-color: #ef4444;
+        color: var(--text-primary);
+      }
+    }
   }
   
   .ant-modal-footer {
     border-top: 1px solid var(--border-primary);
-    background: var(--bg-primary);
-    border-radius: 0 0 12px 12px;
+    background: var(--bg-secondary);
+    padding: 20px 32px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+
+    .ant-btn {
+      min-width: 100px;
+      height: 40px;
+      font-weight: 600;
+      border-radius: 8px;
+    }
   }
   
   .ant-modal-close {
+    top: 24px;
+    right: 24px;
+    width: 40px;
+    height: 40px;
     color: var(--text-secondary);
     transition: all 0.3s ease;
+    border-radius: 8px;
     
     &:hover {
+      background: var(--bg-hover);
       color: var(--text-primary);
       transform: rotate(90deg);
+    }
+
+    .ant-modal-close-x {
+      font-size: 18px;
+      line-height: 40px;
+    }
+  }
+}
+
+// Modal sizes
+.ant-modal {
+  &.modal-lg {
+    max-width: 800px;
+  }
+
+  &.modal-xl {
+    max-width: 1140px;
+  }
+
+  &.modal-fullscreen {
+    max-width: calc(100vw - 32px);
+    margin: 16px auto;
+    
+    .ant-modal-content {
+      height: calc(100vh - 32px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ant-modal-body {
+      flex: 1;
+      overflow: auto;
+    }
+  }
+}
+
+// Confirmation modals
+.ant-modal-confirm {
+  .ant-modal-body {
+    padding: 32px;
+
+    .ant-modal-confirm-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .ant-modal-confirm-content {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  }
+
+  &-warning {
+    .ant-modal-confirm-body > .anticon {
+      color: #f59e0b;
+    }
+  }
+
+  &-error {
+    .ant-modal-confirm-body > .anticon {
+      color: #ef4444;
+    }
+  }
+
+  &-success {
+    .ant-modal-confirm-body > .anticon {
+      color: #22c55e;
+    }
+  }
+
+  &-info {
+    .ant-modal-confirm-body > .anticon {
+      color: var(--primary-600);
     }
   }
 }
 
 // Modal mask animation
 .ant-modal-mask {
-  background-color: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease;
   
   .dark & {
-    background-color: rgba(0, 0, 0, 0.65);
+    background-color: rgba(0, 0, 0, 0.7);
   }
 }
 
@@ -54,19 +219,69 @@
 .ant-drawer {
   .ant-drawer-content {
     background: var(--bg-primary);
+    border-radius: 0;
   }
   
   .ant-drawer-header {
-    background: var(--bg-primary);
+    background: linear-gradient(180deg, var(--bg-primary), var(--bg-secondary));
     border-bottom: 1px solid var(--border-primary);
+    padding: 24px;
     
     .ant-drawer-title {
       color: var(--text-primary);
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 18px;
     }
   }
   
   .ant-drawer-body {
     background: var(--bg-secondary);
+    padding: 24px;
+  }
+
+  .ant-drawer-close {
+    color: var(--text-secondary);
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+
+    &:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      transform: scale(1.1);
+    }
+  }
+
+  // Drawer footer
+  .ant-drawer-footer {
+    border-top: 1px solid var(--border-primary);
+    padding: 20px 24px;
+    background: var(--bg-primary);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+}
+
+// Animations
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
