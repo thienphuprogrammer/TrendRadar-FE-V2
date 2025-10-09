@@ -13,6 +13,7 @@ export const GlobalConfigProvider = ({ children }) => {
   const router = useRouter();
   const [config, setConfig] = useState<UserConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
     let cleanup: (() => void) | undefined;
@@ -20,6 +21,7 @@ export const GlobalConfigProvider = ({ children }) => {
     const loadConfig = async () => {
       try {
         setIsLoading(true);
+        setIsOffline(false);
         const userConfig = await getUserConfig();
         setConfig(userConfig);
         
@@ -28,7 +30,14 @@ export const GlobalConfigProvider = ({ children }) => {
           cleanup = trackUserTelemetry(router, userConfig);
         }
       } catch (error) {
-        console.warn('Failed to get user config, using default:', error);
+        const errorMessage = error?.message || '';
+        const isNetworkError = errorMessage.includes('NetworkError') || 
+                              errorMessage.includes('Failed to fetch') ||
+                              errorMessage.includes('502') ||
+                              errorMessage.includes('CORS');
+        
+        setIsOffline(isNetworkError);
+        
         // Set a default config so the app can continue
         setConfig({
           isTelemetryEnabled: false,
@@ -52,6 +61,7 @@ export const GlobalConfigProvider = ({ children }) => {
 
   const value = {
     config,
+    isOffline,
   };
 
   // Always render children, even if config is loading
