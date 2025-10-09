@@ -44,11 +44,24 @@ const PromptStyle = styled.div`
   width: 680px;
   left: 50%;
   margin-left: calc(-340px + 133px);
-  bottom: 18px;
+  bottom: 24px;
   z-index: 999;
-  box-shadow:
-    rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
-    rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-primary);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+
+  .dark & {
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  &:focus-within {
+    border-color: var(--primary-500);
+    box-shadow: 0 8px 32px rgba(14, 165, 233, 0.25);
+  }
 `;
 
 export default forwardRef<Attributes, Props>(function Prompt(props, ref) {
