@@ -77,10 +77,10 @@ const client = new ApolloClient({
       errorPolicy: 'all',
     },
   },
-  // Suppress development warnings in production builds
-  ...(process.env.NODE_ENV === 'production' && {
-    connectToDevTools: false,
-  }),
+  // Use new devtools API (Apollo v3.14+)
+  devtools: {
+    enabled: process.env.NODE_ENV !== 'production',
+  },
 });
 
 export default client;
