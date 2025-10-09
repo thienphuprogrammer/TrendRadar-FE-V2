@@ -24,4 +24,7 @@ ops/kind
 
 *.egg-info/
 
-.next/
+.next/-e 
+# Environment files
+*.env
+*.env.*
