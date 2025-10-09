@@ -1,9 +1,0 @@
-DB_TYPE=pg
-SQLITE_FILE=testdb.sqlite3
-OTHER_SERVICE_USING_DOCKER=true
-PG_URL=postgresql://trendradar:trendradar_password@postgres:5432/trendradar
-
-
-OTHER_SERVICE_USING_DOCKER=true
-EXPERIMENTAL_ENGINE_RUST_VERSION=false
-
