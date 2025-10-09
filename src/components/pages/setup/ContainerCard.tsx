@@ -6,6 +6,17 @@ const Container = styled.div<{ maxWidth?: number }>`
   margin: 68px auto;
 `;
 
+const StyledCard = styled(Card)`
+  && {
+    background: var(--bg-primary) !important;
+    border-color: var(--border-primary) !important;
+    
+    .ant-card-body {
+      background: transparent !important;
+    }
+  }
+`;
+
 interface Props {
   step: number;
   children: React.ReactNode;
@@ -17,14 +28,14 @@ export default function ContainerCard(props: Props) {
 
   return (
     <Container maxWidth={maxWidth}>
-      <Card>
+      <StyledCard>
         <Steps current={step} className="mb-12">
           <Steps.Step title="Connect" />
           <Steps.Step title="Select Tables" />
           <Steps.Step title="Define Relationships" />
         </Steps>
         <div className="px-12 pb-6">{props.children}</div>
-      </Card>
+      </StyledCard>
     </Container>
   );
 }
