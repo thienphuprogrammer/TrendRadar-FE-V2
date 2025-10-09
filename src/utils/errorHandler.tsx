@@ -454,18 +454,37 @@ errorHandlers.set('UpdateInstruction', new UpdateInstructionErrorHandler());
 errorHandlers.set('DeleteInstruction', new DeleteInstructionErrorHandler());
 
 const errorHandler = (error: ErrorResponse) => {
-  // networkError
-  if (error.networkError) {
-    message.error(
-      'No internet. Please check your network connection and try again.',
-    );
-  }
-
-  const operationName = error?.operation?.operationName || '';
-  if (error.graphQLErrors) {
-    for (const err of error.graphQLErrors) {
-      errorHandlers.get(operationName)?.handle(err);
+  try {
+    // networkError - Don't block UI, just show warning
+    if (error.networkError) {
+      message.warning({
+        content: 'Connection issue. Using cached or default data.',
+        duration: 3,
+      });
+      console.error('Network Error:', error.networkError);
+      // Don't throw - let the UI render with fallback data
+      return;
     }
+
+    const operationName = error?.operation?.operationName || '';
+    if (error.graphQLErrors) {
+      for (const err of error.graphQLErrors) {
+        const handler = errorHandlers.get(operationName);
+        if (handler) {
+          handler.handle(err);
+        } else {
+          // Generic error handling for operations without specific handlers
+          console.error(`GraphQL Error in ${operationName}:`, err.message);
+          message.warning({
+            content: 'Some features may be limited. Using default data.',
+            duration: 3,
+          });
+        }
+      }
+    }
+  } catch (handlerError) {
+    // Even if error handling fails, don't crash the app
+    console.error('Error in error handler:', handlerError);
   }
 };
 
