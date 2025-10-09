@@ -138,9 +138,8 @@ export default function Home() {
   const [preloadThread] = useThreadLazyQuery({
     fetchPolicy: 'cache-and-network',
     onError: (error) => {
-      const errorInfo = handleGraphQLError(error);
-      console.error('Preload thread error:', errorInfo.message);
-      // Continue anyway - thread can be loaded later
+      handleGraphQLError(error);
+      // Silently continue - thread can be loaded later
     },
   });
 
