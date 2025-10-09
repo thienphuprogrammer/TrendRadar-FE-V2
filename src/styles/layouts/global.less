@@ -67,6 +67,71 @@ body {
   }
 }
 
+// Typography - Fix for all headings and text
+.ant-typography {
+  color: var(--text-primary);
+}
+
+h1.ant-typography,
+h2.ant-typography,
+h3.ant-typography,
+h4.ant-typography,
+h5.ant-typography,
+h6.ant-typography,
+.ant-typography h1,
+.ant-typography h2,
+.ant-typography h3,
+.ant-typography h4,
+.ant-typography h5,
+.ant-typography h6 {
+  color: var(--text-primary);
+}
+
+.ant-typography-secondary {
+  color: var(--text-secondary) !important;
+}
+
+// Steps component - Better visibility
+.ant-steps-item-title {
+  color: var(--text-primary) !important;
+  font-weight: 500;
+}
+
+.ant-steps-item-description {
+  color: var(--text-secondary) !important;
+}
+
+.ant-steps-item-wait .ant-steps-item-icon {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-secondary);
+}
+
+.ant-steps-item-wait .ant-steps-item-icon > .ant-steps-icon {
+  color: var(--text-muted);
+}
+
+.ant-steps-item-process .ant-steps-item-icon {
+  background-color: var(--primary-500);
+  border-color: var(--primary-500);
+}
+
+.ant-steps-item-finish .ant-steps-item-icon {
+  background-color: var(--bg-tertiary);
+  border-color: var(--primary-500);
+}
+
+.ant-steps-item-finish .ant-steps-item-icon > .ant-steps-icon {
+  color: var(--primary-500);
+}
+
+.ant-steps-item-tail::after {
+  background-color: var(--border-primary);
+}
+
+.ant-steps-item-finish > .ant-steps-item-container > .ant-steps-item-tail::after {
+  background-color: var(--primary-500);
+}
+
 @media (prefers-color-scheme: dark) {
   html body {
     background: var(--bg-secondary);
