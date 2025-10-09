@@ -12,30 +12,17 @@ import LearningSection from '@/components/learning';
 const Layout = styled.div`
   position: relative;
   height: 100%;
-  background-color: var(--gray-2);
-  color: var(--gray-8);
-  padding-bottom: 12px;
-  overflow-x: hidden;
+  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);\n  border-right: 1px solid var(--border-primary);\n  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);\n  padding-bottom: 12px;\n  overflow-x: hidden;\n  transition: all 0.3s ease;\n\n  .dark & {\n    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);\n    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3);\n  }
 `;
 
 const Content = styled.div`
   flex-grow: 1;
   overflow-y: auto;
+  padding: 16px 12px;
 `;
 
 const StyledButton = styled(Button)`
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  padding-left: 16px;
-  padding-right: 16px;
-  color: var(--gray-8) !important;
-  border-radius: 0;
-
-  &:hover,
-  &:focus {
-    background-color: var(--gray-4);
-  }
+  cursor: pointer;\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  padding: 10px 16px;\n  margin: 4px 8px;\n  border-radius: 8px;\n  color: var(--text-secondary) !important;\n  font-weight: 500;\n  transition: all 0.3s ease;\n  border: none;\n\n  .anticon {\n    font-size: 16px;\n  }\n\n  &:hover,\n  &:focus {\n    background: var(--bg-hover) !important;\n    color: var(--primary-600) !important;\n    transform: translateX(4px);\n  }\n\n  &:active {\n    transform: translateX(2px) scale(0.98);\n  }
 `;
 
 type Props = (ModelingSidebarProps | HomeSidebarProps) & {
