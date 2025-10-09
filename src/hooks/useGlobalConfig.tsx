@@ -8,7 +8,9 @@ type ContextProps = {
   isOffline?: boolean;
 };
 
-const GlobalConfigContext = createContext<ContextProps>({});
+const GlobalConfigContext = createContext<ContextProps>({
+  isOffline: false,
+});
 
 export const GlobalConfigProvider = ({ children }) => {
   const router = useRouter();
