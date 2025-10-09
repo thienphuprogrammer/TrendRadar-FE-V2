@@ -65,8 +65,8 @@ export default function useRecommendedQuestionsInstruction() {
       const data = result.data?.getProjectRecommendationQuestions;
 
       // for existing projects that do not have to generate recommended questions yet
-      if (isRecommendedFinished(data.status)) {
-        if (data.questions.length > 0) {
+      if (data && isRecommendedFinished(data.status)) {
+        if (data.questions && data.questions.length > 0) {
           // for regenerate then leave and go back to the home page
           setRecommendedQuestions(getGroupedQuestions(data.questions));
 
