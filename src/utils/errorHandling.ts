@@ -34,14 +34,20 @@ export interface ErrorWithRetry {
 }
 
 export function handleGraphQLError(error: any): ErrorWithRetry {
-  // Log errors in development only, or to external logging service
-  if (process.env.NODE_ENV === 'development') {
-    console.warn('GraphQL Error (using fallback data):', error?.message || error);
-  }
-
   // Network errors - usually 502, connection refused, timeout
   if (error.networkError) {
     const statusCode = error.networkError.statusCode;
+    
+    // Log structured error in development
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+      import('./errorLogger').then(({ logNetworkError }) => {
+        logNetworkError(
+          error.networkError.result?.url || 'GraphQL API',
+          statusCode,
+          error
+        );
+      });
+    }
     
     // 502 Bad Gateway - backend service unavailable
     if (statusCode === 502) {
@@ -60,6 +66,14 @@ export function handleGraphQLError(error: any): ErrorWithRetry {
   // GraphQL errors
   if (error.graphQLErrors && error.graphQLErrors.length > 0) {
     const firstError = error.graphQLErrors[0];
+    
+    // Log in development
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+      import('./errorLogger').then(({ logApiError }) => {
+        logApiError(firstError.path?.join('.') || 'Query', error, true);
+      });
+    }
+    
     return {
       message: firstError.message || 'An error occurred while fetching data.',
       canRetry: true,
@@ -67,6 +81,12 @@ export function handleGraphQLError(error: any): ErrorWithRetry {
   }
 
   // Generic error - don't alarm users
+  if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+    import('./errorLogger').then(({ logApiError }) => {
+      logApiError('Unknown operation', error, true);
+    });
+  }
+  
   return {
     message: 'Loading from cache. Some features may be limited.',
     canRetry: true,
