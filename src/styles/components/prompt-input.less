@@ -1,0 +1,332 @@
+// Beautiful Prompt Input with Modern Design
+
+.prompt-input-container {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 400px);
+  max-width: 900px;
+  z-index: 100;
+  padding: 0 24px;
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+  @media (max-width: 1024px) {
+    width: calc(100% - 48px);
+  }
+}
+
+.prompt-input-wrapper {
+  position: relative;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-primary);
+  border-radius: 24px;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(14, 165, 233, 0.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+
+  .dark & {
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(20px);
+    box-shadow: 
+      0 20px 60px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(14, 165, 233, 0.1);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg, #0ea5e9, #8b5cf6, #ec4899);
+    border-radius: 24px;
+    opacity: 0;
+    transition: opacity 0.4s;
+    z-index: -1;
+  }
+
+  &:focus-within {
+    border-color: transparent;
+    box-shadow: 
+      0 20px 60px rgba(14, 165, 233, 0.2),
+      0 0 0 1px rgba(14, 165, 233, 0.2);
+
+    &::before {
+      opacity: 1;
+    }
+
+    .input-glow {
+      opacity: 1;
+    }
+  }
+
+  &.is-typing {
+    transform: scale(1.02);
+  }
+
+  .input-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150%;
+    height: 150%;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none;
+  }
+}
+
+.prompt-input-content {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 16px 20px;
+  position: relative;
+  z-index: 1;
+
+  .input-actions-left {
+    display: flex;
+    gap: 8px;
+
+    .action-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-primary);
+      border-radius: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s;
+
+      &:hover {
+        background: var(--bg-hover);
+        border-color: var(--primary-500);
+        color: var(--primary-600);
+        transform: translateY(-2px);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      .anticon {
+        font-size: 18px;
+      }
+    }
+  }
+
+  .input-field-wrapper {
+    flex: 1;
+    position: relative;
+
+    .input-field {
+      width: 100%;
+      min-height: 44px;
+      max-height: 200px;
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 15px;
+      line-height: 1.6;
+      resize: none;
+      outline: none;
+      font-family: inherit;
+
+      &::placeholder {
+        color: var(--text-muted);
+      }
+
+      &::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: var(--border-secondary);
+        border-radius: 2px;
+      }
+    }
+
+    .char-counter {
+      position: absolute;
+      bottom: 8px;
+      right: 16px;
+      font-size: 11px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+  }
+
+  .input-actions-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    .send-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .anticon {
+        font-size: 20px;
+        position: relative;
+        z-index: 1;
+        transition: transform 0.3s;
+      }
+
+      &:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 8px 24px rgba(14, 165, 233, 0.4);
+
+        &::before {
+          opacity: 1;
+        }
+
+        .anticon {
+          transform: translateX(2px);
+        }
+      }
+
+      &:active {
+        transform: translateY(0) scale(1);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      &.is-loading {
+        .anticon {
+          animation: spin 1s linear infinite;
+        }
+      }
+    }
+  }
+}
+
+// Suggestions/Commands Popup
+.prompt-suggestions {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 0;
+  right: 0;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 16px;
+  box-shadow: var(--shadow-xl);
+  padding: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+  animation: slideUpFade 0.3s ease;
+
+  .suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+
+    .suggestion-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(168, 85, 247, 0.1));
+      border-radius: 8px;
+      font-size: 18px;
+    }
+
+    .suggestion-content {
+      flex: 1;
+
+      .suggestion-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 2px;
+      }
+
+      .suggestion-description {
+        font-size: 12px;
+        color: var(--text-tertiary);
+      }
+    }
+
+    .suggestion-shortcut {
+      padding: 4px 8px;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    &:hover {
+      background: var(--bg-hover);
+      transform: translateX(4px);
+
+      .suggestion-icon {
+        transform: scale(1.1);
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
