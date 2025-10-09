@@ -24,11 +24,18 @@ body {
 }
 
 .ant-card {
-  background: var(--bg-primary);
+  background: var(--bg-primary) !important;
   border-color: var(--border-primary);
+  color: var(--text-primary);
   
   &:hover {
     box-shadow: var(--shadow-lg);
+  }
+  
+  // Force proper background in dark mode
+  .dark & {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-primary) !important;
   }
 }
 
