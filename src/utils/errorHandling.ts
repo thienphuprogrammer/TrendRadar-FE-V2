@@ -18,6 +18,13 @@ export const DEFAULT_DATA = {
   ],
   models: [],
   relationships: [],
+  settings: {
+    dataSource: null,
+    sampleDataset: false,
+  },
+  instructions: [],
+  questionSqlPairs: [],
+  apiHistory: [],
 };
 
 export interface ErrorWithRetry {
