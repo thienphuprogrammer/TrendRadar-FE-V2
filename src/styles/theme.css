@@ -191,31 +191,60 @@ a:hover {
   }
 }
 
-/* Dark Mode Force Overrides */
+/* Dark Mode Force Overrides - Applied with High Specificity */
 .dark {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
 }
 
-.dark .ant-card {
+html.dark body {
+  background-color: var(--bg-secondary) !important;
+}
+
+html.dark .ant-card,
+.dark .ant-card,
+body.dark .ant-card {
   background-color: var(--bg-primary) !important;
-  color: var(--text-primary);
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
 }
 
+html.dark .ant-card .ant-card-body,
+.dark .ant-card .ant-card-body {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+html.dark .ant-typography,
 .dark .ant-typography,
+html.dark h1,
 .dark h1,
+html.dark h2,
 .dark h2,
+html.dark h3,
 .dark h3,
+html.dark h4,
 .dark h4,
+html.dark h5,
 .dark h5,
+html.dark h6,
 .dark h6 {
   color: var(--text-primary) !important;
 }
 
+html.dark .ant-steps-item-title,
 .dark .ant-steps-item-title {
   color: var(--text-primary) !important;
 }
 
+html.dark .ant-steps-item-wait .ant-steps-item-title,
 .dark .ant-steps-item-wait .ant-steps-item-title {
   color: var(--text-tertiary) !important;
+}
+
+/* Ensure text in Typography component is visible */
+html.dark .ant-typography.ant-typography-secondary,
+.dark .ant-typography.ant-typography-secondary {
+  color: var(--text-secondary) !important;
 }
