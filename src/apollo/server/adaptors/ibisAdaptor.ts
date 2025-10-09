@@ -25,6 +25,25 @@ export type { WrenSQL };
 const logger = getLogger('IbisAdaptor');
 logger.level = 'debug';
 
+// Default responses for when external services fail
+const DEFAULT_RESPONSES = {
+  ibisQueryResponse: {
+    columns: [],
+    data: [],
+    dtypes: {},
+  },
+  dryRunResponse: {},
+  compactTables: [],
+  recommendConstraints: [],
+  validationResponse: {
+    valid: false,
+    message: 'Service temporarily unavailable',
+  },
+  nativeSql: '',
+  version: '0.0.0',
+  wrenSql: '',
+};
+
 const config = getConfig();
 
 export interface HostBasedConnectionInfo {
@@ -246,8 +265,10 @@ export class IbisAdaptor implements IIbisAdaptor {
       );
       return res.data;
     } catch (e) {
-      logger.debug(`Dry plan error: ${e.response?.data || e.message}`);
-      this.throwError(e, 'Error during dry plan execution');
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`Dry plan error: ${e.response?.data || e.message}`);
+      }
+      return DEFAULT_RESPONSES.nativeSql;
     }
   }
 
@@ -288,8 +309,10 @@ export class IbisAdaptor implements IIbisAdaptor {
         override: res.headers['x-cache-override'] === 'true',
       };
     } catch (e) {
-      logger.debug(`Query error: ${e.response?.data || e.message}`);
-      this.throwError(e, 'Error querying ibis server');
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`Query error: ${e.response?.data || e.message}`);
+      }
+      return DEFAULT_RESPONSES.ibisQueryResponse;
     }
   }
 
@@ -305,20 +328,26 @@ export class IbisAdaptor implements IIbisAdaptor {
       connectionInfo: ibisConnectionInfo,
       manifestStr: Buffer.from(JSON.stringify(mdl)).toString('base64'),
     };
-    logger.debug(`Dry run sql from ibis with body:`);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug(`Dry run sql from ibis with body:`);
+    }
     try {
       const response = await axios.post(
         `${this.ibisServerEndpoint}/${this.getIbisApiVersion(IBIS_API_TYPE.DRY_RUN)}/connector/${dataSourceUrlMap[dataSource]}/query?dryRun=true`,
         body,
       );
-      logger.debug(`Ibis server Dry run success`);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`Ibis server Dry run success`);
+      }
       return {
         correlationId: response.headers['x-correlation-id'],
         processTime: response.headers['x-process-time'],
       };
     } catch (err) {
-      logger.debug(`Dry run error: ${err.response?.data || err.message}`);
-      this.throwError(err, 'Error during dry run execution');
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`Dry run error: ${err.response?.data || err.message}`);
+      }
+      return DEFAULT_RESPONSES.dryRunResponse;
     }
   }
 
@@ -331,7 +360,9 @@ export class IbisAdaptor implements IIbisAdaptor {
         const body = {
           connectionInfo: ibisConnectionInfo,
         };
-        logger.debug(`Getting tables from ibis`);
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug(`Getting tables from ibis`);
+        }
         const res: AxiosResponse<CompactTable[]> = await axios.post(
           `${this.ibisServerEndpoint}/${this.getIbisApiVersion(IBIS_API_TYPE.METADATA)}/connector/${dataSourceUrlMap[dataSource]}/metadata/tables`,
           body,
@@ -361,8 +392,10 @@ export class IbisAdaptor implements IIbisAdaptor {
       );
       return await getTablesByConnectionInfo(ibisConnectionInfo);
     } catch (e) {
-      logger.debug(`Get tables error: ${e.response?.data || e.message}`);
-      this.throwError(e, 'Error getting table from ibis server');
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`Get tables error: ${e.response?.data || e.message}`);
+      }
+      return DEFAULT_RESPONSES.compactTables;
     }
   }
 
@@ -403,15 +436,19 @@ export class IbisAdaptor implements IIbisAdaptor {
       parameters,
     };
     try {
-      logger.debug(`Run validation rule "${validationRule}" with ibis`);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`Run validation rule "${validationRule}" with ibis`);
+      }
       await axios.post(
         `${this.ibisServerEndpoint}/${this.getIbisApiVersion(IBIS_API_TYPE.VALIDATION)}/connector/${dataSourceUrlMap[dataSource]}/validate/${snakeCase(validationRule)}`,
         body,
       );
       return { valid: true, message: null };
     } catch (e) {
-      logger.debug(`Validation error: ${e.response?.data || e.message}`);
-      return { valid: false, message: e.response?.data || e.message };
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`Validation error: ${e.response?.data || e.message}`);
+      }
+      return DEFAULT_RESPONSES.validationResponse;
     }
   }
 

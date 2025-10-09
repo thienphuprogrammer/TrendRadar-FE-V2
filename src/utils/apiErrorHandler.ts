@@ -45,10 +45,10 @@ export async function safeApiCall<T>(
   options: SafeApiCallOptions = {}
 ): Promise<ApiResponse<T>> {
   const {
-    showErrorToUser = false,
+    showErrorToUser = false, // Silent by default
     errorMessage = 'An error occurred',
     defaultValue = null,
-    silentError = false,
+    silentError = true, // Silent by default
     onError,
     onSuccess,
   } = options;
@@ -66,12 +66,12 @@ export async function safeApiCall<T>(
       success: true,
     };
   } catch (error: any) {
-    // Log error for debugging
-    if (!silentError) {
+    // Log error for debugging (only in development)
+    if (!silentError && process.env.NODE_ENV === 'development') {
       console.error('API call failed:', error);
     }
 
-    // Show error to user if configured
+    // Show error to user if explicitly configured (default is silent)
     if (showErrorToUser) {
       const displayMessage = getErrorMessage(error, errorMessage);
       message.error(displayMessage, 5);
@@ -254,7 +254,7 @@ export async function retryApiCall<T>(
     }
   }
 
-  // Show error only after all retries failed
+  // Show error only after all retries failed (if explicitly configured)
   if (options.showErrorToUser && lastError) {
     const errorMsg = getErrorMessage(lastError, options.errorMessage);
     message.error(errorMsg, 5);

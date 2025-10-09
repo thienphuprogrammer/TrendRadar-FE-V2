@@ -39,7 +39,9 @@ export function useSafeQuery<T>({
       setAttempts(0);
     } catch (err: any) {
       const errorInfo = handleGraphQLError(err);
-      console.error('Query error:', errorInfo.message);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Query error:', errorInfo.message);
+      }
       setError(err);
       onError?.(err);
 

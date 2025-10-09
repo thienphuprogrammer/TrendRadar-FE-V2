@@ -56,3 +56,5 @@ ops/kind
 # Environment files
 *.env
 *.env.*
+
+.next/

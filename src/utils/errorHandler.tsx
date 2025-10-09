@@ -40,7 +40,10 @@ const replaceMessage = (message: string, detailMessage?: string) => {
 abstract class ErrorHandler {
   public handle(error: GraphQLError) {
     const errorMessage = this.getErrorMessage(error);
-    if (errorMessage) message.error(errorMessage);
+    if (errorMessage && process.env.NODE_ENV === 'development') {
+      console.error('GraphQL Error:', errorMessage);
+    }
+    // Silent error handling - no user messages
   }
 
   abstract getErrorMessage(error: GraphQLError): string | null;
@@ -455,13 +458,11 @@ errorHandlers.set('DeleteInstruction', new DeleteInstructionErrorHandler());
 
 const errorHandler = (error: ErrorResponse) => {
   try {
-    // networkError - Don't block UI, just show warning
+    // networkError - Silent handling, no user messages
     if (error.networkError) {
-      message.warning({
-        content: 'Connection issue. Using cached or default data.',
-        duration: 3,
-      });
-      console.error('Network Error:', error.networkError);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Network Error:', error.networkError);
+      }
       // Don't throw - let the UI render with fallback data
       return;
     }
@@ -471,20 +472,23 @@ const errorHandler = (error: ErrorResponse) => {
       for (const err of error.graphQLErrors) {
         const handler = errorHandlers.get(operationName);
         if (handler) {
-          handler.handle(err);
+          // Silent error handling - no user messages
+          if (process.env.NODE_ENV === 'development') {
+            console.error(`GraphQL Error in ${operationName}:`, err.message);
+          }
         } else {
           // Generic error handling for operations without specific handlers
-          console.error(`GraphQL Error in ${operationName}:`, err.message);
-          message.warning({
-            content: 'Some features may be limited. Using default data.',
-            duration: 3,
-          });
+          if (process.env.NODE_ENV === 'development') {
+            console.error(`GraphQL Error in ${operationName}:`, err.message);
+          }
         }
       }
     }
   } catch (handlerError) {
     // Even if error handling fails, don't crash the app
-    console.error('Error in error handler:', handlerError);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error in error handler:', handlerError);
+    }
   }
 };
 

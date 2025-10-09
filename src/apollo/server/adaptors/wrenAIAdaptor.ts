@@ -42,6 +42,77 @@ import { ThreadResponse } from '@server/repositories';
 const logger = getLogger('WrenAIAdaptor');
 logger.level = 'debug';
 
+// Default responses for when external services fail
+const DEFAULT_RESPONSES = {
+  askResult: {
+    type: null,
+    status: 'IDLE',
+    error: null,
+    response: [],
+    rephrasedQuestion: null,
+    intentReasoning: null,
+    sqlGenerationReasoning: null,
+    retrievedTables: [],
+    invalidSql: null,
+    traceId: null,
+  },
+  askDetailResult: {
+    type: null,
+    status: 'IDLE',
+    error: null,
+    response: {
+      description: null,
+      steps: [],
+    },
+  },
+  recommendationQuestionsResult: {
+    status: 'IDLE',
+    questions: [],
+    error: null,
+  },
+  textBasedAnswerResult: {
+    status: 'IDLE',
+    numRowsUsedInLLM: 0,
+    error: null,
+  },
+  chartResult: {
+    status: 'IDLE',
+    error: null,
+    response: {
+      reasoning: null,
+      chartType: null,
+      chartSchema: null,
+    },
+  },
+  sqlPairResult: {
+    status: 'IDLE',
+    error: null,
+  },
+  questionsResult: {
+    status: 'IDLE',
+    error: null,
+    questions: [],
+  },
+  instructionResult: {
+    status: 'IDLE',
+    error: null,
+  },
+  askFeedbackResult: {
+    status: 'IDLE',
+    error: null,
+    response: [],
+    traceId: null,
+    invalidSql: null,
+  },
+  deployResponse: {
+    status: 'FAILED',
+    error: 'Service temporarily unavailable',
+  },
+  asyncQueryResponse: {
+    queryId: 'default-query-id',
+  },
+};
+
 const getAIServiceError = (error: any) => {
   const { data } = error.response || {};
   return data?.detail
@@ -242,8 +313,12 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       });
       return { queryId: res.data.query_id };
     } catch (err: any) {
-      logger.debug(`Got error when asking TrendRadarAI: ${getAIServiceError(err)}`);
-      throw err;
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(
+          `Got error when asking TrendRadarAI: ${getAIServiceError(err)}`,
+        );
+      }
+      return DEFAULT_RESPONSES.asyncQueryResponse;
     }
   }
 
@@ -267,13 +342,12 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       );
       return this.transformAskResult(res.data);
     } catch (err: any) {
-      logger.debug(
-        `Got error when getting ask result: ${getAIServiceError(err)}`,
-      );
-      // throw err;
-      throw Errors.create(Errors.GeneralErrorCodes.INTERNAL_SERVER_ERROR, {
-        originalError: err,
-      });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(
+          `Got error when getting ask result: ${getAIServiceError(err)}`,
+        );
+      }
+      return DEFAULT_RESPONSES.askResult as AskResult;
     }
   }
 
@@ -343,12 +417,18 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
         },
       );
       const deployId = res.data.id;
-      logger.debug(
-        `TrendRadarAI: Deploying TrendRadarAI, hash: ${hash}, deployId: ${deployId}`,
-      );
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(
+          `TrendRadarAI: Deploying TrendRadarAI, hash: ${hash}, deployId: ${deployId}`,
+        );
+      }
       const deploySuccess = await this.waitDeployFinished(deployId);
       if (deploySuccess) {
-        logger.debug(`TrendRadarAI: Deploy TrendRadarAI success, hash: ${hash}`);
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug(
+            `TrendRadarAI: Deploy TrendRadarAI success, hash: ${hash}`,
+          );
+        }
         return { status: WrenAIDeployStatusEnum.SUCCESS };
       } else {
         return {
@@ -357,13 +437,12 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
         };
       }
     } catch (err: any) {
-      logger.debug(
-        `Got error when deploying to TrendRadarAI, hash: ${hash}. Error: ${err.message}`,
-      );
-      return {
-        status: WrenAIDeployStatusEnum.FAILED,
-        error: `TrendRadarAI Error: deployment hash:${hash}, ${err.message}`,
-      };
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(
+          `Got error when deploying to TrendRadarAI, hash: ${hash}. Error: ${err.message}`,
+        );
+      }
+      return DEFAULT_RESPONSES.deployResponse as WrenAIDeployResponse;
     }
   }
 
@@ -377,21 +456,27 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       max_categories: input.maxCategories,
       configuration: input.configuration,
     };
-    logger.info(`TrendRadarAI: Generating recommendation questions`);
+    if (process.env.NODE_ENV === 'development') {
+      logger.info(`TrendRadarAI: Generating recommendation questions`);
+    }
     try {
       const res = await axios.post(
         `${this.wrenAIBaseEndpoint}/v1/question-recommendations`,
         body,
       );
-      logger.info(
-        `TrendRadarAI: Generating recommendation questions, queryId: ${res.data.id}`,
-      );
+      if (process.env.NODE_ENV === 'development') {
+        logger.info(
+          `TrendRadarAI: Generating recommendation questions, queryId: ${res.data.id}`,
+        );
+      }
       return { queryId: res.data.id };
     } catch (err: any) {
-      logger.debug(
-        `Got error when generating recommendation questions: ${getAIServiceError(err)}`,
-      );
-      throw err;
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(
+          `Got error when generating recommendation questions: ${getAIServiceError(err)}`,
+        );
+      }
+      return DEFAULT_RESPONSES.asyncQueryResponse;
     }
   }
 
@@ -404,10 +489,12 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       );
       return this.transformRecommendationQuestionsResult(res.data);
     } catch (err: any) {
-      logger.debug(
-        `Got error when getting recommendation questions result: ${getAIServiceError(err)}`,
-      );
-      throw err;
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(
+          `Got error when getting recommendation questions result: ${getAIServiceError(err)}`,
+        );
+      }
+      return DEFAULT_RESPONSES.recommendationQuestionsResult as RecommendationQuestionsResult;
     }
   }
 
@@ -478,8 +565,12 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       );
       return { queryId: res.data.query_id };
     } catch (err: any) {
-      logger.debug(`Got error when creating chart: ${getAIServiceError(err)}`);
-      throw err;
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(
+          `Got error when creating chart: ${getAIServiceError(err)}`,
+        );
+      }
+      return DEFAULT_RESPONSES.asyncQueryResponse;
     }
   }
 
@@ -490,10 +581,12 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       );
       return this.transformChartResult(res.data);
     } catch (err: any) {
-      logger.debug(
-        `Got error when getting chart result: ${getAIServiceError(err)}`,
-      );
-      throw err;
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(
+          `Got error when getting chart result: ${getAIServiceError(err)}`,
+        );
+      }
+      return DEFAULT_RESPONSES.chartResult as ChartResult;
     }
   }
 
@@ -784,7 +877,9 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
         } else if (status === WrenAISystemStatus.INDEXING) {
           // do nothing
         } else {
-          logger.debug(`TrendRadarAI: Unknown TrendRadarAI deploy status: ${status}`);
+          logger.debug(
+            `TrendRadarAI: Unknown TrendRadarAI deploy status: ${status}`,
+          );
           return;
         }
       } catch (err: any) {

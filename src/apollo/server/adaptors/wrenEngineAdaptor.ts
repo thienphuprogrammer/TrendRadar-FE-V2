@@ -7,6 +7,27 @@ import { CompactTable, DEFAULT_PREVIEW_LIMIT } from '../services';
 const logger = getLogger('WrenEngineAdaptor');
 logger.level = 'debug';
 
+// Default responses for when external services fail
+const DEFAULT_RESPONSES = {
+  engineQueryResponse: {
+    columns: [],
+    data: [],
+  },
+  describeStatementResponse: {
+    columns: [],
+  },
+  wrenEngineValidationResponse: {
+    valid: false,
+    message: 'Service temporarily unavailable',
+  },
+  wrenEngineDryRunResponse: [],
+  compactTables: [],
+  deployStatusResponse: {
+    systemStatus: 'UNKNOWN',
+    version: '0.0.0',
+  },
+};
+
 export interface WrenEngineDeployStatusResponse {
   systemStatus: string;
   version: string;
@@ -145,8 +166,10 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
         return { valid: false, message: JSON.stringify(result) };
       }
     } catch (err: any) {
-      logger.debug(`Got error when validating column: ${err.message}`);
-      return { valid: false, message: err.message };
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`Got error when validating column: ${err.message}`);
+      }
+      return DEFAULT_RESPONSES.wrenEngineValidationResponse;
     }
   }
 
@@ -157,12 +180,19 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
   }
 
   public async listTables() {
-    const sql =
-      'SELECT \
-      table_catalog, table_schema, table_name, column_name, ordinal_position, is_nullable, data_type\
-      FROM INFORMATION_SCHEMA.COLUMNS;';
-    const response = await this.queryDuckdb(sql);
-    return this.formatToCompactTable(response);
+    try {
+      const sql =
+        'SELECT \
+        table_catalog, table_schema, table_name, column_name, ordinal_position, is_nullable, data_type\
+        FROM INFORMATION_SCHEMA.COLUMNS;';
+      const response = await this.queryDuckdb(sql);
+      return this.formatToCompactTable(response);
+    } catch (err: any) {
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`Got error when listing tables: ${err.message}`);
+      }
+      return DEFAULT_RESPONSES.compactTables;
+    }
   }
 
   public async putSessionProps(props: Record<string, any>) {
@@ -199,11 +229,10 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
       const res = await axios.post(url.href, sql, { headers });
       return res.data as EngineQueryResponse;
     } catch (err: any) {
-      logger.debug(`Got error when querying duckdb: ${err.message}`);
-      throw Errors.create(Errors.GeneralErrorCodes.WREN_ENGINE_ERROR, {
-        customMessage: err.response?.data?.message || err.message,
-        originalError: err,
-      });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`Got error when querying duckdb: ${err.message}`);
+      }
+      return DEFAULT_RESPONSES.engineQueryResponse;
     }
   }
 
@@ -253,11 +282,10 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
 
       return res.data;
     } catch (err: any) {
-      logger.debug(`Got error when previewing data: ${err.message}`);
-      throw Errors.create(Errors.GeneralErrorCodes.WREN_ENGINE_ERROR, {
-        customMessage: err.response?.data?.message || err.message,
-        originalError: err,
-      });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`Got error when previewing data: ${err.message}`);
+      }
+      return DEFAULT_RESPONSES.engineQueryResponse;
     }
   }
 
@@ -304,23 +332,26 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
         sql,
         manifest,
       };
-      logger.debug(
-        `Dry run TrendRadarengine with body: ${JSON.stringify(sql, null, 2)}`,
-      );
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(
+          `Dry run TrendRadarengine with body: ${JSON.stringify(sql, null, 2)}`,
+        );
+      }
       const url = new URL(this.dryRunUrlPath, this.wrenEngineBaseEndpoint);
       const res: AxiosResponse<WrenEngineDryRunResponse[]> = await axios({
         method: 'get',
         url: url.href,
         data: body,
       });
-      logger.debug(`TrendRadarEngine Dry run success`);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`TrendRadarEngine Dry run success`);
+      }
       return res.data;
     } catch (err: any) {
-      logger.info(`Got error when dry running`);
-      throw Errors.create(Errors.GeneralErrorCodes.DRY_RUN_ERROR, {
-        customMessage: err.response.data.message,
-        originalError: err,
-      });
+      if (process.env.NODE_ENV === 'development') {
+        logger.info(`Got error when dry running`);
+      }
+      return DEFAULT_RESPONSES.wrenEngineDryRunResponse;
     }
   }
 

@@ -164,10 +164,18 @@ export default function useAskPrompt(threadId?: number) {
   const [createAskingTask, createAskingTaskResult] =
     useCreateAskingTaskMutation();
   const [cancelAskingTask] = useCancelAskingTaskMutation({
-    onError: (error) => console.error(error),
+    onError: (error) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Cancel asking task error:', error);
+      }
+    },
   });
   const [rerunAskingTask] = useRerunAskingTaskMutation({
-    onError: (error) => console.error(error),
+    onError: (error) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Rerun asking task error:', error);
+      }
+    },
   });
   const [fetchAskingTask, askingTaskResult] = useAskingTaskLazyQuery({
     pollInterval: 1000,
@@ -175,7 +183,11 @@ export default function useAskPrompt(threadId?: number) {
   const [fetchAskingStreamTask, askingStreamTaskResult] = useAskingStreamTask();
   const [createInstantRecommendedQuestions] =
     useCreateInstantRecommendedQuestionsMutation({
-      onError: (error) => console.error(error),
+      onError: (error) => {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Create instant recommended questions error:', error);
+        }
+      },
     });
   const [fetchInstantRecommendedQuestions, instantRecommendedQuestionsResult] =
     useInstantRecommendedQuestionsLazyQuery({
@@ -265,9 +277,11 @@ export default function useAskPrompt(threadId?: number) {
   const onStop = async (queryId?: string) => {
     const taskId = queryId || createAskingTaskResult.data?.createAskingTask.id;
     if (taskId) {
-      await cancelAskingTask({ variables: { taskId } }).catch((error) =>
-        console.error(error),
-      );
+      await cancelAskingTask({ variables: { taskId } }).catch((error) => {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Cancel asking task error:', error);
+        }
+      });
       // waiting for polling fetching stop
       await nextTick(1000);
     }
@@ -291,7 +305,9 @@ export default function useAskPrompt(threadId?: number) {
         askingTaskResult.client,
       );
     } catch (error) {
-      console.error(error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Rerun asking task error:', error);
+      }
     }
   };
 
@@ -306,7 +322,9 @@ export default function useAskPrompt(threadId?: number) {
         variables: { taskId: response.data.createAskingTask.id },
       });
     } catch (error) {
-      console.error(error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Create asking task error:', error);
+      }
     }
   };
 

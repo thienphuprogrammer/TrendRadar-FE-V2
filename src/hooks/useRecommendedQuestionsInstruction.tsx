@@ -90,9 +90,10 @@ export default function useRecommendedQuestionsInstruction() {
           recommendedQuestionsTask.status ===
             RecommendedQuestionsTaskStatus.FAILED
         ) {
-          message.error(
-            `We couldn't regenerate questions right now. Let's try again later.`,
-          );
+          // Silent error handling - no user messages
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Failed to regenerate questions');
+          }
         }
       } else {
         setIsRegenerate(true);

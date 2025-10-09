@@ -18,6 +18,9 @@ export const DEFAULT_DATA = {
   ],
   models: [],
   relationships: [],
+  views: [],
+  dashboards: [],
+  calculatedFields: [],
   settings: {
     dataSource: null,
     sampleDataset: false,
@@ -25,6 +28,58 @@ export const DEFAULT_DATA = {
   instructions: [],
   questionSqlPairs: [],
   apiHistory: [],
+  deployStatus: {
+    status: 'IDLE',
+  },
+  askingTask: {
+    status: 'IDLE',
+    type: null,
+    rephrasedQuestion: null,
+    intentReasoning: null,
+    sqlGenerationReasoning: null,
+    retrievedTables: [],
+    invalidSql: null,
+    traceId: null,
+    queryId: null,
+    candidates: [],
+    error: null,
+  },
+  thread: {
+    id: 0,
+    responses: [],
+  },
+  threadResponse: {
+    id: 0,
+    threadId: 0,
+    question: '',
+    sql: null,
+    view: null,
+    breakdownDetail: null,
+    answerDetail: null,
+    chartDetail: null,
+    askingTask: null,
+    adjustment: null,
+    adjustmentTask: null,
+  },
+  recommendedQuestionsTask: {
+    status: 'IDLE',
+    questions: [],
+    error: null,
+  },
+  viewInfo: {
+    id: 0,
+    name: '',
+    statement: '',
+    displayName: '',
+  },
+  viewValidation: {
+    valid: false,
+    message: null,
+  },
+  previewData: [],
+  modelSync: {
+    status: 'IDLE',
+  },
 };
 
 export interface ErrorWithRetry {

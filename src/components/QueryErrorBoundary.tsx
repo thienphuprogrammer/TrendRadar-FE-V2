@@ -16,6 +16,7 @@ interface QueryErrorBoundaryProps {
   showRetry?: boolean;
   emptyMessage?: string;
   errorMessage?: string;
+  silent?: boolean; // New prop to control silent mode
 }
 
 const ErrorContainer = styled(motion.div)`
@@ -86,6 +87,7 @@ export default function QueryErrorBoundary({
   showRetry = true,
   emptyMessage = 'No data available',
   errorMessage,
+  silent = true, // Silent by default
 }: QueryErrorBoundaryProps) {
   // Show loading state
   if (loading) {
@@ -99,6 +101,16 @@ export default function QueryErrorBoundary({
       return <>{fallback}</>;
     }
 
+    // Silent mode - just render children with default data
+    if (silent) {
+      if (process.env.NODE_ENV === 'development') {
+        const errorInfo = handleGraphQLError(error);
+        console.error('QueryErrorBoundary silent error:', errorInfo.message);
+      }
+      return <>{children}</>;
+    }
+
+    // Non-silent mode - show error UI
     const errorInfo = handleGraphQLError(error);
     const displayMessage = errorMessage || errorInfo.message;
 

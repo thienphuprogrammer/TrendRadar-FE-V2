@@ -14,7 +14,9 @@ const apolloErrorLink = onError(({ graphQLErrors, networkError, operation }) => 
       const errorKey = `graphql-${operationName}-${message}`;
       if (!errorCache.has(errorKey)) {
         errorCache.add(errorKey);
-        console.warn(`[GraphQL] ${operationName}: ${message.substring(0, 100)}`);
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`[GraphQL] ${operationName}: ${message.substring(0, 100)}`);
+        }
       }
     });
   }
@@ -23,13 +25,15 @@ const apolloErrorLink = onError(({ graphQLErrors, networkError, operation }) => 
     const errorKey = `network-${operationName}`;
     if (!errorCache.has(errorKey)) {
       errorCache.add(errorKey);
-      console.warn(`[Network] ${operationName}: Using fallback data`);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[Network] ${operationName}: Using fallback data`);
+      }
     }
     // Don't crash the app on network errors
   }
 
-  // Call the existing error handler (it will show user-facing messages)
-  errorHandler({ graphQLErrors, networkError, operation });
+  // Call the existing error handler (now silent)
+  errorHandler({ graphQLErrors, networkError, operation, forward: () => {} });
 });
 
 // Retry link for failed requests (reduced retries to minimize console noise)
