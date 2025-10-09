@@ -121,15 +121,16 @@ export default function Home() {
   
   const [createThread, { loading: threadCreating, error: createThreadError }] = useCreateThreadMutation({
     onError: (error) => {
-      const errorInfo = handleGraphQLError(error);
-      console.error('Create thread error:', errorInfo.message);
-      // Error will be shown in the UI if needed
+      handleGraphQLError(error);
+      // Error logged by handleGraphQLError
     },
     onCompleted: () => {
       try {
         homeSidebar.refetch();
       } catch (error) {
-        console.error('Refetch error:', error);
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Refetch error:', error);
+        }
       }
     },
   });
