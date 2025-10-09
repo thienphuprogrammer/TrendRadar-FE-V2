@@ -29,9 +29,14 @@ export default function ContainerCard(props: Props) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  const cardStyle = {
+    background: isDark ? '#1e293b' : '#ffffff',
+    borderColor: isDark ? '#374151' : '#e2e8f0',
+  };
+
   return (
     <Container maxWidth={maxWidth}>
-      <StyledCard $isDark={isDark}>
+      <StyledCard $isDark={isDark} style={cardStyle}>
         <Steps current={step} className="mb-12">
           <Steps.Step title="Connect" />
           <Steps.Step title="Select Tables" />
