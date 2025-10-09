@@ -19,6 +19,15 @@ const nextConfig = withLess({
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Transpile Ant Design packages to fix ES module issues
+  transpilePackages: [
+    '@ant-design/icons',
+    '@ant-design/icons-svg',
+    'antd',
+    'rc-util',
+    'rc-pagination',
+    'rc-picker',
+  ],
   compiler: {
     // Enables the styled-components SWC transform
     styledComponents: {
