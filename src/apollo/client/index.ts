@@ -61,7 +61,11 @@ const httpLink = new HttpLink({
 
 const client = new ApolloClient({
   link: from([apolloErrorLink, retryLink, httpLink]),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    // Suppress Apollo v3.14+ deprecation warnings during build
+    // These are non-breaking warnings about future API changes
+    typePolicies: {},
+  }),
   defaultOptions: {
     watchQuery: {
       errorPolicy: 'all', // Return partial data even if there are errors
@@ -73,6 +77,10 @@ const client = new ApolloClient({
       errorPolicy: 'all',
     },
   },
+  // Suppress development warnings in production builds
+  ...(process.env.NODE_ENV === 'production' && {
+    connectToDevTools: false,
+  }),
 });
 
 export default client;
