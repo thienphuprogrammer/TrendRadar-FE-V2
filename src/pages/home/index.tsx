@@ -177,11 +177,26 @@ export default function Home() {
     try {
       askPrompt.onStopPolling();
       const response = await createThread({ variables: { data: payload } });
+      
+      if (!response || !response.data || !response.data.createThread) {
+        throw new Error('Invalid response from server');
+      }
+      
       const threadId = response.data.createThread.id;
-      await preloadThread({ variables: { threadId } });
+      
+      // Try to preload thread, but don't fail if it doesn't work
+      try {
+        await preloadThread({ variables: { threadId } });
+      } catch (preloadError) {
+        console.warn('Failed to preload thread, continuing anyway:', preloadError);
+      }
+      
       router.push(Path.Home + `/${threadId}`);
     } catch (error) {
-      console.error(error);
+      console.error('Failed to create thread:', error);
+      const errorInfo = handleGraphQLError(error);
+      // You could show a toast notification here if needed
+      // message.error(errorInfo.message);
     }
   };
 
