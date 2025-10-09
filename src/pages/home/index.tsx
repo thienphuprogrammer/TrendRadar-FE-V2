@@ -189,15 +189,18 @@ export default function Home() {
       try {
         await preloadThread({ variables: { threadId } });
       } catch (preloadError) {
-        console.warn('Failed to preload thread, continuing anyway:', preloadError);
+        if (process.env.NODE_ENV === 'development') {
+          console.info('Thread will be loaded on navigation');
+        }
       }
       
       router.push(Path.Home + `/${threadId}`);
     } catch (error) {
-      console.error('Failed to create thread:', error);
-      const errorInfo = handleGraphQLError(error);
-      // You could show a toast notification here if needed
-      // message.error(errorInfo.message);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Failed to create thread:', error);
+      }
+      handleGraphQLError(error);
+      // Error is handled gracefully - user sees default UI
     }
   };
 
