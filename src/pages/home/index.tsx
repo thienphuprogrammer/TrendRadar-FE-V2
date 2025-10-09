@@ -112,8 +112,10 @@ export default function Home() {
     fetchPolicy: 'cache-and-network',
     onError: (error) => {
       const errorInfo = handleGraphQLError(error);
-      console.error('Suggested questions error:', errorInfo.message);
-      // Don't show error to user, use default data instead
+      // Silently use fallback data - error already logged by handleGraphQLError
+      if (process.env.NODE_ENV === 'development') {
+        console.info('Using default suggested questions');
+      }
     },
   });
   
