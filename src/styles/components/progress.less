@@ -1,0 +1,104 @@
+// Enhanced progress bar styling
+.ant-progress {
+  .ant-progress-outer {
+    .ant-progress-inner {
+      background: var(--bg-tertiary);
+      border-radius: 100px;
+    }
+  }
+  
+  // Line progress
+  &-line {
+    .ant-progress-bg {
+      background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+      border-radius: 100px;
+      transition: all 0.3s ease;
+    }
+    
+    &.ant-progress-status-success {
+      .ant-progress-bg {
+        background: linear-gradient(90deg, #22c55e, #16a34a);
+      }
+    }
+    
+    &.ant-progress-status-exception {
+      .ant-progress-bg {
+        background: linear-gradient(90deg, #ef4444, #dc2626);
+      }
+    }
+  }
+  
+  // Circle progress
+  &-circle {
+    .ant-progress-circle-path {
+      stroke: url(#progress-gradient);
+    }
+    
+    &.ant-progress-status-success {
+      .ant-progress-circle-path {
+        stroke: #22c55e;
+      }
+    }
+    
+    &.ant-progress-status-exception {
+      .ant-progress-circle-path {
+        stroke: #ef4444;
+      }
+    }
+  }
+  
+  .ant-progress-text {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+}
+
+// Skeleton loading
+.ant-skeleton {
+  .ant-skeleton-content {
+    .ant-skeleton-title,
+    .ant-skeleton-paragraph > li {
+      background: linear-gradient(
+        90deg,
+        var(--bg-tertiary) 25%,
+        var(--bg-hover) 50%,
+        var(--bg-tertiary) 75%
+      );
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s ease-in-out infinite;
+      border-radius: 4px;
+    }
+  }
+  
+  .ant-skeleton-avatar {
+    background: linear-gradient(
+      90deg,
+      var(--bg-tertiary) 25%,
+      var(--bg-hover) 50%,
+      var(--bg-tertiary) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+  }
+  
+  .ant-skeleton-button {
+    background: linear-gradient(
+      90deg,
+      var(--bg-tertiary) 25%,
+      var(--bg-hover) 50%,
+      var(--bg-tertiary) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: 6px;
+  }
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
