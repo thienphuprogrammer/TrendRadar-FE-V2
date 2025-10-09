@@ -5,6 +5,7 @@ import { trackUserTelemetry } from '@/utils/telemetry';
 
 type ContextProps = {
   config?: UserConfig | null;
+  isOffline?: boolean;
 };
 
 const GlobalConfigContext = createContext<ContextProps>({});
