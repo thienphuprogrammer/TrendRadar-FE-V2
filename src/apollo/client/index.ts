@@ -22,21 +22,22 @@ const apolloErrorLink = onError(({ graphQLErrors, networkError, operation }) => 
   errorHandler({ graphQLErrors, networkError, operation });
 });
 
-// Retry link for failed requests
+// Retry link for failed requests (reduced retries to minimize console noise)
 const retryLink = new RetryLink({
   delay: {
-    initial: 300,
-    max: 3000,
+    initial: 500,
+    max: 2000,
     jitter: true,
   },
   attempts: {
-    max: 3,
+    max: 1, // Reduced from 3 to 1 to minimize console errors
     retryIf: (error, _operation) => {
-      // Retry on network errors or 5xx server errors
+      // Only retry on network errors, not server errors (502/500)
+      // Server errors likely won't resolve with retries
       return !!error && (
         error.message.includes('Failed to fetch') ||
         error.message.includes('NetworkError') ||
-        error.statusCode >= 500
+        error.message.includes('CORS')
       );
     },
   },
