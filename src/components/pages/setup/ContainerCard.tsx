@@ -1,20 +1,16 @@
 import styled from 'styled-components';
 import { Card, Steps } from 'antd';
+import { useTheme } from '@/hooks/useTheme';
 
 const Container = styled.div<{ maxWidth?: number }>`
   max-width: ${(props) => props.maxWidth || 1200}px;
   margin: 68px auto;
 `;
 
-const StyledCard = styled(Card)`
+const StyledCard = styled(Card)<{ $isDark: boolean }>`
   && {
-    background: #ffffff !important;
-    border-color: #e2e8f0 !important;
-    
-    .dark & {
-      background: #1e293b !important;
-      border-color: #374151 !important;
-    }
+    background: ${props => props.$isDark ? '#1e293b' : '#ffffff'} !important;
+    border-color: ${props => props.$isDark ? '#374151' : '#e2e8f0'} !important;
     
     .ant-card-body {
       background: transparent !important;
@@ -30,10 +26,12 @@ interface Props {
 
 export default function ContainerCard(props: Props) {
   const { step, maxWidth } = props;
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   return (
     <Container maxWidth={maxWidth}>
-      <StyledCard>
+      <StyledCard $isDark={isDark}>
         <Steps current={step} className="mb-12">
           <Steps.Step title="Connect" />
           <Steps.Step title="Select Tables" />
