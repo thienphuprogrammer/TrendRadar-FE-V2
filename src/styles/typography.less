@@ -1,0 +1,285 @@
+// Typography System with Theme-Based Fonts
+
+// Import Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+// Font Variables
+:root {
+  // Light Theme Fonts
+  --font-primary-light: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading-light: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono-light: 'JetBrains Mono', 'Courier New', monospace;
+  
+  // Dark Theme Fonts
+  --font-primary-dark: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading-dark: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono-dark: 'JetBrains Mono', 'Courier New', monospace;
+  
+  // Active Font (Light by default)
+  --font-primary: var(--font-primary-light);
+  --font-heading: var(--font-heading-light);
+  --font-mono: var(--font-mono-light);
+  
+  // Font Weights
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+  
+  // Font Sizes
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-base: 15px;
+  --font-size-lg: 17px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+  --font-size-4xl: 36px;
+  --font-size-5xl: 48px;
+  
+  // Line Heights
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.6;
+  --line-height-loose: 1.8;
+  
+  // Letter Spacing
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.02em;
+  --letter-spacing-wider: 0.05em;
+}
+
+// Dark Theme Font Override
+.dark {
+  --font-primary: var(--font-primary-dark);
+  --font-heading: var(--font-heading-dark);
+  --font-mono: var(--font-mono-dark);
+}
+
+// Base Typography
+body {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: font-family 0.3s ease;
+}
+
+// Headings
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  transition: font-family 0.3s ease;
+  
+  .dark & {
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--letter-spacing-wide);
+  }
+}
+
+h1, .h1 {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-extrabold);
+  
+  .dark & {
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+h2, .h2 {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+}
+
+h3, .h3 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+}
+
+h4, .h4 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+h5, .h5 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+h6, .h6 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+}
+
+// Paragraph
+p {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: 1em;
+  transition: font-family 0.3s ease;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// Text Styles
+.text-xs { font-size: var(--font-size-xs); }
+.text-sm { font-size: var(--font-size-sm); }
+.text-base { font-size: var(--font-size-base); }
+.text-lg { font-size: var(--font-size-lg); }
+.text-xl { font-size: var(--font-size-xl); }
+.text-2xl { font-size: var(--font-size-2xl); }
+.text-3xl { font-size: var(--font-size-3xl); }
+.text-4xl { font-size: var(--font-size-4xl); }
+.text-5xl { font-size: var(--font-size-5xl); }
+
+// Font Weights
+.font-light { font-weight: var(--font-weight-light); }
+.font-normal { font-weight: var(--font-weight-normal); }
+.font-medium { font-weight: var(--font-weight-medium); }
+.font-semibold { font-weight: var(--font-weight-semibold); }
+.font-bold { font-weight: var(--font-weight-bold); }
+.font-extrabold { font-weight: var(--font-weight-extrabold); }
+.font-black { font-weight: var(--font-weight-black); }
+
+// Font Families
+.font-primary { font-family: var(--font-primary); }
+.font-heading { font-family: var(--font-heading); }
+.font-mono { font-family: var(--font-mono); }
+
+// Code & Pre
+code, pre {
+  font-family: var(--font-mono);
+  transition: font-family 0.3s ease;
+}
+
+code {
+  font-size: 0.9em;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  
+  .dark & {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+pre {
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  overflow-x: auto;
+  line-height: var(--line-height-relaxed);
+  
+  .dark & {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  code {
+    background: transparent;
+    padding: 0;
+  }
+}
+
+// Links
+a {
+  font-family: var(--font-primary);
+  transition: font-family 0.3s ease, color 0.3s ease;
+}
+
+// Buttons
+button, .ant-btn {
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-medium);
+  transition: font-family 0.3s ease;
+  
+  .dark & {
+    font-weight: var(--font-weight-semibold);
+  }
+}
+
+// Inputs
+input, textarea, select, .ant-input, .ant-input-number {
+  font-family: var(--font-primary);
+  transition: font-family 0.3s ease;
+}
+
+// Special Text Classes
+.text-gradient {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-extrabold);
+  background: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 50%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+  
+  .dark & {
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+.text-display {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-extrabold);
+  font-size: var(--font-size-5xl);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  
+  .dark & {
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-normal);
+  }
+}
+
+// Ant Design Overrides
+.ant-typography {
+  &.ant-typography-h1,
+  &.ant-typography-h2,
+  &.ant-typography-h3,
+  &.ant-typography-h4,
+  &.ant-typography-h5 {
+    font-family: var(--font-heading);
+    transition: font-family 0.3s ease;
+  }
+}
+
+// Smooth Font Transition Animation
+@keyframes fontFadeIn {
+  from {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Apply animation when theme changes
+.dark * {
+  animation: fontFadeIn 0.3s ease;
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
