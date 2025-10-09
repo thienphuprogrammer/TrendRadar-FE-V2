@@ -145,9 +145,8 @@ export default function Home() {
 
   const { data: settingsResult, error: settingsError } = useGetSettingsQuery({
     onError: (error) => {
-      const errorInfo = handleGraphQLError(error);
-      console.error('Settings error:', errorInfo.message);
-      // Use default settings if API fails
+      handleGraphQLError(error);
+      // Silently use default settings - error already logged
     },
   });
   
