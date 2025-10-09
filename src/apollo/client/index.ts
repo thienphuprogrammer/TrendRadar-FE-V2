@@ -3,22 +3,32 @@ import { onError } from '@apollo/client/link/error';
 import { RetryLink } from '@apollo/client/link/retry';
 import errorHandler from '@/utils/errorHandler';
 
-// Error handling link with enhanced logging
+// Error handling link with minimal logging (only log once per error type)
+const errorCache = new Set();
+
 const apolloErrorLink = onError(({ graphQLErrors, networkError, operation }) => {
+  const operationName = operation?.operationName || 'unknown';
+  
   if (graphQLErrors) {
-    graphQLErrors.forEach(({ message, locations, path }) => {
-      console.warn(
-        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
-      );
+    graphQLErrors.forEach(({ message }) => {
+      const errorKey = `graphql-${operationName}-${message}`;
+      if (!errorCache.has(errorKey)) {
+        errorCache.add(errorKey);
+        console.warn(`[GraphQL] ${operationName}: ${message.substring(0, 100)}`);
+      }
     });
   }
 
   if (networkError) {
-    console.warn(`[Network error]: ${networkError.message}`);
+    const errorKey = `network-${operationName}`;
+    if (!errorCache.has(errorKey)) {
+      errorCache.add(errorKey);
+      console.warn(`[Network] ${operationName}: Using fallback data`);
+    }
     // Don't crash the app on network errors
   }
 
-  // Call the existing error handler
+  // Call the existing error handler (it will show user-facing messages)
   errorHandler({ graphQLErrors, networkError, operation });
 });
 
