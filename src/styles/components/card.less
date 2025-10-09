@@ -1,12 +1,15 @@
 // Card component styling enhancements
 .ant-card {
+  background: var(--bg-primary) !important;
   border-radius: 12px;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border-primary);
   
   .dark & {
+    background: var(--bg-primary) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--border-primary);
+    border: 1px solid var(--border-primary) !important;
   }
   
   &:hover {
@@ -21,12 +24,13 @@
   .ant-card-head {
     border-bottom: 1px solid var(--border-primary);
     font-weight: 600;
-    color: var(--text-primary);
-    background: transparent;
+    color: var(--text-primary) !important;
+    background: transparent !important;
   }
   
   .ant-card-body {
     color: var(--text-secondary);
+    background: transparent !important;
   }
 }
 
