@@ -16,6 +16,13 @@ require('../styles/theme.css');
 
 Spin.setDefaultIndicator(defaultIndicator);
 
+// Initialize error logging in development
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+  import('../utils/errorLogger').then(({ initializeErrorLogging }) => {
+    initializeErrorLogging();
+  });
+}
+
 function App({ Component, pageProps }: AppProps) {
   return (
     <>
