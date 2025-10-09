@@ -108,26 +108,46 @@ export default function Home() {
   const homeSidebar = useHomeSidebar();
   const askPrompt = useAskPrompt();
 
-  const { data: suggestedQuestionsData } = useSuggestedQuestionsQuery({
+  const { data: suggestedQuestionsData, error: suggestedQuestionsError } = useSuggestedQuestionsQuery({
     fetchPolicy: 'cache-and-network',
+    onError: (error) => {
+      const errorInfo = handleGraphQLError(error);
+      console.error('Suggested questions error:', errorInfo.message);
+    },
   });
-  const [createThread, { loading: threadCreating }] = useCreateThreadMutation({
-    onError: (error) => console.error(error),
+  
+  const [createThread, { loading: threadCreating, error: createThreadError }] = useCreateThreadMutation({
+    onError: (error) => {
+      const errorInfo = handleGraphQLError(error);
+      console.error('Create thread error:', errorInfo.message);
+    },
     onCompleted: () => homeSidebar.refetch(),
   });
+  
   const [preloadThread] = useThreadLazyQuery({
     fetchPolicy: 'cache-and-network',
+    onError: (error) => {
+      const errorInfo = handleGraphQLError(error);
+      console.error('Preload thread error:', errorInfo.message);
+    },
   });
 
-  const { data: settingsResult } = useGetSettingsQuery();
+  const { data: settingsResult, error: settingsError } = useGetSettingsQuery({
+    onError: (error) => {
+      const errorInfo = handleGraphQLError(error);
+      console.error('Settings error:', errorInfo.message);
+    },
+  });
+  
   const settings = settingsResult?.settings;
   const isSampleDataset = useMemo(
     () => Boolean(settings?.dataSource?.sampleDataset),
     [settings],
   );
 
+  // Use default data if API fails
   const sampleQuestions = useMemo(
-    () => suggestedQuestionsData?.suggestedQuestions.questions || [],
+    () => suggestedQuestionsData?.suggestedQuestions?.questions || DEFAULT_DATA.suggestedQuestions,
     [suggestedQuestionsData],
   );
 
