@@ -113,6 +113,7 @@ export default function Home() {
     onError: (error) => {
       const errorInfo = handleGraphQLError(error);
       console.error('Suggested questions error:', errorInfo.message);
+      // Don't show error to user, use default data instead
     },
   });
   
@@ -120,8 +121,15 @@ export default function Home() {
     onError: (error) => {
       const errorInfo = handleGraphQLError(error);
       console.error('Create thread error:', errorInfo.message);
+      // Error will be shown in the UI if needed
     },
-    onCompleted: () => homeSidebar.refetch(),
+    onCompleted: () => {
+      try {
+        homeSidebar.refetch();
+      } catch (error) {
+        console.error('Refetch error:', error);
+      }
+    },
   });
   
   const [preloadThread] = useThreadLazyQuery({
@@ -129,6 +137,7 @@ export default function Home() {
     onError: (error) => {
       const errorInfo = handleGraphQLError(error);
       console.error('Preload thread error:', errorInfo.message);
+      // Continue anyway - thread can be loaded later
     },
   });
 
@@ -136,18 +145,27 @@ export default function Home() {
     onError: (error) => {
       const errorInfo = handleGraphQLError(error);
       console.error('Settings error:', errorInfo.message);
+      // Use default settings if API fails
     },
   });
   
-  const settings = settingsResult?.settings;
+  // Safely access settings with fallback
+  const settings = settingsResult?.settings || DEFAULT_DATA.settings;
   const isSampleDataset = useMemo(
     () => Boolean(settings?.dataSource?.sampleDataset),
     [settings],
   );
 
-  // Use default data if API fails
+  // Use default data if API fails - UI will never crash
   const sampleQuestions = useMemo(
-    () => suggestedQuestionsData?.suggestedQuestions?.questions || DEFAULT_DATA.suggestedQuestions,
+    () => {
+      try {
+        return suggestedQuestionsData?.suggestedQuestions?.questions || DEFAULT_DATA.suggestedQuestions;
+      } catch (error) {
+        console.error('Error accessing suggested questions:', error);
+        return DEFAULT_DATA.suggestedQuestions;
+      }
+    },
     [suggestedQuestionsData],
   );
 
