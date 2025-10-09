@@ -8,6 +8,7 @@ import { PostHogProvider } from 'posthog-js/react';
 import { ApolloProvider } from '@apollo/client';
 import { defaultIndicator } from '@/components/PageLoading';
 import { ThemeProvider } from '@/hooks/useTheme';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 require('../styles/index.less');
 require('../styles/tailwind.css');
@@ -22,17 +23,19 @@ function App({ Component, pageProps }: AppProps) {
         <title>TrendRadarAI</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <ThemeProvider>
-        <GlobalConfigProvider>
-          <ApolloProvider client={apolloClient}>
-            <PostHogProvider client={posthog}>
-              <main className="app">
-                <Component {...pageProps} />
-              </main>
-            </PostHogProvider>
-          </ApolloProvider>
-        </GlobalConfigProvider>
-      </ThemeProvider>
+      <ErrorBoundary>
+        <ThemeProvider>
+          <GlobalConfigProvider>
+            <ApolloProvider client={apolloClient}>
+              <PostHogProvider client={posthog}>
+                <main className="app">
+                  <Component {...pageProps} />
+                </main>
+              </PostHogProvider>
+            </ApolloProvider>
+          </GlobalConfigProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
     </>
   );
 }
