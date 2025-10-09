@@ -1,0 +1,197 @@
+// Enhanced form styling
+.ant-form {
+  // Form item
+  .ant-form-item {
+    margin-bottom: 24px;
+    
+    .ant-form-item-label {
+      > label {
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 14px;
+        
+        &.ant-form-item-required {
+          &:not(.ant-form-item-required-mark-optional)::before {
+            color: var(--error-500);
+          }
+        }
+      }
+    }
+    
+    .ant-form-item-explain-error {
+      color: var(--error-600);
+      font-size: 13px;
+      margin-top: 4px;
+      animation: slideInDown 0.3s ease;
+    }
+    
+    .ant-form-item-explain-success {
+      color: var(--success-600);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+  }
+  
+  // Form validation states
+  .ant-form-item-has-error {
+    .ant-input,
+    .ant-input-affix-wrapper,
+    .ant-input-number,
+    .ant-select-selector,
+    .ant-picker {
+      border-color: var(--error-500);
+      
+      &:focus,
+      &.ant-input-focused {
+        border-color: var(--error-500);
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+      }
+    }
+  }
+  
+  .ant-form-item-has-success {
+    .ant-input,
+    .ant-input-affix-wrapper,
+    .ant-input-number,
+    .ant-select-selector {
+      border-color: var(--success-500);
+    }
+  }
+  
+  .ant-form-item-has-warning {
+    .ant-input,
+    .ant-input-affix-wrapper,
+    .ant-input-number,
+    .ant-select-selector {
+      border-color: var(--warning-500);
+    }
+  }
+}
+
+// Checkbox and Radio
+.ant-checkbox-wrapper,
+.ant-radio-wrapper {
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    color: var(--text-primary);
+  }
+}
+
+.ant-checkbox {
+  .ant-checkbox-inner {
+    border-color: var(--border-secondary);
+    background: var(--bg-primary);
+    transition: all 0.3s ease;
+  }
+  
+  &:hover .ant-checkbox-inner {
+    border-color: var(--primary-500);
+  }
+  
+  &-checked {
+    .ant-checkbox-inner {
+      background: var(--primary-600);
+      border-color: var(--primary-600);
+    }
+    
+    &::after {
+      border-color: var(--primary-600);
+    }
+  }
+  
+  &-indeterminate {
+    .ant-checkbox-inner::after {
+      background: var(--primary-600);
+    }
+  }
+}
+
+.ant-radio {
+  .ant-radio-inner {
+    border-color: var(--border-secondary);
+    background: var(--bg-primary);
+    transition: all 0.3s ease;
+  }
+  
+  &:hover .ant-radio-inner {
+    border-color: var(--primary-500);
+  }
+  
+  &-checked {
+    .ant-radio-inner {
+      border-color: var(--primary-600);
+      
+      &::after {
+        background: var(--primary-600);
+      }
+    }
+  }
+}
+
+// Switch
+.ant-switch {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  transition: all 0.3s ease;
+  
+  &:hover:not(.ant-switch-disabled) {
+    background: var(--bg-hover);
+  }
+  
+  &-checked {
+    background: var(--primary-600);
+    
+    &:hover:not(.ant-switch-disabled) {
+      background: var(--primary-700);
+    }
+  }
+  
+  .ant-switch-handle {
+    &::before {
+      background: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+// Slider
+.ant-slider {
+  .ant-slider-rail {
+    background: var(--bg-tertiary);
+  }
+  
+  .ant-slider-track {
+    background: var(--primary-600);
+  }
+  
+  .ant-slider-handle {
+    border-color: var(--primary-600);
+    background: white;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+    
+    &:hover,
+    &:focus {
+      border-color: var(--primary-700);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+    }
+  }
+  
+  &:hover {
+    .ant-slider-track {
+      background: var(--primary-700);
+    }
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
