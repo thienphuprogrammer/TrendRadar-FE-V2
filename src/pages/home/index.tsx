@@ -14,6 +14,8 @@ import useHomeSidebar from '@/hooks/useHomeSidebar';
 import useAskPrompt from '@/hooks/useAskPrompt';
 import useRecommendedQuestionsInstruction from '@/hooks/useRecommendedQuestionsInstruction';
 import RecommendedQuestionsPrompt from '@/components/pages/home/prompt/RecommendedQuestionsPrompt';
+import ErrorFallback from '@/components/ErrorFallback';
+import { DEFAULT_DATA, handleGraphQLError } from '@/utils/errorHandling';
 import {
   useSuggestedQuestionsQuery,
   useCreateThreadMutation,
