@@ -34,10 +34,23 @@ export interface ErrorWithRetry {
 }
 
 export function handleGraphQLError(error: any): ErrorWithRetry {
-  console.error('GraphQL Error:', error);
+  // Log errors in development only, or to external logging service
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('GraphQL Error (using fallback data):', error?.message || error);
+  }
 
-  // Network errors
+  // Network errors - usually 502, connection refused, timeout
   if (error.networkError) {
+    const statusCode = error.networkError.statusCode;
+    
+    // 502 Bad Gateway - backend service unavailable
+    if (statusCode === 502) {
+      return {
+        message: 'Service temporarily unavailable. Using cached data.',
+        canRetry: true,
+      };
+    }
+    
     return {
       message: 'Network error. Please check your connection.',
       canRetry: true,
@@ -53,9 +66,9 @@ export function handleGraphQLError(error: any): ErrorWithRetry {
     };
   }
 
-  // Generic error
+  // Generic error - don't alarm users
   return {
-    message: 'An unexpected error occurred. Using default data.',
+    message: 'Loading from cache. Some features may be limited.',
     canRetry: true,
   };
 }
