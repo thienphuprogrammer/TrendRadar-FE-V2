@@ -8,8 +8,13 @@ const Container = styled.div<{ maxWidth?: number }>`
 
 const StyledCard = styled(Card)`
   && {
-    background: var(--bg-primary) !important;
-    border-color: var(--border-primary) !important;
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    
+    .dark & {
+      background: #1e293b !important;
+      border-color: #374151 !important;
+    }
     
     .ant-card-body {
       background: transparent !important;
