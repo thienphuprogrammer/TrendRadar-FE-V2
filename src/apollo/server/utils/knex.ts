@@ -33,19 +33,28 @@ export const bootstrapKnex = (options: KnexOptions) => {
 };
 
 // Get knex instance using server config
+// Singleton knex instance to ensure consistency
+let knexInstance: any = null;
+
 export const getKnex = () => {
-  // Force SQLite - override any environment variables
+  if (knexInstance) {
+    return knexInstance;
+  }
+  
+  // ABSOLUTELY FORCE SQLite - ignore ALL environment variables
   const dbType = 'sqlite';
   const sqliteFile = '/app/db.sqlite3';
   const debug = false;
   const pgUrl = undefined;
   
-  console.log('getKnex config (FORCED TO SQLITE):', { dbType, sqliteFile });
+  console.log('🔧 getKnex: FORCING SQLITE (singleton init):', { dbType, sqliteFile });
   
-  return bootstrapKnex({
+  knexInstance = bootstrapKnex({
     dbType,
     pgUrl,
     debug,
     sqliteFile,
   });
+  
+  return knexInstance;
 };
