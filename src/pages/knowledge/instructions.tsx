@@ -9,7 +9,7 @@ import {
 } from 'antd';
 import styled from 'styled-components';
 import SiderLayout from '@/components/layouts/SiderLayout';
-import PageLayout from '@/components/layouts/PageLayout';
+import { PageLayout } from '@/components/layouts/PageLayout';
 import { InstructionsSVG } from '@/utils/svgs';
 import QuestionOutlined from '@ant-design/icons/QuestionOutlined';
 import { MORE_ACTION } from '@/utils/enum';
@@ -21,6 +21,7 @@ import useModalAction from '@/hooks/useModalAction';
 import GlobalLabel from '@/components/pages/knowledge/GlobalLabel';
 import InstructionModal from '@/components/modals/InstructionModal';
 import InstructionDrawer from '@/components/pages/knowledge/InstructionDrawer';
+import GradientButton from '@/components/common/GradientButton';
 import { Instruction } from '@/apollo/client/graphql/__types__';
 import {
   useInstructionsQuery,
@@ -168,30 +169,33 @@ export default function ManageInstructions() {
   return (
     <SiderLayout loading={false}>
       <PageLayout
-        title={
-          <>
-            <StyledInstructionsIcon className="mr-2 gray-8" />
-            Manage instruction
-          </>
-        }
+        icon={<StyledInstructionsIcon />}
+        title="Manage Instructions"
+        badge="Knowledge Base"
         titleExtra={
-          <Button type="primary" onClick={() => instructionModal.openModal()}>
-            Add an instruction
-          </Button>
+          <GradientButton
+            variant="primary"
+            onClick={() => instructionModal.openModal()}
+          >
+            Add Instruction
+          </GradientButton>
         }
         description={
           <>
-            On this page, you can manage saved instructions that guide TrendRadarAI
-            in generating SQL queries. These instructions help TrendRadarAI
-            understand your data model and business rules, improving query
-            accuracy and reducing the need for manual refinements.{' '}
+            Create and manage custom instructions that guide TrendRadar AI in generating accurate SQL queries. 
+            These instructions help the AI understand your data model and business rules, improving query 
+            accuracy and reducing manual refinements.{' '}
             <Link
-              className="gray-8 underline"
               href="https://docs.getwren.ai/oss/guide/knowledge/instructions"
               rel="noopener noreferrer"
               target="_blank"
+              style={{ 
+                color: 'var(--accent-600)', 
+                textDecoration: 'none',
+                fontWeight: '600'
+              }}
             >
-              Learn more.
+              Learn more →
             </Link>
           </>
         }

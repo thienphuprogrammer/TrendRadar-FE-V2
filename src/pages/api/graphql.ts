@@ -14,6 +14,7 @@ import {
 } from '@/apollo/server/utils/error';
 import { TelemetryEvent } from '@/apollo/server/telemetry/telemetry';
 import { components } from '@/common';
+import { authenticateUser } from '@/apollo/server/auth/authMiddleware';
 
 const serverConfig = getConfig();
 const logger = getLogger('APOLLO');
@@ -125,9 +126,14 @@ const bootstrapServer = async () => {
       return defaultApolloErrorHandler(error);
     },
     introspection: process.env.NODE_ENV !== 'production',
-    context: (): IContext => ({
-      config: serverConfig,
-      telemetry,
+    context: async ({ req }: { req: NextApiRequest }): Promise<IContext> => {
+      // Authenticate user from request
+      const user = await authenticateUser(req);
+      
+      return {
+        config: serverConfig,
+        user,
+        telemetry,
       // adaptor
       wrenEngineAdaptor,
       ibisServerAdaptor: ibisAdaptor,
@@ -162,7 +168,8 @@ const bootstrapServer = async () => {
       projectRecommendQuestionBackgroundTracker,
       threadRecommendQuestionBackgroundTracker,
       dashboardCacheBackgroundTracker,
-    }),
+    };
+    },
   });
   await apolloServer.start();
   return apolloServer;

@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import { ReactNode, useEffect, useRef, memo, useState } from 'react';
 import { Button } from 'antd';
 import styled from 'styled-components';
+import { motion, AnimatePresence } from 'framer-motion';
 import { PROCESS_STATE } from '@/utils/enum';
 import { attachLoading } from '@/utils/helper';
 import { BrainSVG } from '@/utils/svgs';
@@ -22,15 +23,22 @@ import {
   RecommendedQuestionsTask,
 } from '@/apollo/client/graphql/__types__';
 
-const StyledResult = styled.div`
+const StyledResult = styled(motion.div)`
   position: absolute;
   bottom: calc(100% + 12px);
   left: 0;
   width: 100%;
-  background: white;
-  box-shadow:
-    rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
-    rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 16px;
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+
+  .dark & {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: var(--border-secondary);
+  }
 
   .adm-brain-svg {
     width: 14px;
@@ -64,8 +72,15 @@ interface Props {
 const Wrapper = ({ children }) => {
   return (
     <StyledResult
-      className="border border-gray-3 rounded p-4"
+      className="p-4"
       data-testid="prompt__result"
+      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+      transition={{
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1],
+      }}
     >
       {children}
     </StyledResult>
@@ -77,25 +92,49 @@ const makeProcessing = (text: string) => (props: Props) => {
   const [loading, setLoading] = useState(false);
   return (
     <Wrapper>
-      <div className="d-flex justify-space-between">
-        <span>
-          <LoadingOutlined className="mr-2 geekblue-6 text-lg" spin />
-          {text}
-        </span>
-        <Button
-          className={clsx(
-            'adm-btn-no-style bg-gray-3 text-sm px-2',
-            loading ? 'gray-6' : 'gray-7',
-          )}
-          type="text"
-          size="small"
-          onClick={attachLoading(onStop, setLoading)}
-          disabled={loading}
+      <motion.div
+        className="d-flex justify-space-between align-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1 }}
+      >
+        <motion.span
+          className="d-flex align-center"
+          style={{ color: 'var(--text-primary)' }}
         >
-          <StopOutlined className="-mr-1" />
-          Stop
-        </Button>
-      </div>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            style={{ display: 'inline-flex' }}
+          >
+            <LoadingOutlined
+              className="mr-2 text-lg"
+              style={{ color: 'var(--accent-500)' }}
+            />
+          </motion.div>
+          {text}
+        </motion.span>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Button
+            className={clsx(
+              'adm-btn-no-style text-sm px-2',
+              loading ? 'gray-6' : 'gray-7',
+            )}
+            type="text"
+            size="small"
+            onClick={attachLoading(onStop, setLoading)}
+            disabled={loading}
+            style={{
+              background: 'var(--bg-hover)',
+              borderRadius: '8px',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <StopOutlined className="-mr-1" />
+            Stop
+          </Button>
+        </motion.div>
+      </motion.div>
     </Wrapper>
   );
 };
@@ -113,34 +152,70 @@ const makeProcessingError =
 
     return (
       <Wrapper>
-        <div className="d-flex justify-space-between text-medium mb-2">
-          <div className="d-flex align-center">
+        <motion.div
+          className="d-flex justify-space-between text-medium mb-2"
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div
+            className="d-flex align-center"
+            style={{ color: 'var(--text-primary)' }}
+          >
             {config.icon}
             {config.title || shortMessage}
           </div>
-          <Button
-            className="adm-btn-no-style gray-7 bg-gray-3 text-sm px-2"
-            type="text"
-            size="small"
-            onClick={onClose}
+          <motion.div
+            whileHover={{ scale: 1.05, rotate: 90 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <CloseOutlined className="-mr-1" />
-            Close
-          </Button>
-        </div>
-        <div className="gray-7">
+            <Button
+              className="adm-btn-no-style text-sm px-2"
+              type="text"
+              size="small"
+              onClick={onClose}
+              style={{
+                background: 'var(--bg-hover)',
+                borderRadius: '8px',
+                color: 'var(--text-secondary)',
+              }}
+            >
+              <CloseOutlined className="-mr-1" />
+              Close
+            </Button>
+          </motion.div>
+        </motion.div>
+        <motion.div
+          className="gray-7"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          style={{ color: 'var(--text-secondary)' }}
+        >
           {config.description || data.intentReasoning || message}
-        </div>
+        </motion.div>
         {hasStacktrace && (
-          <ErrorCollapse className="mt-2" message={stacktrace.join('\n')} />
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ delay: 0.3 }}
+          >
+            <ErrorCollapse className="mt-2" message={stacktrace.join('\n')} />
+          </motion.div>
         )}
 
         {recommendedQuestionProps.show && (
-          <RecommendedQuestions
-            className="mt-2"
-            {...recommendedQuestionProps.state}
-            onSelect={onSelectRecommendedQuestion}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <RecommendedQuestions
+              className="mt-2"
+              {...recommendedQuestionProps.state}
+              onSelect={onSelectRecommendedQuestion}
+            />
+          </motion.div>
         )}
       </Wrapper>
     );
@@ -180,6 +255,7 @@ const GeneralAnswer = (props: Props) => {
     if ($wrapper.current) {
       $wrapper.current.scrollTo({
         top: $wrapper.current.scrollHeight,
+        behavior: 'smooth',
       });
     }
   };
@@ -197,50 +273,105 @@ const GeneralAnswer = (props: Props) => {
 
   return (
     <Wrapper>
-      <div className="d-flex justify-space-between">
-        <div className="d-flex align-start">
-          <MessageOutlined className="mr-2 mt-1 geekblue-6" />
+      <motion.div
+        className="d-flex justify-space-between"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1 }}
+      >
+        <div
+          className="d-flex align-start"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 200 }}
+          >
+            <MessageOutlined
+              className="mr-2 mt-1"
+              style={{ color: 'var(--accent-500)' }}
+            />
+          </motion.div>
           <b className="text-semi-bold">{originalQuestion}</b>
         </div>
-        <Button
-          className="adm-btn-no-style gray-7 bg-gray-3 text-sm px-2"
-          type="text"
-          size="small"
-          onClick={onClose}
+        <motion.div
+          whileHover={{ scale: 1.05, rotate: 90 }}
+          whileTap={{ scale: 0.95 }}
         >
-          <CloseOutlined className="-mr-1" />
-          Close
-        </Button>
-      </div>
+          <Button
+            className="adm-btn-no-style text-sm px-2"
+            type="text"
+            size="small"
+            onClick={onClose}
+            style={{
+              background: 'var(--bg-hover)',
+              borderRadius: '8px',
+              color: 'var(--text-secondary)',
+            }}
+          >
+            <CloseOutlined className="-mr-1" />
+            Close
+          </Button>
+        </motion.div>
+      </motion.div>
       <div className="py-3">
-        <div className="bg-gray-2 gray-6 py-2 px-3">
+        <motion.div
+          className="py-2 px-3"
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          style={{
+            background: 'var(--bg-tertiary)',
+            borderRadius: '12px',
+            color: 'var(--text-secondary)',
+          }}
+        >
           <div className="d-flex align-center">
             <BrainSVG className="mr-2 adm-brain-svg" />
-            <span className="text-medium ">User Intent Recognized</span>
+            <span className="text-medium">User Intent Recognized</span>
           </div>
           <div style={{ paddingLeft: 22 }}>{data.intentReasoning}</div>
-        </div>
+        </motion.div>
 
-        <div
+        <motion.div
           ref={$wrapper}
           className="py-2 px-3"
           style={{ maxHeight: 'calc(100vh - 480px)', overflowY: 'auto' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
         >
           <MarkdownBlock content={askingStreamTask} />
-          {isDone && (
-            <div className="gray-6">
-              <InfoCircleOutlined className="mr-2" />
-              For the most accurate semantics, please visit the modeling page.
-            </div>
-          )}
-        </div>
+          <AnimatePresence>
+            {isDone && (
+              <motion.div
+                className="gray-6"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ delay: 0.2 }}
+                style={{ color: 'var(--text-tertiary)' }}
+              >
+                <InfoCircleOutlined className="mr-2" />
+                For the most accurate semantics, please visit the modeling page.
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </div>
 
       {recommendedQuestionProps.show && (
-        <RecommendedQuestions
-          {...recommendedQuestionProps.state}
-          onSelect={onSelectRecommendedQuestion}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <RecommendedQuestions
+            {...recommendedQuestionProps.state}
+            onSelect={onSelectRecommendedQuestion}
+          />
+        </motion.div>
       )}
     </Wrapper>
   );

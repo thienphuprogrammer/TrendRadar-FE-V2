@@ -1,8 +1,14 @@
 import { useRouter } from 'next/router';
-import { Button } from 'antd';
+import { Button, Spin } from 'antd';
 import styled from 'styled-components';
+import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 import { Path } from '@/utils/enum';
-import SettingOutlined from '@ant-design/icons/SettingOutlined';
+import { LogoutOutlined } from '@ant-design/icons';
+import { useAuth } from '@/hooks/useAuth';
+import { NAV_ITEMS, filterNavByRole } from '@/config/navigation';
+import UserProfile from './UserProfile';
+import NavigationMenu from './NavigationMenu';
 import Home, { Props as HomeSidebarProps } from './Home';
 import Modeling, { Props as ModelingSidebarProps } from './Modeling';
 import Knowledge from './Knowledge';
@@ -12,96 +18,233 @@ import LearningSection from '@/components/learning';
 const Layout = styled.div`
   position: relative;
   height: 100%;
-  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);\n  border-right: 1px solid var(--border-primary);\n  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);\n  padding-bottom: 12px;\n  overflow-x: hidden;\n  transition: all 0.3s ease;\n\n  .dark & {\n    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);\n    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3);\n  }
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(249, 250, 251, 0.98) 100%
+  );
+  border-right: 1px solid rgba(229, 231, 235, 0.8);
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.05);
+  overflow-x: hidden;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(102, 126, 234, 0.4) 50%,
+      transparent 100%
+    );
+  }
 `;
 
 const Content = styled.div`
   flex-grow: 1;
   overflow-y: auto;
-  padding: 16px 12px;
+  padding: 20px 16px;
+  position: relative;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-secondary);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+  }
 `;
 
 const StyledButton = styled(Button)`
-  cursor: pointer;\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  padding: 10px 16px;\n  margin: 4px 8px;\n  border-radius: 8px;\n  color: var(--text-secondary) !important;\n  font-weight: 500;\n  transition: all 0.3s ease;\n  border: none;\n\n  .anticon {\n    font-size: 16px;\n  }\n\n  &:hover,\n  &:focus {\n    background: var(--bg-hover) !important;\n    color: var(--primary-600) !important;\n    transform: translateX(4px);\n  }\n\n  &:active {\n    transform: translateX(2px) scale(0.98);\n  }
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  margin: 6px 12px;
+  border-radius: 12px;
+  color: var(--text-secondary) !important;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+
+  .anticon {
+    font-size: 18px;
+    transition: all 0.3s ease;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(16, 185, 129, 0.1),
+      transparent
+    );
+    transition: left 0.5s ease;
+  }
+
+  &:hover,
+  &:focus {
+    background: var(--bg-hover) !important;
+    color: var(--accent-600) !important;
+    transform: translateX(6px);
+    border-color: rgba(16, 185, 129, 0.2);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+
+    &::before {
+      left: 100%;
+    }
+
+    .anticon {
+      transform: scale(1.1);
+      color: var(--accent-500);
+    }
+  }
+
+  &:active {
+    transform: translateX(4px) scale(0.98);
+  }
 `;
 
 type Props = (ModelingSidebarProps | HomeSidebarProps) & {
   onOpenSettings?: () => void;
 };
 
-const DynamicSidebar = (
-  props: Props & {
-    pathname: string;
-  },
-) => {
-  const { pathname, ...restProps } = props;
+export default function Sidebar(props: Props) {
+  const { onOpenSettings } = props;
+  const router = useRouter();
+  const { user, logout, loading } = useAuth();
 
-  const getContent = () => {
-    if (pathname.startsWith(Path.Home)) {
-      return <Home {...(restProps as HomeSidebarProps)} />;
+  const _onSettingsClick = (event) => {
+    onOpenSettings && onOpenSettings();
+    event.target.blur();
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
+
+  // Check if we're on legacy pages (Home, Modeling, Knowledge, API Management)
+  const isLegacyPage =
+    router.pathname.startsWith(Path.Home) ||
+    router.pathname.startsWith(Path.Modeling) ||
+    router.pathname.startsWith(Path.Knowledge) ||
+    router.pathname.startsWith(Path.APIManagement);
+
+  // Filter navigation items based on user role
+  const filteredNavItems = user ? filterNavByRole(NAV_ITEMS, user.role) : [];
+
+  // Redirect unauthenticated users to login on new pages
+  useEffect(() => {
+    if (!user && !loading && !isLegacyPage && router.pathname !== '/login') {
+      router.push('/login');
+    }
+  }, [user, loading, isLegacyPage, router]);
+
+  const getSidebarContent = () => {
+    if (router.pathname.startsWith(Path.Home)) {
+      return <Home {...(props as HomeSidebarProps)} />;
     }
 
-    if (pathname.startsWith(Path.Modeling)) {
-      return <Modeling {...(restProps as ModelingSidebarProps)} />;
+    if (router.pathname.startsWith(Path.Modeling)) {
+      return <Modeling {...(props as ModelingSidebarProps)} />;
     }
 
-    if (pathname.startsWith(Path.Knowledge)) {
+    if (router.pathname.startsWith(Path.Knowledge)) {
       return <Knowledge />;
     }
 
-    if (pathname.startsWith(Path.APIManagement)) {
+    if (router.pathname.startsWith(Path.APIManagement)) {
       return <APIManagement />;
     }
 
     return null;
   };
 
-  return <Content>{getContent()}</Content>;
-};
-
-export default function Sidebar(props: Props) {
-  const { onOpenSettings } = props;
-  const router = useRouter();
-
-  const onSettingsClick = (event) => {
-    onOpenSettings && onOpenSettings();
-    event.target.blur();
-  };
-
   return (
     <Layout className="d-flex flex-column">
-      <DynamicSidebar {...props} pathname={router.pathname} />
-      <LearningSection />
-      <div className="border-t border-gray-4 pt-2">
-        <StyledButton type="text" block onClick={onSettingsClick}>
-          <SettingOutlined className="text-md" />
-          Settings
-        </StyledButton>
-        {/* <StyledButton type="text" block>
-          <Link
-            className="d-flex align-center"
-            href="https://discord.com/invite/5DvshJqG8Z"
-            target="_blank"
-            rel="noopener noreferrer"
-            data-ph-capture="true"
-            data-ph-capture-attribute-name="cta_go_to_discord"
+      {/* User Profile Section */}
+      {user && !isLegacyPage && <UserProfile user={user} />}
+
+      <Content>
+        {isLegacyPage ? (
+          /* Legacy sidebar content for Home/Modeling/Knowledge/API pages */
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
           >
-            <DiscordIcon className="mr-2" style={{ width: 16 }} /> Discord
-          </Link>
-        </StyledButton> */}
-        {/* <StyledButton type="text" block>
-          <Link
-            className="d-flex align-center"
-            href="https://github.com/Canner/WrenAI"
-            target="_blank"
-            rel="noopener noreferrer"
-            data-ph-capture="true"
-            data-ph-capture-attribute-name="cta_go_to_github"
-          >
-            <GithubIcon className="mr-2" style={{ width: 16 }} /> GitHub
-          </Link>
-        </StyledButton> */}
-      </div>
+            {getSidebarContent()}
+          </motion.div>
+        ) : (
+          /* New modern navigation menu */
+          <>
+            {loading && (
+              <div className="p-4 text-center text-gray-500">
+                <Spin size="small" /> Loading...
+              </div>
+            )}
+
+            {!loading && user && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+              >
+                <NavigationMenu items={filteredNavItems} />
+              </motion.div>
+            )}
+          </>
+        )}
+      </Content>
+
+      {isLegacyPage && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+        >
+          <LearningSection />
+        </motion.div>
+      )}
+
+      {/* Bottom Actions */}
+      <motion.div
+        className="border-t border-gray-4 pt-2 mt-auto"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+      >
+        {user && (
+          <StyledButton type="text" block onClick={handleLogout}>
+            <LogoutOutlined className="text-md" />
+            Logout
+          </StyledButton>
+        )}
+      </motion.div>
     </Layout>
   );
 }

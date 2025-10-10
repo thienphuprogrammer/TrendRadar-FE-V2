@@ -1,19 +1,75 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# TrendRadar AI - SaaS BI Platform
 
-## Start wren-ui from source code
+A powerful SaaS Business Intelligence platform with RBAC (Role-Based Access Control), trend analytics, chatbot, and comprehensive data management features.
 
-Step 1. Make sure your node version is 18
+## 🚀 Features
+
+- **RBAC System**: 4 roles (Admin, Owner, Analyst, Viewer) with granular permissions
+- **Dynamic Dashboard**: KPI tiles, charts, auto-refreshing Hot Trends
+- **Trend Explorer**: Hashtag rankings, sentiment analysis, forecasting, CSV export
+- **AI Chatbot**: Real-time streaming responses via SSE
+- **Data Lab**: File upload (CSV/XLSX), schema detection, chart suggestions
+- **Action Center**: Restock suggestions, content generator, task management
+- **Integrations**: Connect to TikTok, Shopee, Google Analytics, POS systems
+- **Reports & Export**: PDF, PowerPoint, scheduled email reports
+- **User Management**: Full CRUD for users (Admin only)
+- **Audit Logging**: Track all sensitive actions
+
+## 🎯 Quick Start (5 Minutes)
+
+**Step 1**: Install dependencies
 ```bash
-node -v
+npm install
+# or
+yarn install
 ```
 
-Step 2. Install dependencies:
-
+**Step 2**: Run database migrations
 ```bash
-yarn 
+npm run migrate
+# or
+yarn migrate
 ```
 
-Step 3(Optional). Switching database
+**Step 3**: Seed dummy data for testing
+```bash
+node scripts/seed_dummy.js
+# or for minimal data
+node scripts/seed_dummy.js minimal
+```
+
+**Step 4**: Start development server
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+**Step 5**: Open browser and login
+- URL: [http://localhost:3000/login](http://localhost:3000/login)
+- Use one of the test accounts below
+
+## 🔑 Test Accounts
+
+| Role | Email | Password | Permissions |
+|------|-------|----------|-------------|
+| **Admin** | admin@example.com | admin123 | Full system access |
+| **Owner** | owner@example.com | owner123 | Manage team & billing |
+| **Analyst** | analyst@example.com | analyst123 | Create & export reports |
+| **Viewer** | viewer@example.com | viewer123 | Read-only access |
+
+## 📊 API Seed Endpoint
+
+For quick testing in development:
+```bash
+curl -X POST http://localhost:3000/api/dev/seed?profile=full
+# or
+curl -X POST http://localhost:3000/api/dev/seed?profile=minimal
+```
+
+## 🗄️ Database Configuration
+
+**Switching database (Optional)**
 
 Wren-ui uses SQLite as our default database. To use Postgres as the database of wren-ui, you need to set the two environment variable below.
 
@@ -39,36 +95,139 @@ export DB_TYPE=sqlite
 export SQLITE_FILE={your_sqlite_file_path}
 ```
 
-Step 4. Run migrations:
+## 🏗️ Architecture
 
-```bash
-yarn migrate
-# or
-npm run migrate
+### Frontend
+- **Framework**: Next.js 14
+- **UI Library**: Ant Design 4
+- **State Management**: React Context + Apollo Client
+- **Styling**: LESS + Tailwind CSS
+- **Charts**: Vega-Lite + React Grid Layout
+
+### Backend
+- **API**: Next.js API Routes + GraphQL (Apollo Server)
+- **Database**: SQLite / PostgreSQL (via Knex.js)
+- **Authentication**: JWT (jsonwebtoken)
+- **Authorization**: RBAC middleware
+- **File Processing**: csv-parser, xlsx
+- **PDF/PPT**: pdfkit, pptxgenjs
+
+## 📁 Project Structure
+
+```
+├── migrations/              # Database migrations
+│   ├── 20250511000001_create_users_and_auth.js
+│   ├── 20250511000002_create_business_tables.js
+│   └── 20250511000003_create_content_tables.js
+├── scripts/
+│   └── seed_dummy.js       # Seed script for test data
+├── src/
+│   ├── apollo/
+│   │   ├── server/
+│   │   │   ├── auth/       # Auth services & middleware
+│   │   │   ├── rbac/       # Permission matrix & RBAC
+│   │   │   └── ...
+│   ├── components/
+│   │   ├── ProtectedRoute.tsx
+│   │   ├── layouts/
+│   │   └── pages/          # Page-specific components
+│   ├── config/
+│   │   └── navigation.ts   # Role-based navigation config
+│   ├── hooks/
+│   │   └── useAuth.tsx     # Auth context & hook
+│   ├── pages/
+│   │   ├── login.tsx
+│   │   ├── dashboard/
+│   │   ├── trends/
+│   │   ├── chatbot/
+│   │   ├── data-lab/
+│   │   ├── actions/
+│   │   ├── integrations/
+│   │   ├── settings/
+│   │   ├── admin/          # Admin-only pages
+│   │   └── api/
+│   │       ├── auth/       # Login, logout, register
+│   │       ├── chatbot/    # SSE streaming
+│   │       └── dev/        # Seed endpoint
+│   └── styles/
+└── ACCEPTANCE_CRITERIA.md  # Testing checklist
 ```
 
+## 🧪 Testing
 
-Step 5. Run the development server:
-
+### Run Unit Tests
 ```bash
-# Execute this if you start wren-engine and ibis-server via docker
-# Linux or MacOS
-export OTHER_SERVICE_USING_DOCKER=true
-export EXPERIMENTAL_ENGINE_RUST_VERSION=false # set to true if you want to use the experimental Rust version of the TrendRadarEngine
-# Windows
-SET OTHER_SERVICE_USING_DOCKER=true
-SET EXPERIMENTAL_ENGINE_RUST_VERSION=false # set to true if you want to use the experimental Rust version of the TrendRadarEngine
-
-# Run the development server
-yarn dev
-# or
-npm run dev
+npm test
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Run E2E Tests
+```bash
+npm run test:e2e
+```
 
+### Manual Testing Checklist
+See [ACCEPTANCE_CRITERIA.md](./ACCEPTANCE_CRITERIA.md) for detailed testing steps.
 
-## Development wren-ui module on local
+## 🔒 Security
+
+- **JWT Tokens**: 7-day expiration, stored in localStorage
+- **Password Hashing**: bcrypt with 10 salt rounds
+- **RBAC Enforcement**: Backend middleware + frontend guards
+- **Audit Logging**: All sensitive actions logged
+- **2FA Ready**: UI implemented, backend pending
+
+## 📦 Dependencies
+
+Key dependencies added for SaaS BI features:
+- `jsonwebtoken` - JWT authentication
+- `bcryptjs` - Password hashing
+- `csv-parser`, `xlsx` - File processing
+- `pdfkit`, `pptxgenjs` - Report generation
+- `nodemailer` - Email scheduling
+- `speakeasy`, `qrcode` - 2FA (future)
+- `react-big-calendar` - Content scheduling
+
+## 🚢 Deployment
+
+### Environment Variables
+```bash
+# JWT Secret (change in production!)
+JWT_SECRET=your-secret-key-here
+
+# Database
+DB_TYPE=sqlite  # or 'pg' for PostgreSQL
+SQLITE_FILE=./db.sqlite3  # if using SQLite
+PG_URL=postgres://user:pass@localhost:5432/dbname  # if using Postgres
+
+# Node Environment
+NODE_ENV=production
+```
+
+### Build for Production
+```bash
+npm run build
+npm start
+```
+
+## 🤝 Contributing
+
+1. Create feature branch: `git checkout -b feature/your-feature`
+2. Commit changes: `git commit -m 'Add some feature'`
+3. Push to branch: `git push origin feature/your-feature`
+4. Submit pull request
+
+## 📞 Support
+
+For issues or questions:
+- Check [ACCEPTANCE_CRITERIA.md](./ACCEPTANCE_CRITERIA.md)
+- Review test account credentials above
+- Verify seed data loaded correctly
+
+---
+
+## Original WrenAI Documentation
+
+### Development wren-ui module on local
 There are many modules in TrendRadarAI, to develop wren-ui, you can start other modules(services) via docker-compose.
 In the [Start wren-ui from source code](#Start-wren-ui-from-source-code) section, you've know how to start wren-ui from the source code to develop.
 To start other modules via docker-compose, you can follow the steps below.

@@ -20,27 +20,28 @@ export const GlobalConfigProvider = ({ children }) => {
 
   useEffect(() => {
     let cleanup: (() => void) | undefined;
-    
+
     const loadConfig = async () => {
       try {
         setIsLoading(true);
         setIsOffline(false);
         const userConfig = await getUserConfig();
         setConfig(userConfig);
-        
+
         // telemetry setup - only if enabled
         if (userConfig.isTelemetryEnabled) {
           cleanup = trackUserTelemetry(router, userConfig);
         }
       } catch (error) {
         const errorMessage = error?.message || '';
-        const isNetworkError = errorMessage.includes('NetworkError') || 
-                              errorMessage.includes('Failed to fetch') ||
-                              errorMessage.includes('502') ||
-                              errorMessage.includes('CORS');
-        
+        const isNetworkError =
+          errorMessage.includes('NetworkError') ||
+          errorMessage.includes('Failed to fetch') ||
+          errorMessage.includes('502') ||
+          errorMessage.includes('CORS');
+
         setIsOffline(isNetworkError);
-        
+
         // Set a default config so the app can continue
         setConfig({
           isTelemetryEnabled: false,

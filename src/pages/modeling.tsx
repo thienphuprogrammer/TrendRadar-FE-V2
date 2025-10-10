@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
-import { forwardRef, useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useImperativeHandle } from 'react';
 import { message } from 'antd';
 import styled from 'styled-components';
 import { MORE_ACTION, NODE_TYPE } from '@/utils/enum';
@@ -48,9 +48,22 @@ import * as events from '@/utils/events';
 
 const Diagram = dynamic(() => import('@/components/diagram'), { ssr: false });
 // https://github.com/vercel/next.js/issues/4957#issuecomment-413841689
-const ForwardDiagram = forwardRef(function ForwardDiagram(props: any, ref) {
-  return <Diagram {...props} forwardRef={ref} />;
-});
+interface DiagramProps {
+  data: any;
+  onMoreClick: (data: any) => void;
+  onNodeClick: (data: any) => void;
+  onAddClick: (data: any) => void;
+}
+
+const ForwardDiagram = React.forwardRef<any, DiagramProps>(
+  function ForwardDiagram(props, ref) {
+    const diagramRef = useRef<any>(null);
+
+    useImperativeHandle(ref, () => diagramRef.current, []);
+
+    return <Diagram {...props} forwardRef={diagramRef} />;
+  },
+);
 
 const DiagramWrapper = styled.div`
   position: relative;
@@ -387,15 +400,17 @@ export default function Modeling() {
           onSelect,
         }}
       >
-        <DiagramWrapper>
+        {React.createElement(
+          DiagramWrapper,
+          {},
           <ForwardDiagram
             ref={diagramRef}
             data={diagramData}
             onMoreClick={onMoreClick}
             onNodeClick={onNodeClick}
             onAddClick={onAddClick}
-          />
-        </DiagramWrapper>
+          />,
+        )}
         <MetadataDrawer
           {...metadataDrawer.state}
           onClose={metadataDrawer.closeDrawer}

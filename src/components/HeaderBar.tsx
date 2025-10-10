@@ -17,36 +17,85 @@ const { Header } = Layout;
 
 const StyledButton = styled(Button)<{ $isHighlight: boolean }>`
   background: ${(props) =>
-    props.$isHighlight ? 'rgba(14, 165, 233, 0.15)' : 'transparent'};
-  font-weight: ${(props) => (props.$isHighlight ? '600' : 'normal')};
+    props.$isHighlight ? 'var(--accent-gradient)' : 'transparent'};
+  font-weight: ${(props) => (props.$isHighlight ? '600' : '500')};
   border: ${(props) =>
-    props.$isHighlight ? '1px solid rgba(14, 165, 233, 0.3)' : '1px solid transparent'};
-  color: ${(props) =>
-    props.$isHighlight ? 'var(--primary-600)' : 'var(--text-secondary)'};
-  transition: all 0.3s ease;
+    props.$isHighlight
+      ? '1px solid rgba(16, 185, 129, 0.3)'
+      : '1px solid transparent'};
+  color: ${(props) => (props.$isHighlight ? 'white' : 'var(--text-secondary)')};
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transition: left 0.5s ease;
+  }
 
   &:hover,
   &:focus {
     background: ${(props) =>
+      props.$isHighlight ? 'var(--accent-gradient)' : 'var(--bg-hover)'};
+    color: ${(props) => (props.$isHighlight ? 'white' : 'var(--accent-600)')};
+    border-color: ${(props) =>
       props.$isHighlight
-        ? 'rgba(14, 165, 233, 0.2)'
-        : 'var(--bg-hover)'};
-    color: var(--primary-600);
-    border-color: rgba(14, 165, 233, 0.3);
-    transform: translateY(-1px);
+        ? 'rgba(16, 185, 129, 0.4)'
+        : 'rgba(16, 185, 129, 0.2)'};
+    transform: translateY(-2px);
+    box-shadow: ${(props) =>
+      props.$isHighlight
+        ? '0 8px 20px rgba(16, 185, 129, 0.3)'
+        : '0 4px 12px rgba(16, 185, 129, 0.15)'};
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(0.98);
   }
 `;
 
 const StyledHeader = styled(Header)`
-  height: 56px;
+  height: 64px;
   border-bottom: 1px solid var(--border-primary);
   background: var(--bg-primary);
-  padding: 12px 24px;
-  box-shadow: var(--shadow-sm);
+  padding: 16px 24px;
+  box-shadow: var(--shadow-md);
   transition: all 0.3s ease;
-  
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(16, 185, 129, 0.2) 50%,
+      transparent 100%
+    );
+  }
+
   .dark & {
     background: var(--bg-secondary);
+    box-shadow: var(--shadow-lg);
   }
 `;
 

@@ -2,17 +2,17 @@
 
 .prompt-input-container {
   position: fixed;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 400px);
-  max-width: 900px;
+  bottom: 15px;
+  // left: 50%;
+  transform: translateX(-3%);
+  width: calc(100% - 32px);
+  max-width: 100%;
   z-index: 100;
-  padding: 0 24px;
+  padding: 0 0px;
   animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 
   @media (max-width: 1024px) {
-    width: calc(100% - 48px);
+    width: calc(100% - 32px);
   }
 }
 
@@ -39,7 +39,7 @@
     content: '';
     position: absolute;
     inset: -2px;
-    background: linear-gradient(135deg, #0ea5e9, #8b5cf6, #ec4899);
+    background: var(--accent-gradient);
     border-radius: 24px;
     opacity: 0;
     transition: opacity 0.4s;
@@ -49,8 +49,8 @@
   &:focus-within {
     border-color: transparent;
     box-shadow: 
-      0 20px 60px rgba(14, 165, 233, 0.2),
-      0 0 0 1px rgba(14, 165, 233, 0.2);
+      0 20px 60px rgba(16, 185, 129, 0.2),
+      0 0 0 1px rgba(16, 185, 129, 0.2);
 
     &::before {
       opacity: 1;
@@ -106,8 +106,8 @@
 
       &:hover {
         background: var(--bg-hover);
-        border-color: var(--primary-500);
-        color: var(--primary-600);
+        border-color: var(--accent-500);
+        color: var(--accent-600);
         transform: translateY(-2px);
       }
 
@@ -174,7 +174,7 @@
       justify-content: center;
       width: 44px;
       height: 44px;
-      background: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%);
+      background: var(--accent-gradient);
       border: none;
       border-radius: 12px;
       color: white;
@@ -187,7 +187,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+        background: linear-gradient(135deg, var(--accent-600) 0%, var(--accent-700) 100%);
         opacity: 0;
         transition: opacity 0.3s;
       }
@@ -201,7 +201,7 @@
 
       &:hover {
         transform: translateY(-2px) scale(1.05);
-        box-shadow: 0 8px 24px rgba(14, 165, 233, 0.4);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
 
         &::before {
           opacity: 1;
@@ -261,7 +261,7 @@
       justify-content: center;
       width: 36px;
       height: 36px;
-      background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(168, 85, 247, 0.1));
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
       border-radius: 8px;
       font-size: 18px;
     }

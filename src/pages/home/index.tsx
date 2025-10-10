@@ -1,20 +1,17 @@
 // import ModernHome from './ModernHome';
 
 // Temporary fallback to original home
-import { ComponentRef, useMemo, useRef } from 'react';
+import { ComponentRef, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { Button, Typography } from 'antd';
-import { motion } from 'framer-motion';
-import { Logo } from '@/components/Logo';
+// import { motion } from 'framer-motion';
 import { Path } from '@/utils/enum';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import Prompt from '@/components/pages/home/prompt';
-import DemoPrompt from '@/components/pages/home/prompt/DemoPrompt';
+import EnhancedHome from '@/components/pages/home/EnhancedHome';
 import useHomeSidebar from '@/hooks/useHomeSidebar';
 import useAskPrompt from '@/hooks/useAskPrompt';
 import useRecommendedQuestionsInstruction from '@/hooks/useRecommendedQuestionsInstruction';
-import RecommendedQuestionsPrompt from '@/components/pages/home/prompt/RecommendedQuestionsPrompt';
-import ErrorFallback from '@/components/ErrorFallback';
+// import ErrorFallback from '@/components/ErrorFallback';
 import { DEFAULT_DATA, handleGraphQLError } from '@/utils/errorHandling';
 import {
   useSuggestedQuestionsQuery,
@@ -24,106 +21,18 @@ import {
 import { useGetSettingsQuery } from '@/apollo/client/graphql/settings.generated';
 import { CreateThreadInput } from '@/apollo/client/graphql/__types__';
 
-const { Text } = Typography;
-
-const Wrapper = ({ children }) => {
-  return (
-    <div
-      className="d-flex align-center justify-center flex-column animate-fade-in"
-      style={{ height: '100%' }}
-    >
-      <div className="animate-scale-in">
-        <Logo size={48} color="var(--primary-600)" />
-      </div>
-      <div 
-        className="text-md text-medium mt-3 animate-slide-up"
-        style={{ 
-          color: 'var(--text-primary)',
-          fontWeight: 600,
-          fontSize: '18px'
-        }}
-      >
-        Know more about your data
-      </div>
-      {children}
-    </div>
-  );
-};
-
-const SampleQuestionsInstruction = (props) => {
-  const { sampleQuestions, onSelect } = props;
-
-  return (
-    <Wrapper>
-      <DemoPrompt demo={sampleQuestions} onSelect={onSelect} />
-    </Wrapper>
-  );
-};
-
-function RecommendedQuestionsInstruction(props) {
-  const { onSelect, loading } = props;
-
-  const {
-    buttonProps,
-    generating,
-    recommendedQuestions,
-    showRetry,
-    showRecommendedQuestionsPromptMode,
-  } = useRecommendedQuestionsInstruction();
-
-  return showRecommendedQuestionsPromptMode ? (
-    <div
-      className="d-flex align-center flex-column pt-10"
-      style={{ margin: 'auto' }}
-    >
-      <RecommendedQuestionsPrompt
-        recommendedQuestions={recommendedQuestions}
-        onSelect={onSelect}
-        loading={loading}
-      />
-      <div className="py-12" />
-    </div>
-  ) : (
-    <Wrapper>
-      <Button className="mt-6" {...buttonProps} />
-      {generating && (
-        <Text className="mt-3 text-sm gray-6">
-          Thinking of good questions for you... (about 1 minute)
-        </Text>
-      )}
-      {!generating && showRetry && (
-        <Text className="mt-3 text-sm gray-6 text-center">
-          We couldn't think of questions right now.
-          <br />
-          Let's try again later.
-        </Text>
-      )}
-    </Wrapper>
-  );
-}
-
 export default function Home() {
   const $prompt = useRef<ComponentRef<typeof Prompt>>(null);
   const router = useRouter();
   const homeSidebar = useHomeSidebar();
   const askPrompt = useAskPrompt();
 
-  const { data: suggestedQuestionsData, error: suggestedQuestionsError } = useSuggestedQuestionsQuery({
-    fetchPolicy: 'cache-and-network',
-    onError: (error) => {
-      const errorInfo = handleGraphQLError(error);
-      // Silently use fallback data - error already logged by handleGraphQLError
-      if (process.env.NODE_ENV === 'development') {
-        console.info('Using default suggested questions');
-      }
-    },
-  });
-  
-  const [createThread, { loading: threadCreating, error: createThreadError }] = useCreateThreadMutation({
-    onError: (error) => {
-      handleGraphQLError(error);
-      // Error logged by handleGraphQLError
-    },
+  const { data: suggestedQuestionsData, error: suggestedQuestionsError } =
+    useSuggestedQuestionsQuery({
+      fetchPolicy: 'cache-and-network',
+    });
+
+  const [createThread, { error: createThreadError }] = useCreateThreadMutation({
     onCompleted: () => {
       try {
         homeSidebar.refetch();
@@ -134,22 +43,41 @@ export default function Home() {
       }
     },
   });
-  
-  const [preloadThread] = useThreadLazyQuery({
+
+  const [preloadThread, { error: preloadThreadError }] = useThreadLazyQuery({
     fetchPolicy: 'cache-and-network',
-    onError: (error) => {
-      handleGraphQLError(error);
-      // Silently continue - thread can be loaded later
-    },
   });
 
-  const { data: settingsResult, error: settingsError } = useGetSettingsQuery({
-    onError: (error) => {
-      handleGraphQLError(error);
-      // Silently use default settings - error already logged
-    },
-  });
-  
+  const { data: settingsResult, error: settingsError } = useGetSettingsQuery();
+
+  // Error handling moved to effects for Apollo 4 compatibility
+  useEffect(() => {
+    if (suggestedQuestionsError) {
+      handleGraphQLError(suggestedQuestionsError);
+      if (process.env.NODE_ENV === 'development') {
+        console.info('Using default suggested questions');
+      }
+    }
+  }, [suggestedQuestionsError]);
+
+  useEffect(() => {
+    if (createThreadError) {
+      handleGraphQLError(createThreadError);
+    }
+  }, [createThreadError]);
+
+  useEffect(() => {
+    if (preloadThreadError) {
+      handleGraphQLError(preloadThreadError);
+    }
+  }, [preloadThreadError]);
+
+  useEffect(() => {
+    if (settingsError) {
+      handleGraphQLError(settingsError);
+    }
+  }, [settingsError]);
+
   // Safely access settings with fallback
   const settings = settingsResult?.settings || DEFAULT_DATA.settings;
   const isSampleDataset = useMemo(
@@ -158,19 +86,20 @@ export default function Home() {
   );
 
   // Use default data if API fails - UI will never crash
-  const sampleQuestions = useMemo(
-    () => {
-      try {
-        return suggestedQuestionsData?.suggestedQuestions?.questions || DEFAULT_DATA.suggestedQuestions;
-      } catch (error) {
-        console.error('Error accessing suggested questions:', error);
-        return DEFAULT_DATA.suggestedQuestions;
-      }
-    },
-    [suggestedQuestionsData],
-  );
+  const sampleQuestions = useMemo(() => {
+    try {
+      return (
+        suggestedQuestionsData?.suggestedQuestions?.questions ||
+        DEFAULT_DATA.suggestedQuestions
+      );
+    } catch (error) {
+      console.error('Error accessing suggested questions:', error);
+      return DEFAULT_DATA.suggestedQuestions;
+    }
+  }, [suggestedQuestionsData]);
 
   const onSelectQuestion = async ({ question }) => {
+    console.log('onSelectQuestion', question);
     $prompt.current.submit(question);
   };
 
@@ -178,22 +107,22 @@ export default function Home() {
     try {
       askPrompt.onStopPolling();
       const response = await createThread({ variables: { data: payload } });
-      
+
       if (!response || !response.data || !response.data.createThread) {
         throw new Error('Invalid response from server');
       }
-      
+
       const threadId = response.data.createThread.id;
-      
+
       // Try to preload thread, but don't fail if it doesn't work
       try {
         await preloadThread({ variables: { threadId } });
-      } catch (preloadError) {
+      } catch (_preloadError) {
         if (process.env.NODE_ENV === 'development') {
           console.info('Thread will be loaded on navigation');
         }
       }
-      
+
       router.push(Path.Home + `/${threadId}`);
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
@@ -204,21 +133,20 @@ export default function Home() {
     }
   };
 
+  // Get recommended questions data
+  const { recommendedQuestions, generating } =
+    useRecommendedQuestionsInstruction();
+
   return (
     <SiderLayout loading={false} sidebar={homeSidebar}>
-      {isSampleDataset && (
-        <SampleQuestionsInstruction
-          sampleQuestions={sampleQuestions}
-          onSelect={onSelectQuestion}
-        />
-      )}
-
-      {!isSampleDataset && (
-        <RecommendedQuestionsInstruction
-          onSelect={onCreateResponse}
-          loading={threadCreating}
-        />
-      )}
+      <EnhancedHome
+        isSampleDataset={isSampleDataset}
+        sampleQuestions={sampleQuestions}
+        recommendedQuestions={recommendedQuestions}
+        loading={generating}
+        onSelectSampleQuestion={onSelectQuestion}
+        onSelectRecommendedQuestion={onCreateResponse}
+      />
       <Prompt
         ref={$prompt}
         {...askPrompt}

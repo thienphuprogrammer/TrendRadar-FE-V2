@@ -5,13 +5,14 @@ import { getAbsoluteTime } from '@/utils/time';
 import useDrawerAction from '@/hooks/useDrawerAction';
 import { getColumnSearchProps } from '@/utils/table';
 import SiderLayout from '@/components/layouts/SiderLayout';
-import PageLayout from '@/components/layouts/PageLayout';
+import { PageLayout } from '@/components/layouts/PageLayout';
 import ApiOutlined from '@ant-design/icons/ApiOutlined';
 import EyeOutlined from '@ant-design/icons/EyeOutlined';
 import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
 import CloseCircleOutlined from '@ant-design/icons/CloseCircleOutlined';
 import SQLCodeBlock from '@/components/code/SQLCodeBlock';
 import DetailsDrawer from '@/components/pages/apiManagement/DetailsDrawer';
+import GradientButton from '@/components/common/GradientButton';
 import { useApiHistoryQuery } from '@/apollo/client/graphql/apiManagement.generated';
 import { ApiType, ApiHistoryResponse } from '@/apollo/client/graphql/__types__';
 
@@ -148,14 +149,14 @@ export default function APIHistory() {
       align: 'center',
       fixed: 'right',
       render: (record) => (
-        <Button
-          className="gray-8"
-          type="text"
+        <GradientButton
+          variant="ghost"
           size="small"
+          icon={<EyeOutlined />}
           onClick={() => detailsDrawer.openDrawer(record)}
         >
-          <EyeOutlined /> Details
-        </Button>
+          Details
+        </GradientButton>
       ),
     },
   ];
@@ -163,26 +164,24 @@ export default function APIHistory() {
   return (
     <SiderLayout loading={false} sidebar={null}>
       <PageLayout
-        title={
-          <>
-            <ApiOutlined className="mr-2 gray-8" />
-            API history
-          </>
-        }
+        icon={<ApiOutlined />}
+        title="API History"
+        badge="API Management"
         description={
           <>
-            <div>
-              Here you can view the full history of API calls, including request
-              inputs, responses, and execution details.{' '}
-              <Link
-                className="gray-8 underline mr-2"
-                href="https://docs.getwren.ai/oss/guide/api-access/history"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Learn more.
-              </Link>
-            </div>
+            Monitor and analyze all API calls with detailed request/response data, execution times, and status codes.{' '}
+            <Link
+              href="https://docs.getwren.ai/oss/guide/api-access/history"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ 
+                color: 'var(--accent-600)', 
+                textDecoration: 'none',
+                fontWeight: '600'
+              }}
+            >
+              Learn more →
+            </Link>
           </>
         }
       >

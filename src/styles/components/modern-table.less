@@ -1,0 +1,237 @@
+// Modern Table Styling
+.ant-table {
+  &.ant-table-has-header {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-primary);
+
+    .ant-table-thead > tr > th {
+      background: linear-gradient(135deg, 
+        rgba(16, 185, 129, 0.05) 0%, 
+        rgba(5, 150, 105, 0.05) 100%);
+      border-bottom: 2px solid var(--accent-200);
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 14px;
+      padding: 16px 12px;
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--accent-gradient);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      &:hover::before {
+        opacity: 1;
+      }
+    }
+
+    .ant-table-tbody > tr {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-bottom: 1px solid var(--border-primary);
+
+      &:hover {
+        background: var(--table-hover-bg);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+      }
+
+      > td {
+        padding: 16px 12px;
+        border-bottom: 1px solid var(--border-primary);
+        color: var(--text-primary);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      &:last-child > td {
+        border-bottom: none;
+      }
+    }
+
+    .ant-table-pagination {
+      margin: 24px 0 0 0;
+      padding: 0 16px 16px 16px;
+
+      .ant-pagination-item {
+        border-radius: 8px;
+        border: 1px solid var(--border-primary);
+        transition: all 0.3s ease;
+
+        &:hover {
+          border-color: var(--accent-300);
+          background: var(--accent-50);
+        }
+
+        &.ant-pagination-item-active {
+          background: var(--accent-gradient);
+          border-color: var(--accent-500);
+          color: white;
+        }
+      }
+
+      .ant-pagination-prev,
+      .ant-pagination-next {
+        border-radius: 8px;
+        border: 1px solid var(--border-primary);
+        transition: all 0.3s ease;
+
+        &:hover {
+          border-color: var(--accent-300);
+          background: var(--accent-50);
+        }
+      }
+    }
+  }
+}
+
+// Modern Tag Styling
+.ant-tag {
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border: 1px solid var(--border-primary);
+  transition: all 0.3s ease;
+
+  &.ant-tag-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--accent-600);
+    border-color: var(--accent-300);
+  }
+
+  &.ant-tag-error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border-color: #fca5a5;
+  }
+
+  &.ant-tag-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+    border-color: #fcd34d;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Modern Button Styling in Tables
+.ant-table .ant-btn {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.ant-btn-text {
+    color: var(--text-secondary);
+    border: 1px solid transparent;
+
+    &:hover {
+      color: var(--accent-600);
+      background: var(--accent-50);
+      border-color: var(--accent-200);
+      transform: translateY(-1px);
+    }
+  }
+
+  &.ant-btn-primary {
+    background: var(--accent-gradient);
+    border: none;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+    }
+  }
+}
+
+// Modern Code Block Styling
+.ant-table .code-block {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--accent-gradient);
+  }
+}
+
+// Modern Filter Styling
+.ant-table-filter-dropdown {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+
+  .ant-input {
+    border-radius: 8px;
+    border: 1px solid var(--border-primary);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+
+    &:focus {
+      border-color: var(--accent-400);
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+    }
+  }
+
+  .ant-checkbox-wrapper {
+    color: var(--text-primary);
+    margin-bottom: 8px;
+
+    .ant-checkbox {
+      .ant-checkbox-inner {
+        border-radius: 4px;
+        border-color: var(--border-primary);
+
+        &:hover {
+          border-color: var(--accent-400);
+        }
+      }
+
+      &.ant-checkbox-checked .ant-checkbox-inner {
+        background: var(--accent-gradient);
+        border-color: var(--accent-500);
+      }
+    }
+  }
+}
+
+// Responsive Table
+@media (max-width: 768px) {
+  .ant-table {
+    &.ant-table-has-header {
+      .ant-table-thead > tr > th,
+      .ant-table-tbody > tr > td {
+        padding: 12px 8px;
+        font-size: 13px;
+      }
+    }
+  }
+}

@@ -1,21 +1,29 @@
 import { ApolloClient, HttpLink, InMemoryCache, from } from '@apollo/client';
+import { loadDevMessages, loadErrorMessages } from '@apollo/client/dev';
 import { onError } from '@apollo/client/link/error';
 import { RetryLink } from '@apollo/client/link/retry';
 import errorHandler from '@/utils/errorHandler';
+if (process.env.NODE_ENV !== 'production') {
+  loadDevMessages();
+  loadErrorMessages();
+}
 
 // Error handling link with minimal logging (only log once per error type)
 const errorCache = new Set();
 
-const apolloErrorLink = onError(({ graphQLErrors, networkError, operation }) => {
+const apolloErrorLink = onError((errorResponse) => {
+  const { graphQLErrors, networkError, operation } = errorResponse;
   const operationName = operation?.operationName || 'unknown';
-  
+
   if (graphQLErrors) {
     graphQLErrors.forEach(({ message }) => {
       const errorKey = `graphql-${operationName}-${message}`;
       if (!errorCache.has(errorKey)) {
         errorCache.add(errorKey);
         if (process.env.NODE_ENV === 'development') {
-          console.warn(`[GraphQL] ${operationName}: ${message.substring(0, 100)}`);
+          console.warn(
+            `[GraphQL] ${operationName}: ${message.substring(0, 100)}`,
+          );
         }
       }
     });
@@ -33,7 +41,7 @@ const apolloErrorLink = onError(({ graphQLErrors, networkError, operation }) => 
   }
 
   // Call the existing error handler (now silent)
-  errorHandler({ graphQLErrors, networkError, operation, forward: () => {} });
+  errorHandler(errorResponse);
 });
 
 // Retry link for failed requests (reduced retries to minimize console noise)
@@ -48,10 +56,11 @@ const retryLink = new RetryLink({
     retryIf: (error, _operation) => {
       // Only retry on network errors, not server errors (502/500)
       // Server errors likely won't resolve with retries
-      return !!error && (
-        error.message.includes('Failed to fetch') ||
-        error.message.includes('NetworkError') ||
-        error.message.includes('CORS')
+      return (
+        !!error &&
+        (error.message.includes('Failed to fetch') ||
+          error.message.includes('NetworkError') ||
+          error.message.includes('CORS'))
       );
     },
   },

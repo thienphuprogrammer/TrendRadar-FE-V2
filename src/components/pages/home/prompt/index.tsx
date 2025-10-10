@@ -6,8 +6,9 @@ import {
   useImperativeHandle,
 } from 'react';
 import styled from 'styled-components';
+import { motion, AnimatePresence } from 'framer-motion';
 import { PROCESS_STATE } from '@/utils/enum';
-import PromptInput from '@/components/pages/home/prompt/Input';
+import PromptInput from '@/components/pages/home/EnhancedPromptInput';
 import PromptResult from '@/components/pages/home/prompt/Result';
 import useAskProcessState, {
   getIsProcessing,
@@ -39,28 +40,58 @@ interface Attributes {
   close: () => void;
 }
 
-const PromptStyle = styled.div`
+const PromptContainer = styled(motion.div)`
   position: fixed;
-  width: 680px;
-  left: 50%;
-  margin-left: calc(-340px + 133px);
-  bottom: 24px;
+  bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 999;
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+  pointer-events: none;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+`;
+
+const PromptStyle = styled(motion.div)`
+  position: relative;
+  width: 60%;
+  max-width: 100%;
+  transform: translateX(12%);
   background: var(--bg-primary);
   border: 2px solid var(--border-primary);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  transition: all 0.3s ease;
+  box-shadow: var(--shadow-xl);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: all;
 
   .dark & {
     background: rgba(30, 41, 59, 0.95);
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   }
 
   &:focus-within {
-    border-color: var(--primary-500);
-    box-shadow: 0 8px 32px rgba(14, 165, 233, 0.25);
+    border-color: var(--accent-500);
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.25);
+  }
+`;
+
+const Backdrop = styled(motion.div)`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 998;
+  pointer-events: all;
+
+  .dark & {
+    background: rgba(0, 0, 0, 0.5);
   }
 `;
 
@@ -168,26 +199,53 @@ export default forwardRef<Attributes, Props>(function Prompt(props, ref) {
   );
 
   return (
-    <PromptStyle className="p-3">
-      <PromptInput
-        question={question}
-        isProcessing={isProcessing}
-        onAsk={submitAsk}
-        inputProps={inputProps}
-      />
+    <>
+      <AnimatePresence>
+        {showResult && (
+          <Backdrop
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={closeResult}
+          />
+        )}
+      </AnimatePresence>
 
-      {showResult && (
-        <PromptResult
-          data={result}
-          error={error}
-          loading={loading}
-          processState={currentProcessState}
-          onSelectRecommendedQuestion={selectRecommendedQuestion}
-          onIntentSQLAnswer={intentSQLAnswer}
-          onClose={closeResult}
-          onStop={stopProcess}
-        />
-      )}
-    </PromptStyle>
+      <PromptContainer
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.4,
+          type: 'spring',
+          stiffness: 100,
+          damping: 15,
+        }}
+      >
+        <PromptStyle className="p-15">
+          <PromptInput
+            question={question}
+            isProcessing={isProcessing}
+            onAsk={submitAsk}
+            inputProps={inputProps}
+          />
+
+          <AnimatePresence>
+            {showResult && (
+              <PromptResult
+                data={result}
+                error={error}
+                loading={loading}
+                processState={currentProcessState}
+                onSelectRecommendedQuestion={selectRecommendedQuestion}
+                onIntentSQLAnswer={intentSQLAnswer}
+                onClose={closeResult}
+                onStop={stopProcess}
+              />
+            )}
+          </AnimatePresence>
+        </PromptStyle>
+      </PromptContainer>
+    </>
   );
 });

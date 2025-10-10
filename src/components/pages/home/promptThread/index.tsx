@@ -113,7 +113,7 @@ export default function PromptThread() {
   };
 
   return (
-    <StyledPromptThread className="mt-12" ref={divRef}>
+    <StyledPromptThread className="mt-12 mb-12" ref={divRef}>
       <AnswerResultIterator
         data={responses}
         onInitPreviewDone={onInitPreviewDone}

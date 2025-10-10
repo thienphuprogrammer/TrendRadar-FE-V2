@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Button, message, Table, TableColumnsType, Typography } from 'antd';
 import { format } from 'sql-formatter';
 import SiderLayout from '@/components/layouts/SiderLayout';
-import PageLayout from '@/components/layouts/PageLayout';
+import { PageLayout } from '@/components/layouts/PageLayout';
 import FunctionOutlined from '@ant-design/icons/FunctionOutlined';
 import { MORE_ACTION } from '@/utils/enum';
 import { getCompactTime } from '@/utils/time';

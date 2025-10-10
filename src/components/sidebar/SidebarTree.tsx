@@ -36,7 +36,7 @@ const anticonStyle = css`
 const StyledTree = styled(Tree)`
   &.ant-tree {
     background-color: transparent;
-    color: var(--gray-8);
+    color: var(--text-primary);
 
     .ant-tree-indent-unit {
       width: 12px;
@@ -46,24 +46,35 @@ const StyledTree = styled(Tree)`
       display: flex;
       align-items: center;
       line-height: 18px;
-      min-height: 28px;
+      min-height: 32px;
       min-width: 1px;
-      padding: 0;
+      padding: 4px 8px;
+      border-radius: 8px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .ant-tree-node-content-wrapper:hover,
+    .ant-tree-node-content-wrapper:hover {
+      background-color: var(--bg-hover);
+      transform: translateX(4px);
+    }
+
     .ant-tree-node-content-wrapper.ant-tree-node-selected {
-      background-color: transparent;
+      background: var(--accent-gradient);
+      color: white;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
     }
 
     .ant-tree-treenode {
-      padding: 0 16px;
+      padding: 2px 8px;
       background-color: transparent;
-      transition: background-color ease-out 0.12s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 8px;
+      margin: 2px 0;
 
       &-selected {
-        color: var(--geekblue-6);
-        background-color: var(--gray-4);
+        color: white;
+        background: var(--accent-gradient);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
       }
 
       .ant-tree-switcher {
@@ -89,11 +100,16 @@ const StyledTree = styled(Tree)`
       }
 
       &-treeNode {
+        border-radius: 8px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        
         &:hover {
-          background-color: var(--gray-4);
+          background-color: var(--bg-hover);
+          transform: translateX(4px);
         }
         &:active {
-          background-color: var(--gray-6);
+          background-color: var(--bg-hover);
+          transform: translateX(2px) scale(0.98);
         }
 
         .ant-tree-title {
