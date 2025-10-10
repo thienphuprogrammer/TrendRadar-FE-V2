@@ -151,5 +151,11 @@ const config = {
 };
 
 export function getConfig(): IConfig {
-  return { ...defaultConfig, ...pickBy(config) };
+  const mergedConfig = { ...defaultConfig, ...pickBy(config) };
+  // FORCE SQLITE - override any PG configuration
+  mergedConfig.dbType = 'sqlite';
+  mergedConfig.sqliteFile = '/app/db.sqlite3';
+  mergedConfig.pgUrl = null;
+  console.log('getConfig FORCING SQLITE:', { dbType: mergedConfig.dbType, sqliteFile: mergedConfig.sqliteFile });
+  return mergedConfig;
 }
