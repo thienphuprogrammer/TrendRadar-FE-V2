@@ -56,11 +56,11 @@ const defaultConfig = {
   dbType: 'sqlite',
 
   // pg
-  pgUrl: 'postgres://postgres:postgres@localhost:5432/admin_ui',
+  pgUrl: null, // Disabled - using SQLite instead
   debug: false,
 
   // sqlite
-  sqliteFile: './db.sqlite3',
+  sqliteFile: '/app/db.sqlite3',
 
   persistCredentialDir: `${process.cwd()}/.tmp`,
 
