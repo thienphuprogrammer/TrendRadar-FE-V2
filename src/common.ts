@@ -48,11 +48,14 @@ export const serverConfig = getConfig();
 
 export const initComponents = () => {
   const telemetry = new PostHogTelemetry();
+  
+  // FORCE SQLITE - override all config
+  console.log('⚡ initComponents: FORCING SQLITE DATABASE');
   const knex = bootstrapKnex({
-    dbType: serverConfig.dbType,
-    pgUrl: serverConfig.pgUrl,
-    debug: serverConfig.debug,
-    sqliteFile: serverConfig.sqliteFile,
+    dbType: 'sqlite',
+    pgUrl: null,
+    debug: false,
+    sqliteFile: '/app/db.sqlite3',
   });
 
   // repositories
