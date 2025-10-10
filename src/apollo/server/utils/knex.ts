@@ -6,8 +6,11 @@ interface KnexOptions {
 }
 
 export const bootstrapKnex = (options: KnexOptions) => {
+  console.log('bootstrapKnex called with options:', JSON.stringify(options));
+  
   if (options.dbType === 'pg') {
     const { pgUrl, debug } = options;
+    console.log('ERROR: TRYING TO USE PG - THIS SHOULD NOT HAPPEN');
     console.log('using pg');
     /* eslint-disable @typescript-eslint/no-var-requires */
     return require('knex')({
@@ -17,7 +20,7 @@ export const bootstrapKnex = (options: KnexOptions) => {
       pool: { min: 2, max: 10 },
     });
   } else {
-    console.log('using sqlite');
+    console.log('✅ CORRECTLY using sqlite at:', options.sqliteFile);
     /* eslint-disable @typescript-eslint/no-var-requires */
     return require('knex')({
       client: 'better-sqlite3',
