@@ -41,13 +41,13 @@ export const getKnex = () => {
     return knexInstance;
   }
   
-  // ABSOLUTELY FORCE SQLite - ignore ALL environment variables
-  const dbType = 'sqlite';
-  const sqliteFile = '/app/db.sqlite3';
-  const debug = false;
-  const pgUrl = undefined;
+  // Use environment variables
+  const dbType = process.env.DB_TYPE || 'sqlite';
+  const sqliteFile = process.env.SQLITE_FILE || '/app/db.sqlite3';
+  const debug = process.env.DEBUG === 'true';
+  const pgUrl = process.env.PG_URL;
   
-  console.log('🔧 getKnex: FORCING SQLITE (singleton init):', { dbType, sqliteFile });
+  console.log('🔧 getKnex config:', { dbType, pgUrl: pgUrl ? 'SET' : 'NOT SET' });
   
   knexInstance = bootstrapKnex({
     dbType,
