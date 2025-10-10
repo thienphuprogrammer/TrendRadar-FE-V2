@@ -15,19 +15,15 @@ A powerful SaaS Business Intelligence platform with RBAC (Role-Based Access Cont
 - **User Management**: Full CRUD for users (Admin only)
 - **Audit Logging**: Track all sensitive actions
 
-## 🎯 Quick Start (5 Minutes)
+## 🚀 Quick Start (5 Minutes)
 
 **Step 1**: Install dependencies
 ```bash
-npm install
-# or
 yarn install
 ```
 
 **Step 2**: Run database migrations
 ```bash
-npm run migrate
-# or
 yarn migrate
 ```
 
@@ -38,16 +34,24 @@ node scripts/seed_dummy.js
 node scripts/seed_dummy.js minimal
 ```
 
-**Step 4**: Start development server
+**Step 4**: Build and start production server
 ```bash
-npm run dev
-# or
+yarn build
+yarn start
+```
+
+**OR** for development with hot reload:
+```bash
 yarn dev
 ```
 
 **Step 5**: Open browser and login
-- URL: [http://localhost:3000/login](http://localhost:3000/login)
+- Production URL: [http://localhost:3000/login](http://localhost:3000/login)
+- Development URL: [http://localhost:3000/login](http://localhost:3000/login)
 - Use one of the test accounts below
+
+**Step 6**: Test all features
+- See [ACCEPTANCE_CRITERIA.md](./ACCEPTANCE_CRITERIA.md) for comprehensive testing guide
 
 ## 🔑 Test Accounts
 
