@@ -31,13 +31,13 @@ export const bootstrapKnex = (options: KnexOptions) => {
 
 // Get knex instance using server config
 export const getKnex = () => {
-  // Use environment variables with fallbacks to defaults
-  const dbType = process.env.DB_TYPE || 'sqlite';
-  const sqliteFile = process.env.SQLITE_FILE || './db.sqlite3';
-  const debug = process.env.DEBUG === 'true';
-  const pgUrl = process.env.PG_URL;
+  // Force SQLite - override any environment variables
+  const dbType = 'sqlite';
+  const sqliteFile = '/app/db.sqlite3';
+  const debug = false;
+  const pgUrl = undefined;
   
-  console.log('getKnex config:', { dbType, sqliteFile, debug, pgUrl });
+  console.log('getKnex config (FORCED TO SQLITE):', { dbType, sqliteFile });
   
   return bootstrapKnex({
     dbType,
